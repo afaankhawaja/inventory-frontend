@@ -4,6 +4,8 @@ import { Button, Checkbox, Form, Input } from "antd";
 import styled from "styled-components";
 import { useNavigate } from "react-router-dom";
 import SignInIcon from "../../../assets/svgs/sign_in_icon.svg?react";
+import { SIGNIN_MUTATION } from "../graphql/mutations";
+import { useMutation } from "@apollo/client";
 
 const PageWrapper = styled.div`
   display: flex;
@@ -89,11 +91,13 @@ const SignUP = styled.p`
 `;
 
 const PasswordReset = styled.div`
-width:full;
-text-align:end;
-color:#1890ff;
-cursor:pointer;
-`
+  width: full;
+  text-align: end;
+  color: #1890ff;
+  cursor: pointer;
+  font-size:14px;
+  margin-top:-10px;
+`;
 
 const StyledForm = styled(Form<FieldType>)`
   width: 100%;
@@ -108,26 +112,50 @@ const StyledForm = styled(Form<FieldType>)`
     box-shadow: 0 4px 15px #1890ff;
     transition: all 0.3s ease;
   }
-
-  }
 `;
 
 type FieldType = {
   username?: string;
   password?: string;
-  remember?: string;
-};
-
-const onFinish: FormProps<FieldType>["onFinish"] = (values) => {
-  console.log("Success:", values);
-};
-
-const onFinishFailed: FormProps<FieldType>["onFinishFailed"] = (errorInfo) => {
-  console.log("Failed:", errorInfo);
+  remember?: boolean;
 };
 
 const SignInForm: React.FC = () => {
+  const [form] = Form.useForm();
   const navigate = useNavigate();
+
+  const [signIn, { loading}] = useMutation(SIGNIN_MUTATION, {
+    onCompleted: (data) => {
+      if (data && data.signin) {
+        localStorage.setItem("access_token", data.signin.access_token);
+        localStorage.setItem("refresh_token", data.signin.refresh_token);
+        alert("Login Successful!");
+        navigate("/home");
+      }
+    },
+    onError: (error) => {
+      alert(error.message);
+    },
+  });
+  
+  const onFinish: FormProps<FieldType>["onFinish"] = async (values) => {
+    try {
+      await signIn({
+        variables: {
+          username: values.username,
+          password: values.password,
+        },
+      });
+    } catch (e) {
+      console.error("Sign-in error caught in onFinish:", e);
+    }
+  };
+
+  const onFinishFailed: FormProps<FieldType>["onFinishFailed"] = (
+    errorInfo
+  ) => {
+    console.log("Failed:", errorInfo);
+  };
 
   const navigateToSignUp = () => {
     navigate("/signup");
@@ -145,12 +173,12 @@ const SignInForm: React.FC = () => {
         </HeaderSection>
 
         <StyledForm
-                  name="basic"
-                  layout="vertical"
-                  initialValues={{ remember: true }}
-                  onFinish={onFinish}
-                  onFinishFailed={onFinishFailed}
-                  theme={{}}
+          form={form}
+          name="signin"
+          layout="vertical"
+          initialValues={{ remember: true }}
+          onFinish={onFinish}
+          onFinishFailed={onFinishFailed}
         >
           <Form.Item<FieldType>
             label="Username"
@@ -166,15 +194,15 @@ const SignInForm: React.FC = () => {
             rules={[{ required: true, message: "Please input your password!" }]}
           >
             <Input.Password placeholder="Enter your password" />
-            <PasswordReset>Forgot password?</PasswordReset>
           </Form.Item>
+          <PasswordReset>Forgot password?</PasswordReset>
 
           <Form.Item<FieldType> name="remember" valuePropName="checked">
             <Checkbox>Remember me</Checkbox>
           </Form.Item>
 
           <Form.Item>
-            <Button type="primary" htmlType="submit">
+            <Button type="primary" htmlType="submit" loading={loading}>
               Sign In
             </Button>
           </Form.Item>

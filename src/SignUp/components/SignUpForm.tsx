@@ -1,10 +1,11 @@
 import React from "react";
 import type { FormProps } from "antd";
-import { Button, Form, Input } from "antd";
+import { Button, Form, Input, InputNumber } from "antd";
 import styled from "styled-components";
 import { useNavigate } from "react-router-dom";
 import SignUpIcon from "../../../assets/svgs/sign_up_user.svg?react"
-
+import { useMutation } from "@apollo/client";
+import { CREATE_USER } from "../graphql/mutations";
 const PageWrapper = styled.div`
   display: flex;
   justify-content: center;
@@ -113,21 +114,47 @@ type FieldType = {
   age?: number;
   image?: string;
   email?: string;
+  cnic?: string;
 };
 
-const onFinish: FormProps<FieldType>["onFinish"] = (values) => {
-  console.log("Success:", values);
-};
 
-const onFinishFailed: FormProps<FieldType>["onFinishFailed"] = (errorInfo) => {
-  console.log("Failed:", errorInfo);
-};
 
 const SignUpForm: React.FC = () => {
   const navigate = useNavigate();
+  const [CreateUser, { loading }] = useMutation(CREATE_USER);
+  const [form]=Form.useForm()
 
   const navigateToSignIn = () => {
     navigate("/");
+  };
+
+
+  const onFinish: FormProps<FieldType>["onFinish"] = (values) => {
+    CreateUser({
+      variables: {
+        username: values.username,
+        first_name: values.firstName,
+        last_name:values.lastName,
+        email: values.email,
+        password_hash: values.password,
+        cnic: values.cnic,
+        age: values.age,
+      },
+    })
+      .then(() => {
+        form.resetFields();
+        navigate("/");
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+    
+  };
+
+  const onFinishFailed: FormProps<FieldType>["onFinishFailed"] = (
+    errorInfo
+  ) => {
+    console.log("Failed:", errorInfo);
   };
 
   return (
@@ -142,7 +169,8 @@ const SignUpForm: React.FC = () => {
         </HeaderSection>
 
         <StyledForm
-          name="basic"
+          form={form}
+          name="signup"
           layout="vertical"
           initialValues={{ remember: true }}
           onFinish={onFinish}
@@ -164,8 +192,16 @@ const SignUpForm: React.FC = () => {
             <Input placeholder="last name" />
           </Form.Item>
 
-          <Form.Item<FieldType> label="age" name="age">
-            <Input placeholder="22 e.g." />
+          <Form.Item<FieldType>
+            label="age"
+            name="age"
+            rules={[{ required: true }]}
+          >
+            <InputNumber placeholder="22 e.g." />
+          </Form.Item>
+
+          <Form.Item<FieldType> label="cnic" name="cnic">
+            <Input placeholder="your identity" />
           </Form.Item>
 
           <Form.Item<FieldType>
@@ -192,7 +228,7 @@ const SignUpForm: React.FC = () => {
 
           <Form.Item>
             <Button type="primary" htmlType="submit">
-              Sign up
+               {!loading? 'Sign up':'signing...'}
             </Button>
           </Form.Item>
         </StyledForm>
