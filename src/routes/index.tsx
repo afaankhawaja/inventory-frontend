@@ -1,18 +1,16 @@
-import { createBrowserRouter, Navigate } from "react-router-dom";
+import { createBrowserRouter } from "react-router-dom";
 
-import Home from "../Home";
 import SignIn from "../SignIn"
 import SignUp from "../SignUp"
 import ProtectedRoute from "../utils/ProtectedRoute";
+import HomeLayout from "../Layout/components/HomeLayout";
+import Dashboard from "../Dashboard";
+import Users from "../Users/index";
 
 const router = createBrowserRouter([
   {
     path: "/signin",
     element: <SignIn />,
-  },
-  {
-    path: "/",
-    element:<Navigate to={'/signin'} replace/>
   },
   {
     path: "/signup",
@@ -22,8 +20,18 @@ const router = createBrowserRouter([
     element: <ProtectedRoute />,
     children: [
       {
-        path: "home",
-        element: <Home />,
+        path: "/",
+        element: <HomeLayout />,
+        children: [
+          {
+            index: true,
+            element: <Dashboard />,
+          },
+          {
+            path: "users",
+            element: <Users />,
+          },
+        ],
       },
     ],
   },
