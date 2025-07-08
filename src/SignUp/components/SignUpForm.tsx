@@ -3,7 +3,7 @@ import type { FormProps } from "antd";
 import { Button, Form, Input, InputNumber } from "antd";
 import styled from "styled-components";
 import { useNavigate } from "react-router-dom";
-import SignUpIcon from "../../../assets/svgs/sign_up_user.svg?react"
+import SignUpIcon from "../../../assets/svgs/sign_up_user.svg?react";
 import { useMutation } from "@apollo/client";
 import { CREATE_USER } from "../graphql/mutations";
 const PageWrapper = styled.div`
@@ -22,7 +22,9 @@ const FormContainer = styled.div`
   background-color: #ffffff;
   padding: 40px;
   border-radius: 15px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1), 0 4px 12px rgba(0, 0, 0, 0.05);
+  box-shadow:
+    0 10px 30px rgba(0, 0, 0, 0.1),
+    0 4px 12px rgba(0, 0, 0, 0.05);
   border: 1px solid #e0e0e0;
   max-width: 500px;
   width: 100%;
@@ -117,24 +119,21 @@ type FieldType = {
   cnic?: string;
 };
 
-
-
 const SignUpForm: React.FC = () => {
   const navigate = useNavigate();
   const [CreateUser, { loading }] = useMutation(CREATE_USER);
-  const [form]=Form.useForm()
+  const [form] = Form.useForm();
 
   const navigateToSignIn = () => {
     navigate("/");
   };
-
 
   const onFinish: FormProps<FieldType>["onFinish"] = (values) => {
     CreateUser({
       variables: {
         username: values.username,
         first_name: values.firstName,
-        last_name:values.lastName,
+        last_name: values.lastName,
         email: values.email,
         password_hash: values.password,
         cnic: values.cnic,
@@ -148,11 +147,10 @@ const SignUpForm: React.FC = () => {
       .catch((error) => {
         console.error(error);
       });
-    
   };
 
   const onFinishFailed: FormProps<FieldType>["onFinishFailed"] = (
-    errorInfo
+    errorInfo,
   ) => {
     console.log("Failed:", errorInfo);
   };
@@ -228,7 +226,7 @@ const SignUpForm: React.FC = () => {
 
           <Form.Item>
             <Button type="primary" htmlType="submit">
-               {!loading? 'Sign up':'signing...'}
+              {!loading ? "Sign up" : "signing..."}
             </Button>
           </Form.Item>
         </StyledForm>

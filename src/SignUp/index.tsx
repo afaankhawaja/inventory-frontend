@@ -1,18 +1,14 @@
-import SignUpForm from './components/SignUpForm'
-import styled from 'styled-components'
+import SignUpForm from "./components/SignUpForm";
+import styled from "styled-components";
 
-const Container = styled.section`
-
-
-`
+const Container = styled.section``;
 
 const index = () => {
-    return (
-      <Container>
-       <SignUpForm/>     
-      </Container>
-    
-  )
-}
+  return (
+    <Container>
+      <SignUpForm />
+    </Container>
+  );
+};
 
-export default index
+export default index;

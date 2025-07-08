@@ -3,8 +3,10 @@ import {
   Form,
   Input,
   InputNumber,
-  Checkbox,
   type FormProps,
+  Row,
+  Col,
+  Switch,
 } from "antd";
 import styled from "styled-components";
 import { useMutation } from "@apollo/client";
@@ -47,7 +49,7 @@ const CreateNewItem = ({ setOpen }: Props) => {
   const [form] = Form.useForm();
   const [createItem, { loading }] = useMutation(CREATE_NEW_ITEM);
 
-    const onFinish: FormProps<ItemType>["onFinish"] = (values) => {
+  const onFinish: FormProps<ItemType>["onFinish"] = (values) => {
     createItem({
       variables: {
         name: values.name,
@@ -109,49 +111,64 @@ const CreateNewItem = ({ setOpen }: Props) => {
         <Input placeholder="Enter condition" />
       </Form.Item>
 
-      <Form.Item<ItemType>
-        label="Quantity in Stock"
-        name="quantity_in_stock"
-        rules={[
-          { required: true, message: "Please input the quantity in stock!" },
-        ]}
-      >
-        <InputNumber placeholder="Enter quantity" />
-      </Form.Item>
-
+      <Row gutter={10}>
+        <Col span={8}>
+          <Form.Item<ItemType>
+            label="Brand"
+            name="brand"
+            rules={[{ required: true, message: "Please input the brand!" }]}
+          >
+            <Input placeholder="Enter brand" />
+          </Form.Item>
+        </Col>
+        <Col span={16}>
+          <Form.Item<ItemType>
+            label="Quantity in Stock"
+            name="quantity_in_stock"
+            rules={[
+              {
+                required: true,
+                message: "Please input the quantity in stock!",
+              },
+            ]}
+          >
+            <InputNumber placeholder="Enter quantity" />
+          </Form.Item>
+        </Col>
+      </Row>
       <Form.Item<ItemType>
         label="Reorder Threshold"
         name="reorder_threshold"
         rules={[
-          { required: true, message: "Please input the reorder threshold!" },
+          {
+            required: true,
+            message: "Please input the reorder threshold!",
+          },
         ]}
       >
         <InputNumber placeholder="Enter reorder threshold" />
       </Form.Item>
 
-      <Form.Item<ItemType>
-        label="Is High Value"
-        name="is_high_value"
-        valuePropName="checked"
-      >
-        <Checkbox>Is High Value</Checkbox>
-      </Form.Item>
-
-      <Form.Item<ItemType>
-        label="Brand"
-        name="brand"
-        rules={[{ required: true, message: "Please input the brand!" }]}
-      >
-        <Input placeholder="Enter brand" />
-      </Form.Item>
-
-      <Form.Item<ItemType>
-        label="Barcode"
-        name="barcode"
-        rules={[{ required: true, message: "Please input the barcode!" }]}
-      >
-        <Input placeholder="Enter barcode" />
-      </Form.Item>
+      <Row gutter={38}>
+        <Col span={12}>
+          <Form.Item<ItemType>
+            label="Barcode"
+            name="barcode"
+            rules={[{ required: true, message: "Please input the barcode!" }]}
+          >
+            <Input placeholder="Enter barcode" />
+          </Form.Item>
+        </Col>
+        <Col span={12} style={{ alignContent: "center" }}>
+          <Form.Item<ItemType>
+            label="High Value item"
+            name="is_high_value"
+            valuePropName="checked"
+          >
+            <Switch />
+          </Form.Item>
+        </Col>
+      </Row>
 
       <Form.Item<ItemType>
         label="Category Name"

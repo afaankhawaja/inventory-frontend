@@ -23,7 +23,9 @@ const FormContainer = styled.div`
   background-color: #ffffff;
   padding: 40px;
   border-radius: 15px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1), 0 4px 12px rgba(0, 0, 0, 0.05);
+  box-shadow:
+    0 10px 30px rgba(0, 0, 0, 0.1),
+    0 4px 12px rgba(0, 0, 0, 0.05);
   border: 1px solid #e0e0e0;
   max-width: 450px;
   width: 100%;
@@ -95,8 +97,8 @@ const PasswordReset = styled.div`
   text-align: end;
   color: #1890ff;
   cursor: pointer;
-  font-size:14px;
-  margin-top:-10px;
+  font-size: 14px;
+  margin-top: -10px;
 `;
 
 const StyledForm = styled(Form<FieldType>)`
@@ -124,7 +126,7 @@ const SignInForm: React.FC = () => {
   const [form] = Form.useForm();
   const navigate = useNavigate();
 
-  const [signIn, { loading}] = useMutation(SIGNIN_MUTATION, {
+  const [signIn, { loading }] = useMutation(SIGNIN_MUTATION, {
     onCompleted: (data) => {
       if (data && data.signin) {
         localStorage.setItem("access_token", data.signin.access_token);
@@ -137,7 +139,7 @@ const SignInForm: React.FC = () => {
       alert(error.message);
     },
   });
-  
+
   const onFinish: FormProps<FieldType>["onFinish"] = async (values) => {
     try {
       await signIn({
@@ -152,7 +154,7 @@ const SignInForm: React.FC = () => {
   };
 
   const onFinishFailed: FormProps<FieldType>["onFinishFailed"] = (
-    errorInfo
+    errorInfo,
   ) => {
     console.log("Failed:", errorInfo);
   };

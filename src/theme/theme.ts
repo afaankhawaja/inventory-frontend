@@ -5,8 +5,7 @@ export const customTheme = {
     fontSize: 16,
   },
   components: {
-      Form: {
-    },
+    Form: {},
     Input: {
       paddingBlock: 10,
       paddingInline: 15,
@@ -15,6 +14,10 @@ export const customTheme = {
       controlHeight: 45,
       fontSize: 18,
       fontWeight: 600,
+    },
+    InputNumber: {
+      paddingBlock: 10,
+      paddingInline: 15,
     },
   },
 };

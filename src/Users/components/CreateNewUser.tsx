@@ -1,4 +1,12 @@
-import { Button, Form, Input, InputNumber, type FormProps } from "antd";
+import {
+  Button,
+  Col,
+  Form,
+  Input,
+  InputNumber,
+  Row,
+  type FormProps,
+} from "antd";
 import styled from "styled-components";
 import { useMutation } from "@apollo/client";
 import { CREATE_USER_WITH_ROLE } from "../graphql/mutations";
@@ -59,7 +67,7 @@ const CreateNewUser = ({ setOpen }: Props) => {
     });
   };
   const onFinishFailed: FormProps<FieldType>["onFinishFailed"] = (
-    errorInfo
+    errorInfo,
   ) => {
     console.log("Failed:", errorInfo);
   };
@@ -81,25 +89,40 @@ const CreateNewUser = ({ setOpen }: Props) => {
         <Input placeholder="Enter your username" />
       </Form.Item>
 
-      <Form.Item<FieldType> label="firstName" name="firstName">
-        <Input placeholder="first name" />
-      </Form.Item>
+      <Row gutter={12}>
+        <Col span={12}>
+          <Form.Item<FieldType> label="firstName" name="firstName">
+            <Input placeholder="first name" />
+          </Form.Item>
+        </Col>
 
-      <Form.Item<FieldType> label="lastName" name="lastName">
-        <Input placeholder="last name" />
-      </Form.Item>
-
-      <Form.Item<FieldType> label="age" name="age" rules={[{ required: true }]}>
-        <InputNumber placeholder="22 e.g." />
-      </Form.Item>
+        <Col span={12}>
+          <Form.Item<FieldType> label="lastName" name="lastName">
+            <Input placeholder="last name" />
+          </Form.Item>
+        </Col>
+      </Row>
 
       <Form.Item<FieldType> label="cnic" name="cnic">
         <Input placeholder="your identity" />
       </Form.Item>
 
-      <Form.Item<FieldType> label="role" name="role">
-        <Input placeholder="Admin etc." />
-      </Form.Item>
+      <Row gutter={50}>
+        <Col span={12}>
+          <Form.Item<FieldType> label="role" name="role">
+            <Input placeholder="Admin etc." />
+          </Form.Item>
+        </Col>
+        <Col span={8}>
+          <Form.Item<FieldType>
+            label="age"
+            name="age"
+            rules={[{ required: true }]}
+          >
+            <InputNumber placeholder="22 e.g." />
+          </Form.Item>
+        </Col>
+      </Row>
 
       <Form.Item<FieldType>
         label="email"

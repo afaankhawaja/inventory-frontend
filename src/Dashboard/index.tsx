@@ -1,8 +1,5 @@
-
 const index = () => {
-  return (
-    <div>index of dashboard</div>
-  )
-}
+  return <div>index of dashboard</div>;
+};
 
-export default index
+export default index;

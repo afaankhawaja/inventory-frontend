@@ -52,7 +52,7 @@ const columns = [
     dataIndex: "location",
     key: "location",
     render: (val: Location) => {
-        if (!val) return;
+      if (!val) return;
       return val.location_name;
     },
   },

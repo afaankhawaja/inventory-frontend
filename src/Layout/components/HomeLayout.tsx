@@ -14,14 +14,12 @@ import { Outlet } from "react-router";
 
 const { Header, Sider, Content } = Layout;
 
-
-
 const HomeLayout: React.FC = () => {
   const [collapsed, setCollapsed] = useState(false);
   const {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
-  const navigate=useNavigate()
+  const navigate = useNavigate();
   return (
     <Layout>
       <Sider

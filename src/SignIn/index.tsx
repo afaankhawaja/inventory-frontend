@@ -1,5 +1,5 @@
-import SignInForm from './components/SignInForm'
-import styled from 'styled-components'
+import SignInForm from "./components/SignInForm";
+import styled from "styled-components";
 
 const Container = styled.section`
   width: 100%;
@@ -9,13 +9,12 @@ const Container = styled.section`
   justify-content: center;
 `;
 
-
 const index = () => {
   return (
     <Container>
       <SignInForm />
     </Container>
   );
-}
+};
 
-export default index
+export default index;
