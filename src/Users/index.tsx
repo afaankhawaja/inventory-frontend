@@ -65,7 +65,18 @@ const Index = () => {
         </>
       )}
       <Modal
-        title="Create New User"
+        title={
+          <div
+            style={{
+              textAlign: "center",
+              color: "#1890ff",
+              fontWeight: "bold",
+              fontSize: "20px",
+            }}
+          >
+            Create New User
+          </div>
+        }
         centered
         open={open}
         footer={null}

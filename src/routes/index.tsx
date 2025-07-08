@@ -6,6 +6,7 @@ import ProtectedRoute from "../utils/ProtectedRoute";
 import HomeLayout from "../Layout/components/HomeLayout";
 import Dashboard from "../Dashboard";
 import Users from "../Users/index";
+import InventoryList from "../InventoryList";
 
 const router = createBrowserRouter([
   {
@@ -30,6 +31,10 @@ const router = createBrowserRouter([
           {
             path: "users",
             element: <Users />,
+          },
+          {
+            path: "inventory-list",
+            element: <InventoryList />,
           },
         ],
       },
