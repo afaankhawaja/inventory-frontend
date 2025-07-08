@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import {
   FileDoneOutlined,
   HomeOutlined,
+  LogoutOutlined,
   MenuFoldOutlined,
   MenuUnfoldOutlined,
   PlusOutlined,
@@ -38,7 +39,11 @@ const HomeLayout: React.FC = () => {
           mode="inline"
           defaultSelectedKeys={["1"]}
           onClick={({ key }) => {
-            navigate(key);
+            if (key === "logout") {
+              localStorage.removeItem("access_token");
+              localStorage.removeItem("refresh_token");
+              navigate("/signin");
+            } else navigate(key);
           }}
           items={[
             {
@@ -65,6 +70,11 @@ const HomeLayout: React.FC = () => {
               key: "/users",
               icon: <UserOutlined />,
               label: "Users",
+            },
+            {
+              key: "logout",
+              icon: <LogoutOutlined />,
+              label: "Log Out",
             },
           ]}
         />

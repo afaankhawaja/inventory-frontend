@@ -132,7 +132,7 @@ const SignInForm: React.FC = () => {
         localStorage.setItem("access_token", data.signin.access_token);
         localStorage.setItem("refresh_token", data.signin.refresh_token);
         alert("Login Successful!");
-        navigate("/home");
+        navigate("/");
       }
     },
     onError: (error) => {
