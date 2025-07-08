@@ -1,7 +1,7 @@
 import { Button, Form, Input, InputNumber, type FormProps } from "antd";
 import styled from "styled-components";
 import { useMutation } from "@apollo/client";
-import { CREATE_USER_WITH_ROLE } from "../graphql/queries";
+import { CREATE_USER_WITH_ROLE } from "../graphql/mutations";
 
 type FieldType = {
   username?: string;
@@ -38,8 +38,7 @@ interface Props {
 
 const CreateNewUser = ({ setOpen }: Props) => {
   const [form] = Form.useForm();
-  const [createUser, { data, loading }] = useMutation(CREATE_USER_WITH_ROLE);
-  console.log("data", data);
+  const [createUser, { loading }] = useMutation(CREATE_USER_WITH_ROLE);
 
   const onFinish: FormProps<FieldType>["onFinish"] = (values) => {
     createUser({
