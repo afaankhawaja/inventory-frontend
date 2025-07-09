@@ -47,9 +47,10 @@ const StyledForm = styled(Form<FieldType>)`
 
 interface PropsType {
   selectedUserId: string;
+  setUpdateModal: (state: boolean) => void;
 }
 
-const UpdateUser = ({ selectedUserId }: PropsType) => {
+const UpdateUser = ({ selectedUserId, setUpdateModal }: PropsType) => {
   const [form] = Form.useForm();
   const { data, loading, error } = useQuery(FETCH_USER_BY_ID, {
     variables: { userID: selectedUserId },
@@ -92,6 +93,7 @@ const UpdateUser = ({ selectedUserId }: PropsType) => {
     }).then(() => {
       form.resetFields();
       alert("updated user sucessfully");
+      setUpdateModal(false);
     });
   };
   const onFinishFailed: FormProps<FieldType>["onFinishFailed"] = (
@@ -177,10 +179,6 @@ const UpdateUser = ({ selectedUserId }: PropsType) => {
           ]}
         >
           <Input placeholder="jeff@mail.com" />
-        </Form.Item>
-
-        <Form.Item<FieldType> label="Password" name="password">
-          <Input.Password />
         </Form.Item>
 
         <Form.Item>

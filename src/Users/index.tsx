@@ -1,12 +1,14 @@
 import styled from "styled-components";
 import UserTable from "./components/UserTable";
 import { FETCH_ALL_USERS } from "./graphql/queries";
-import { useQuery } from "@apollo/client";
+import { useMutation, useQuery } from "@apollo/client";
 import { UserAddOutlined } from "@ant-design/icons";
 import { Button, Modal } from "antd";
 import { useState } from "react";
 import CreateNewUser from "./components/CreateNewUser";
 import UpdateUser from "./components/UpdateUser";
+import DeleteUser from "./components/DeleteUser";
+import { DELETE_USER } from "./graphql/mutations";
 
 const UsersContainer = styled.section`
   width: 100%;
@@ -43,12 +45,33 @@ const TableWrapper = styled.div`
 const Index = () => {
   const [open, setOpen] = useState(false);
   const [updateModal, setUpdateModal] = useState(false);
+  const [deleteModal, setDeleteModal] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState("");
   const { data, loading, error } = useQuery(FETCH_ALL_USERS);
+  const [removeUser] = useMutation(DELETE_USER);
 
-  const handleViewUserClick = (userId: string) => {
-    setSelectedUserId(userId);
+  const handleEditUserClick = (userID: string) => {
+    setSelectedUserId(userID);
     setUpdateModal(true);
+  };
+  const handleDeleteUser = (userID: string) => {
+    setSelectedUserId(userID);
+    setDeleteModal(true);
+  };
+
+  const deleteUser = () => {
+    removeUser({
+      variables: {
+        userID: selectedUserId,
+      },
+    })
+      .then(() => {
+        alert("sucessfully deleted");
+        setDeleteModal(false);
+      })
+      .catch((error) => {
+        alert(error?.message);
+      });
   };
   return (
     <UsersContainer>
@@ -69,7 +92,8 @@ const Index = () => {
             <TableWrapper>
               <UserTable
                 dataSource={data?.users}
-                onViewUser={handleViewUserClick}
+                onEditUser={handleEditUserClick}
+                onDeleteUser={handleDeleteUser}
               />
             </TableWrapper>
           )}
@@ -131,7 +155,34 @@ const Index = () => {
         }}
         height={"90%"}
       >
-        <UpdateUser selectedUserId={selectedUserId} />
+        <UpdateUser
+          selectedUserId={selectedUserId}
+          setUpdateModal={setUpdateModal}
+        />
+      </Modal>
+      <Modal
+        onOk={deleteUser}
+        okText="Delete"
+        okButtonProps={{
+          style: {
+            backgroundColor: "#FF4D4F",
+            borderColor: "#FF4D4F",
+          },
+        }}
+        centered
+        open={deleteModal}
+        onCancel={() => setDeleteModal(false)}
+        width={{
+          xs: "90%",
+          sm: "80%",
+          md: "70%",
+          lg: "60%",
+          xl: "50%",
+          xxl: "40%",
+        }}
+        height={"90%"}
+      >
+        <DeleteUser />
       </Modal>
     </UsersContainer>
   );

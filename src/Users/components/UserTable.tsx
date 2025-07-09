@@ -1,4 +1,25 @@
 import { Space, Table, Tag } from "antd";
+import styled from "styled-components";
+import { DeleteOutlined, EditOutlined } from "@ant-design/icons";
+
+const EditButton = styled.div`
+  display: flex;
+  gap: 0px 10px;
+  color: darkgreen;
+  cursor: pointer;
+  &:hover {
+    color: #32cd32;
+  }
+`;
+const DeleteButton = styled.div`
+  display: flex;
+  gap: 0px 10px;
+  color: red;
+  cursor: pointer;
+  &:hover {
+    color: #8b0000;
+  }
+`;
 
 interface User {
   userId: string;
@@ -20,7 +41,8 @@ interface Role {
 
 interface UserTableProps {
   dataSource?: User[];
-  onViewUser: (userId: string) => void;
+  onEditUser: (userID: string) => void;
+  onDeleteUser: (userID: string) => void;
 }
 
 interface CreatedAtType {
@@ -33,7 +55,11 @@ interface UserNameType {
   username: string;
 }
 
-const UserTable = ({ dataSource, onViewUser }: UserTableProps) => {
+const UserTable = ({
+  dataSource,
+  onEditUser,
+  onDeleteUser,
+}: UserTableProps) => {
   const columns = [
     {
       title: "First Name",
@@ -100,8 +126,13 @@ const UserTable = ({ dataSource, onViewUser }: UserTableProps) => {
       key: "action",
       render: (record: User) => (
         <Space size="middle">
-          <a onClick={() => onViewUser(record.userId)}>Edit</a>
-          <a>Delete</a>
+          <EditButton onClick={() => onEditUser(record.userId)}>
+            <>Edit</> <EditOutlined />
+          </EditButton>
+          <DeleteButton onClick={() => onDeleteUser(record.userId)}>
+            <>Delete </>
+            <DeleteOutlined />
+          </DeleteButton>
         </Space>
       ),
     },
