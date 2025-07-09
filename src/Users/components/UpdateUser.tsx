@@ -153,7 +153,7 @@ const UpdateUser = ({ selectedUserId, setUpdateModal }: PropsType) => {
         <Row gutter={50}>
           <Col span={12}>
             <Form.Item<FieldType> label="Role" name="role">
-              <Select placeholder="Select a role" options={menuItems} />
+              <Select style={{height:'44px'}} placeholder="Select a role" options={menuItems} />
             </Form.Item>
           </Col>
           <Col span={8}>
