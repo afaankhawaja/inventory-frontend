@@ -21,6 +21,8 @@ type FieldType = {
   email?: string;
   cnic?: string;
   role?: string;
+  phone?: string;
+  is_active?: boolean;
 };
 
 const StyledForm = styled(Form<FieldType>)`
@@ -59,6 +61,8 @@ const CreateNewUser = ({ setOpen }: Props) => {
         cnic: values.cnic,
         age: values.age,
         role: values.role,
+        is_active: true,
+        phone: values.phone,
       },
     }).then(() => {
       form.resetFields();
@@ -91,31 +95,31 @@ const CreateNewUser = ({ setOpen }: Props) => {
 
       <Row gutter={12}>
         <Col span={12}>
-          <Form.Item<FieldType> label="firstName" name="firstName">
+          <Form.Item<FieldType> label="First Name" name="firstName">
             <Input placeholder="first name" />
           </Form.Item>
         </Col>
 
         <Col span={12}>
-          <Form.Item<FieldType> label="lastName" name="lastName">
+          <Form.Item<FieldType> label="Last Name" name="lastName">
             <Input placeholder="last name" />
           </Form.Item>
         </Col>
       </Row>
 
-      <Form.Item<FieldType> label="cnic" name="cnic">
+      <Form.Item<FieldType> label="Cnic" name="cnic">
         <Input placeholder="your identity" />
       </Form.Item>
 
       <Row gutter={50}>
         <Col span={12}>
-          <Form.Item<FieldType> label="role" name="role">
+          <Form.Item<FieldType> label="Role" name="role">
             <Input placeholder="Admin etc." />
           </Form.Item>
         </Col>
         <Col span={8}>
           <Form.Item<FieldType>
-            label="age"
+            label="Age"
             name="age"
             rules={[{ required: true }]}
           >
@@ -123,9 +127,12 @@ const CreateNewUser = ({ setOpen }: Props) => {
           </Form.Item>
         </Col>
       </Row>
+      <Form.Item<FieldType> label="Phone" name="phone">
+        <Input placeholder="+9230..." />
+      </Form.Item>
 
       <Form.Item<FieldType>
-        label="email"
+        label="Email"
         name="email"
         rules={[
           { required: true, message: " enter your email!" },

@@ -10,6 +10,8 @@ export const CREATE_USER_WITH_ROLE = gql`
     $password_hash: String
     $email: String
     $role: String
+    $phone: String
+    $is_active: Boolean
   ) {
     createUser(
       createUserInput: {
@@ -18,9 +20,11 @@ export const CREATE_USER_WITH_ROLE = gql`
         last_name: $last_name
         age: $age
         cnic: $cnic
+        phone: $phone
         password_hash: $password_hash
         email: $email
         role: { create: { name: $role } }
+        is_active: $is_active
       }
     ) {
       userId
@@ -28,6 +32,40 @@ export const CREATE_USER_WITH_ROLE = gql`
       role {
         name
       }
+    }
+  }
+`;
+
+export const UPDATE_USER = gql`
+  mutation UpdateUser(
+    $userID: String!
+    $username: String
+    $first_name: String
+    $last_name: String
+    $age: Int
+    $cnic: String
+    $email: String
+    $is_active: Boolean
+    $phone: String
+  ) {
+    updateUser(
+      userID: $userID
+      updateUserInput: {
+        first_name: { set: $first_name }
+        last_name: { set: $last_name }
+        age: { set: $age }
+        username: { set: $username }
+        email: { set: $email }
+        cnic: { set: $cnic }
+        is_active: { set: $is_active }
+        phone: { set: $phone }
+      }
+    ) {
+      username
+      first_name
+      last_name
+      age
+      email
     }
   }
 `;

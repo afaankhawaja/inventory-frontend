@@ -6,6 +6,7 @@ import { UserAddOutlined } from "@ant-design/icons";
 import { Button, Modal } from "antd";
 import { useState } from "react";
 import CreateNewUser from "./components/CreateNewUser";
+import UpdateUser from "./components/UpdateUser";
 
 const UsersContainer = styled.section`
   width: 100%;
@@ -41,7 +42,14 @@ const TableWrapper = styled.div`
 
 const Index = () => {
   const [open, setOpen] = useState(false);
+  const [updateModal, setUpdateModal] = useState(false);
+  const [selectedUserId, setSelectedUserId] = useState("");
   const { data, loading, error } = useQuery(FETCH_ALL_USERS);
+
+  const handleViewUserClick = (userId: string) => {
+    setSelectedUserId(userId);
+    setUpdateModal(true);
+  };
   return (
     <UsersContainer>
       <Title>Users</Title>
@@ -59,7 +67,10 @@ const Index = () => {
             <div>loading users...</div>
           ) : (
             <TableWrapper>
-              <UserTable dataSource={data?.users} />
+              <UserTable
+                dataSource={data?.users}
+                onViewUser={handleViewUserClick}
+              />
             </TableWrapper>
           )}
         </>
@@ -92,6 +103,35 @@ const Index = () => {
         height={"90%"}
       >
         <CreateNewUser setOpen={setOpen} />
+      </Modal>
+      <Modal
+        title={
+          <div
+            style={{
+              textAlign: "center",
+              color: "#1890ff",
+              fontWeight: "bold",
+              fontSize: "20px",
+            }}
+          >
+            Update User
+          </div>
+        }
+        centered
+        open={updateModal}
+        footer={null}
+        onCancel={() => setUpdateModal(false)}
+        width={{
+          xs: "90%",
+          sm: "80%",
+          md: "70%",
+          lg: "60%",
+          xl: "50%",
+          xxl: "40%",
+        }}
+        height={"90%"}
+      >
+        <UpdateUser selectedUserId={selectedUserId} />
       </Modal>
     </UsersContainer>
   );
