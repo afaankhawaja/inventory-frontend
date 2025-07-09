@@ -9,9 +9,18 @@ import {
   UnorderedListOutlined,
   UserOutlined,
 } from "@ant-design/icons";
-import { Button, Layout, Menu, theme } from "antd";
+import {
+  Avatar,
+  Button,
+  Dropdown,
+  Layout,
+  Menu,
+  theme,
+  type MenuProps,
+} from "antd";
 import { useNavigate } from "react-router";
 import { Outlet } from "react-router";
+import CurrentUser from "../../utils/CurrentUser";
 
 const { Header, Sider, Content } = Layout;
 
@@ -21,6 +30,38 @@ const HomeLayout: React.FC = () => {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
   const navigate = useNavigate();
+  const username = CurrentUser();
+
+  const logoutUser = () => {
+    localStorage.removeItem("access_token");
+    localStorage.removeItem("refresh_token");
+    navigate("/signin");
+  };
+  const items: MenuProps["items"] = [
+    {
+      key: "profile",
+      icon: <UserOutlined />,
+      label: (
+        <div style={{ padding: "8px 0" }}>
+          <strong>{username}</strong>
+        </div>
+      ),
+      disabled: true,
+    },
+    {
+      type: "divider",
+    },
+    {
+      key: "logout",
+      icon: <LogoutOutlined />,
+      label: "Logout",
+      danger: true,
+      onClick: () => {
+        logoutUser();
+      },
+    },
+  ];
+
   return (
     <Layout>
       <Sider
@@ -41,9 +82,7 @@ const HomeLayout: React.FC = () => {
           defaultSelectedKeys={["1"]}
           onClick={({ key }) => {
             if (key === "logout") {
-              localStorage.removeItem("access_token");
-              localStorage.removeItem("refresh_token");
-              navigate("/signin");
+              logoutUser();
             } else navigate(key);
           }}
           items={[
@@ -81,7 +120,15 @@ const HomeLayout: React.FC = () => {
         />
       </Sider>
       <Layout>
-        <Header style={{ padding: 0, background: colorBgContainer }}>
+        <Header
+          style={{
+            padding: 10,
+            background: colorBgContainer,
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+          }}
+        >
           <Button
             type="text"
             icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
@@ -92,6 +139,13 @@ const HomeLayout: React.FC = () => {
               height: 64,
             }}
           />
+
+          <Dropdown menu={{ items }} placement="bottomRight" arrow>
+            <Avatar
+              size={{ xs: 24, sm: 32, md: 32, lg: 36, xl: 40, xxl: 54 }}
+              icon={<UserOutlined />}
+            />
+          </Dropdown>
         </Header>
         <Content
           style={{
