@@ -5,11 +5,13 @@ import {
   Input,
   InputNumber,
   Row,
+  Select,
   type FormProps,
 } from "antd";
 import styled from "styled-components";
-import { useMutation } from "@apollo/client";
+import { useMutation, useQuery } from "@apollo/client";
 import { CREATE_USER_WITH_ROLE } from "../graphql/mutations";
+import { FETCH_ALL_ROLES } from "../graphql/queries";
 
 type FieldType = {
   username?: string;
@@ -45,10 +47,18 @@ const StyledForm = styled(Form<FieldType>)`
 interface Props {
   setOpen: (arg: boolean) => void;
 }
-
+interface RoleProp {
+  roleId?: string;
+  name?: string;
+}
 const CreateNewUser = ({ setOpen }: Props) => {
   const [form] = Form.useForm();
   const [createUser, { loading }] = useMutation(CREATE_USER_WITH_ROLE);
+  const { data: roleData } = useQuery(FETCH_ALL_ROLES);
+  const menuItems = roleData?.roles.map((role: RoleProp) => ({
+    value: role?.roleId,
+    label: role?.name,
+  }));
 
   const onFinish: FormProps<FieldType>["onFinish"] = (values) => {
     createUser({
@@ -60,15 +70,19 @@ const CreateNewUser = ({ setOpen }: Props) => {
         password_hash: values.password,
         cnic: values.cnic,
         age: values.age,
-        role: values.role,
         is_active: true,
         phone: values.phone,
+        roleId: values.role,
       },
-    }).then(() => {
-      form.resetFields();
-      alert("created user sucessfully");
-      setOpen(false);
-    });
+    })
+      .then(() => {
+        form.resetFields();
+        alert("created user sucessfully");
+        setOpen(false);
+      })
+      .catch((error) => {
+        console.log("error.message", error.message);
+      });
   };
   const onFinishFailed: FormProps<FieldType>["onFinishFailed"] = (
     errorInfo,
@@ -114,7 +128,7 @@ const CreateNewUser = ({ setOpen }: Props) => {
       <Row gutter={50}>
         <Col span={12}>
           <Form.Item<FieldType> label="Role" name="role">
-            <Input placeholder="Admin etc." />
+            <Select placeholder="Select a role" options={menuItems} />
           </Form.Item>
         </Col>
         <Col span={8}>

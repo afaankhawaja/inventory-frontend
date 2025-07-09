@@ -9,9 +9,9 @@ export const CREATE_USER_WITH_ROLE = gql`
     $cnic: String
     $password_hash: String
     $email: String
-    $role: String
     $phone: String
     $is_active: Boolean
+    $roleId: String!
   ) {
     createUser(
       createUserInput: {
@@ -23,7 +23,7 @@ export const CREATE_USER_WITH_ROLE = gql`
         phone: $phone
         password_hash: $password_hash
         email: $email
-        role: { create: { name: $role } }
+        role: { connect: { roleId: $roleId } }
         is_active: $is_active
       }
     ) {
@@ -47,6 +47,7 @@ export const UPDATE_USER = gql`
     $email: String
     $is_active: Boolean
     $phone: String
+    $roleId: String
   ) {
     updateUser(
       userID: $userID
@@ -59,6 +60,7 @@ export const UPDATE_USER = gql`
         cnic: { set: $cnic }
         is_active: { set: $is_active }
         phone: { set: $phone }
+        role: { connect: { roleId: $roleId } }
       }
     ) {
       username

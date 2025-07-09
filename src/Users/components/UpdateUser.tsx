@@ -1,4 +1,4 @@
-import { FETCH_USER_BY_ID } from "../graphql/queries";
+import { FETCH_ALL_ROLES, FETCH_USER_BY_ID } from "../graphql/queries";
 import { useMutation, useQuery } from "@apollo/client";
 import {
   Form,
@@ -9,6 +9,7 @@ import {
   InputNumber,
   Button,
   type FormProps,
+  Select,
 } from "antd";
 import { useEffect } from "react";
 import styled from "styled-components";
@@ -27,6 +28,11 @@ type FieldType = {
   phone?: string;
   is_active?: boolean;
 };
+
+interface RoleProp {
+  roleId?: string;
+  name?: string;
+}
 
 const StyledForm = styled(Form<FieldType>)`
   width: 100%;
@@ -55,6 +61,11 @@ const UpdateUser = ({ selectedUserId, setUpdateModal }: PropsType) => {
   const { data, loading, error } = useQuery(FETCH_USER_BY_ID, {
     variables: { userID: selectedUserId },
   });
+  const { data: roleData } = useQuery(FETCH_ALL_ROLES);
+  const menuItems = roleData?.roles.map((role: RoleProp) => ({
+    value: role?.roleId,
+    label: role?.name,
+  }));
   const [updateUser] = useMutation(UPDATE_USER);
   const user = data?.user;
   useEffect(() => {
@@ -67,7 +78,7 @@ const UpdateUser = ({ selectedUserId, setUpdateModal }: PropsType) => {
         email: user.email,
         is_active: user.is_active ?? false,
         age: user.age,
-        role: user.role?.name || "",
+        role: user?.role?.name || "",
         password: user?.password_hash,
         cnic: user?.cnic,
       });
@@ -89,6 +100,7 @@ const UpdateUser = ({ selectedUserId, setUpdateModal }: PropsType) => {
         age: values.age,
         is_active: values.is_active,
         phone: values.phone,
+        roleId: values.role,
       },
     }).then(() => {
       form.resetFields();
@@ -141,7 +153,7 @@ const UpdateUser = ({ selectedUserId, setUpdateModal }: PropsType) => {
         <Row gutter={50}>
           <Col span={12}>
             <Form.Item<FieldType> label="Role" name="role">
-              <Input placeholder="Admin etc." />
+              <Select placeholder="Select a role" options={menuItems} />
             </Form.Item>
           </Col>
           <Col span={8}>

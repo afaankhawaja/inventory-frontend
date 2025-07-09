@@ -36,3 +36,11 @@ export const FETCH_USER_BY_ID = gql`
     }
   }
 `;
+export const FETCH_ALL_ROLES = gql`
+  query findall {
+    roles {
+      name
+      roleId
+    }
+  }
+`;
