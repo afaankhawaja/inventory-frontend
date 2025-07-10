@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   EditOutlined,
   FileDoneOutlined,
@@ -25,6 +25,8 @@ import CurrentUser from "../../utils/CurrentUser";
 import { useQuery } from "@apollo/client";
 import { FETCH_USER_BY_USERNAME } from "../graphql/queries";
 import styled from "styled-components";
+import { currentUserDataAtom } from "../../store/atoms";
+import { useAtom } from "jotai";
 
 const UserWrapper = styled.div`
   padding: 8px 0;
@@ -47,7 +49,22 @@ const HomeLayout: React.FC = () => {
   const { data } = useQuery(FETCH_USER_BY_USERNAME, {
     variables: { username: username },
   });
-  const base64Url = data?.username?.image_path;
+  const [userData, setUserData] = useAtom(currentUserDataAtom);
+  useEffect(() => {
+    if (!data) return;
+    updateUser();
+  }, [data]);
+
+  const updateUser = () => {
+    if (!data) return;
+    setUserData({
+      username: data?.username?.username ?? "",
+      email: data?.username?.email,
+      userID: data?.username?.userId,
+      image_path: data?.username?.image_path,
+    });
+  };
+
   const defaultIcon = "../../../assets/images/user.png";
   const logoutUser = () => {
     localStorage.removeItem("access_token");
@@ -60,8 +77,8 @@ const HomeLayout: React.FC = () => {
       icon: <UserOutlined />,
       label: (
         <UserWrapper>
-          <UserName>{username}</UserName>
-          <UserEmail>{data?.username?.email}</UserEmail>
+          <UserName>{userData.username}</UserName>
+          <UserEmail>{userData.email}</UserEmail>
         </UserWrapper>
       ),
       disabled: true,
@@ -71,8 +88,8 @@ const HomeLayout: React.FC = () => {
       icon: <EditOutlined />,
       label: "Edit profile",
       onClick: () => {
-        navigate('/edit-user-details')
-      }
+        navigate("/edit-user-details");
+      },
     },
     {
       type: "divider",
@@ -169,7 +186,7 @@ const HomeLayout: React.FC = () => {
           <Dropdown menu={{ items }} placement="bottomRight" arrow>
             <Avatar
               size={{ xs: 24, sm: 32, md: 32, lg: 36, xl: 40, xxl: 54 }}
-              src={base64Url ? base64Url : defaultIcon}
+              src={userData?.image_path ? userData?.image_path : defaultIcon}
             />
           </Dropdown>
         </Header>

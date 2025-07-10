@@ -6,6 +6,7 @@ export const FETCH_USER_BY_USERNAME = gql`
       userId
       image_path
       email
+      username
     }
   }
 `;
