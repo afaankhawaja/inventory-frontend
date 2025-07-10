@@ -128,7 +128,7 @@ const UserTable = ({
       title: "Action",
       key: "action",
       render: (record: User) =>
-        userData?.role==="super-admin" ? (
+        userData?.role === "super-admin" ? (
           <Space size="middle">
             <EditButton onClick={() => onEditUser(record.userId)}>
               <>Edit</> <EditOutlined />
