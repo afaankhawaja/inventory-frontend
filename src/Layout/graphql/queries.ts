@@ -7,6 +7,9 @@ export const FETCH_USER_BY_USERNAME = gql`
       image_path
       email
       username
+      role {
+        name
+      }
     }
   }
 `;

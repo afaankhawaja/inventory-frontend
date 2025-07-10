@@ -1,6 +1,8 @@
 import { Space, Table, Tag } from "antd";
 import styled from "styled-components";
 import { DeleteOutlined, EditOutlined } from "@ant-design/icons";
+import { useAtom } from "jotai";
+import { currentUserDataAtom } from "../../store/atoms";
 
 const EditButton = styled.div`
   display: flex;
@@ -60,6 +62,7 @@ const UserTable = ({
   onEditUser,
   onDeleteUser,
 }: UserTableProps) => {
+  const [userData] = useAtom(currentUserDataAtom);
   const columns = [
     {
       title: "First Name",
@@ -124,17 +127,24 @@ const UserTable = ({
     {
       title: "Action",
       key: "action",
-      render: (record: User) => (
-        <Space size="middle">
-          <EditButton onClick={() => onEditUser(record.userId)}>
-            <>Edit</> <EditOutlined />
-          </EditButton>
-          <DeleteButton onClick={() => onDeleteUser(record.userId)}>
-            <>Delete </>
-            <DeleteOutlined />
-          </DeleteButton>
-        </Space>
-      ),
+      render: (record: User) =>
+        userData?.role==="super-admin" ? (
+          <Space size="middle">
+            <EditButton onClick={() => onEditUser(record.userId)}>
+              <>Edit</> <EditOutlined />
+            </EditButton>
+            <DeleteButton onClick={() => onDeleteUser(record.userId)}>
+              <>Delete </>
+              <DeleteOutlined />
+            </DeleteButton>
+          </Space>
+        ) : (
+          <Space size="middle">
+            <EditButton onClick={() => onEditUser(record.userId)}>
+              <>Edit</> <EditOutlined />
+            </EditButton>
+          </Space>
+        ),
     },
   ];
 

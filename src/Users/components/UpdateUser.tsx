@@ -106,7 +106,9 @@ const UpdateUser = ({ selectedUserId, setUpdateModal }: PropsType) => {
       form.resetFields();
       alert("updated user sucessfully");
       setUpdateModal(false);
-    });
+    }).catch((error) => {
+        alert(error.message)
+    })
   };
   const onFinishFailed: FormProps<FieldType>["onFinishFailed"] = (
     errorInfo,

@@ -62,6 +62,7 @@ const HomeLayout: React.FC = () => {
       email: data?.username?.email,
       userID: data?.username?.userId,
       image_path: data?.username?.image_path,
+      role: data?.username?.role?.name,
     });
   };
 

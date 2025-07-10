@@ -4,10 +4,12 @@ interface UserData {
   email: string;
   userID: string;
   image_path: string;
+  role: string | null;
 }
 export const currentUserDataAtom = atom<UserData>({
   username: "",
   email: "",
   image_path: "",
   userID: "",
+  role: "",
 });
