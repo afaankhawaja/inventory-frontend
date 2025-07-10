@@ -112,7 +112,6 @@ const UpdateUser = ({ selectedUserId }: PropsType) => {
         is_active: user.is_active ?? false,
         age: user.age,
         cnic: user?.cnic,
-        password: user?.password_hash,
         image: user?.image_path,
       });
     }
@@ -196,17 +195,17 @@ const UpdateUser = ({ selectedUserId }: PropsType) => {
         </Row>
         <Row gutter={12}>
           <Col span={12}>
-            <Form.Item<FieldType>
-              label="Password"
-              name="password"
-              rules={[{ required: true }]}
-            >
-              <Input.Password />
-            </Form.Item>
-          </Col>
-          <Col span={12}>
             <Form.Item<FieldType> label="Phone" name="phone">
               <Input placeholder="your identity" />
+            </Form.Item>
+          </Col>
+          <Col span={8}>
+            <Form.Item<FieldType>
+              label="Age"
+              name="age"
+              rules={[{ required: true }]}
+            >
+              <InputNumber placeholder="22 e.g." />
             </Form.Item>
           </Col>
         </Row>
@@ -228,12 +227,8 @@ const UpdateUser = ({ selectedUserId }: PropsType) => {
             </Form.Item>
           </Col>
           <Col span={8}>
-            <Form.Item<FieldType>
-              label="Age"
-              name="age"
-              rules={[{ required: true }]}
-            >
-              <InputNumber placeholder="22 e.g." />
+            <Form.Item<FieldType> label="Active" name="is_active">
+              <Switch />
             </Form.Item>
           </Col>
         </Row>
@@ -241,11 +236,6 @@ const UpdateUser = ({ selectedUserId }: PropsType) => {
           <Col span={12}>
             <Form.Item<FieldType> label="Cnic" name="cnic">
               <Input />
-            </Form.Item>
-          </Col>
-          <Col span={8}>
-            <Form.Item<FieldType> label="Active" name="is_active">
-              <Switch />
             </Form.Item>
           </Col>
         </Row>

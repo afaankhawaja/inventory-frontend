@@ -138,17 +138,28 @@ const UserTable = ({
               <DeleteOutlined />
             </DeleteButton>
           </Space>
-        ) : (
+        ) : userData?.role === "admin" ? (
           <Space size="middle">
             <EditButton onClick={() => onEditUser(record.userId)}>
               <>Edit</> <EditOutlined />
             </EditButton>
           </Space>
+        ) : (
+          <></>
         ),
     },
   ];
 
-  return <Table dataSource={dataSource} columns={columns} />;
+  const getVisibleColumns = (role: string | null) => {
+    if (role === "admin" || role === "super-admin") {
+      return columns;
+    } else {
+      return columns.filter((column) => column.key !== "action");
+    }
+  };
+  const visibleColumns = getVisibleColumns(userData?.role);
+
+  return <Table dataSource={dataSource} columns={visibleColumns} />;
 };
 
 export default UserTable;
