@@ -23,7 +23,17 @@ import { Outlet } from "react-router";
 import CurrentUser from "../../utils/CurrentUser";
 import { useQuery } from "@apollo/client";
 import { FETCH_USER_BY_USERNAME } from "../graphql/queries";
+import styled from "styled-components";
 
+const UserWrapper = styled.div`
+  padding: 8px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+`;
+
+const UserName = styled.strong``;
+const UserEmail = styled.div``;
 const { Header, Sider, Content } = Layout;
 
 const HomeLayout: React.FC = () => {
@@ -37,7 +47,7 @@ const HomeLayout: React.FC = () => {
     variables: { username: username },
   });
   const base64Url = data?.username?.image_path;
-  const defaultIcon="../../../assets/images/user.png"
+  const defaultIcon = "../../../assets/images/user.png";
   const logoutUser = () => {
     localStorage.removeItem("access_token");
     localStorage.removeItem("refresh_token");
@@ -48,9 +58,10 @@ const HomeLayout: React.FC = () => {
       key: "profile",
       icon: <UserOutlined />,
       label: (
-        <div style={{ padding: "8px 0" }}>
-          <strong>{username}</strong>
-        </div>
+        <UserWrapper>
+          <UserName>{username}</UserName>
+          <UserEmail>{data?.username?.email}</UserEmail>
+        </UserWrapper>
       ),
       disabled: true,
     },

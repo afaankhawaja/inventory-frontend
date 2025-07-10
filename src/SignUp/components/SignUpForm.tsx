@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom";
 import SignUpIcon from "../../../assets/svgs/sign_up_user.svg?react";
 import { useMutation } from "@apollo/client";
 import { CREATE_USER } from "../graphql/mutations";
-import { UploadOutlined } from '@ant-design/icons'
+import { UploadOutlined } from "@ant-design/icons";
 import type { UploadFile } from "antd/es/upload/interface";
 
 const PageWrapper = styled.div`
@@ -140,8 +140,7 @@ const SignUpForm: React.FC = () => {
       reader.onerror = (error) => reject(error);
     });
 
-
-  const onFinish: FormProps<FieldType>["onFinish"] =async (values) => {
+  const onFinish: FormProps<FieldType>["onFinish"] = async (values) => {
     let base64: string | undefined;
     if (fileList.length > 0) {
       const file = fileList[0].originFileObj as File;
@@ -156,7 +155,7 @@ const SignUpForm: React.FC = () => {
         password_hash: values.password,
         cnic: values.cnic,
         age: values.age,
-        image_path:base64
+        image_path: base64,
       },
     })
       .then(() => {

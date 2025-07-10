@@ -5,6 +5,7 @@ export const FETCH_USER_BY_USERNAME = gql`
     username(username: $username) {
       userId
       image_path
+      email
     }
   }
 `;
