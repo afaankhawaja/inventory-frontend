@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import {
+  EditOutlined,
   FileDoneOutlined,
   HomeOutlined,
   LogoutOutlined,
@@ -64,6 +65,14 @@ const HomeLayout: React.FC = () => {
         </UserWrapper>
       ),
       disabled: true,
+    },
+    {
+      key: "edit",
+      icon: <EditOutlined />,
+      label: "Edit profile",
+      onClick: () => {
+        navigate('/edit-user-details')
+      }
     },
     {
       type: "divider",

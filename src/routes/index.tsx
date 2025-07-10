@@ -7,6 +7,7 @@ import HomeLayout from "../Layout/components/HomeLayout";
 import Dashboard from "../Dashboard";
 import Users from "../Users/index";
 import InventoryList from "../InventoryList";
+import EditUserDetails from "../EditUserDetails"
 
 const router = createBrowserRouter([
   {
@@ -35,6 +36,10 @@ const router = createBrowserRouter([
           {
             path: "inventory-list",
             element: <InventoryList />,
+          },
+          {
+            path: "edit-user-details",
+            element:<EditUserDetails/>
           },
         ],
       },
