@@ -84,12 +84,13 @@ const UpdateUser = ({ selectedUserId }: PropsType) => {
     variables: { userID: selectedUserId },
   });
   const [currentUser] = useAtom(currentUserDataAtom);
-  const [updateUser] = useMutation(UPDATE_USER);
+  const [updateUser, { loading: updateLoading }] = useMutation(UPDATE_USER);
   const user = data?.user;
   const navigate = useNavigate();
-  const base64 = currentUser
-    ? currentUser?.image_path
-    : "../../../assets/images/user.png";
+  const base64Url =
+    currentUser?.image_path !== null
+      ? currentUser?.image_path
+      : "../../../assets/images/user.png";
   const username = currentUser ? currentUser.username : "";
 
   const getBase64 = (file: File): Promise<string> =>
@@ -112,6 +113,7 @@ const UpdateUser = ({ selectedUserId }: PropsType) => {
         age: user.age,
         cnic: user?.cnic,
         password: user?.password_hash,
+        image: user?.image_path,
       });
     }
   }, [user, form]);
@@ -124,6 +126,8 @@ const UpdateUser = ({ selectedUserId }: PropsType) => {
     if (fileList.length > 0) {
       const file = fileList[0].originFileObj as File;
       base64 = await getBase64(file);
+    } else {
+      base64 = user?.image_path;
     }
     updateUser({
       variables: {
@@ -158,7 +162,7 @@ const UpdateUser = ({ selectedUserId }: PropsType) => {
   return (
     <Wrapper>
       <UserSection>
-        <Avatar size={74} src={base64} />
+        <Avatar size={74} src={base64Url} />
         <UserNameTitle>{username} </UserNameTitle>
       </UserSection>
       <StyledForm
@@ -192,7 +196,11 @@ const UpdateUser = ({ selectedUserId }: PropsType) => {
         </Row>
         <Row gutter={12}>
           <Col span={12}>
-            <Form.Item<FieldType> label="Password" name="password">
+            <Form.Item<FieldType>
+              label="Password"
+              name="password"
+              rules={[{ required: true }]}
+            >
               <Input.Password />
             </Form.Item>
           </Col>
@@ -254,17 +262,18 @@ const UpdateUser = ({ selectedUserId }: PropsType) => {
         <Row style={{ justifyContent: "end" }} gutter={12}>
           <Col>
             <Form.Item>
-              <Button color="purple" variant="outlined" htmlType="submit">
-                {!loading ? "save" : "saving..."}
+              <Button variant="outlined" htmlType="submit">
+                {!updateLoading ? "save" : "saving..."}
               </Button>
             </Form.Item>
           </Col>
           <Col>
             <Button
+              color="pink"
+              variant="outlined"
               onClick={() => {
                 navigate("/");
               }}
-              variant="outlined"
             >
               back <RollbackOutlined />
             </Button>
