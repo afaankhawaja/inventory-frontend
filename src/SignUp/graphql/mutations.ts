@@ -9,6 +9,7 @@ export const CREATE_USER = gql`
     $cnic: String
     $password_hash: String
     $email: String
+    $image_path: String
   ) {
     createUser(
       createUserInput: {
@@ -19,6 +20,7 @@ export const CREATE_USER = gql`
         cnic: $cnic
         password_hash: $password_hash
         email: $email
+        image_path: $image_path
       }
     ) {
       userId

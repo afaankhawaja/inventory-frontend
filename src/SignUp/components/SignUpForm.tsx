@@ -1,11 +1,14 @@
-import React from "react";
+import React, { useState } from "react";
 import type { FormProps } from "antd";
-import { Button, Form, Input, InputNumber } from "antd";
+import { Button, Form, Input, InputNumber, Upload } from "antd";
 import styled from "styled-components";
 import { useNavigate } from "react-router-dom";
 import SignUpIcon from "../../../assets/svgs/sign_up_user.svg?react";
 import { useMutation } from "@apollo/client";
 import { CREATE_USER } from "../graphql/mutations";
+import { UploadOutlined } from '@ant-design/icons'
+import type { UploadFile } from "antd/es/upload/interface";
+
 const PageWrapper = styled.div`
   display: flex;
   justify-content: center;
@@ -114,12 +117,13 @@ type FieldType = {
   firstName?: string;
   lastName?: string;
   age?: number;
-  image?: string;
+  image?: File;
   email?: string;
   cnic?: string;
 };
 
 const SignUpForm: React.FC = () => {
+  const [fileList, setFileList] = useState<UploadFile[]>([]);
   const navigate = useNavigate();
   const [CreateUser, { loading }] = useMutation(CREATE_USER);
   const [form] = Form.useForm();
@@ -128,7 +132,21 @@ const SignUpForm: React.FC = () => {
     navigate("/");
   };
 
-  const onFinish: FormProps<FieldType>["onFinish"] = (values) => {
+  const getBase64 = (file: File): Promise<string> =>
+    new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = (error) => reject(error);
+    });
+
+
+  const onFinish: FormProps<FieldType>["onFinish"] =async (values) => {
+    let base64: string | undefined;
+    if (fileList.length > 0) {
+      const file = fileList[0].originFileObj as File;
+      base64 = await getBase64(file);
+    }
     CreateUser({
       variables: {
         username: values.username,
@@ -138,6 +156,7 @@ const SignUpForm: React.FC = () => {
         password_hash: values.password,
         cnic: values.cnic,
         age: values.age,
+        image_path:base64
       },
     })
       .then(() => {
@@ -222,6 +241,16 @@ const SignUpForm: React.FC = () => {
             rules={[{ required: true, message: "Please input your password!" }]}
           >
             <Input.Password placeholder="Enter your password" />
+          </Form.Item>
+          <Form.Item<FieldType> label="Profile Picture" name="image">
+            <Upload
+              accept="image/*"
+              beforeUpload={() => false}
+              fileList={fileList}
+              onChange={({ fileList }) => setFileList(fileList)}
+            >
+              <Button icon={<UploadOutlined />}>Select Image</Button>
+            </Upload>
           </Form.Item>
 
           <Form.Item>

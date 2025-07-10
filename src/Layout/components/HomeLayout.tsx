@@ -21,6 +21,8 @@ import {
 import { useNavigate } from "react-router";
 import { Outlet } from "react-router";
 import CurrentUser from "../../utils/CurrentUser";
+import { useQuery } from "@apollo/client";
+import { FETCH_USER_BY_USERNAME } from "../graphql/queries";
 
 const { Header, Sider, Content } = Layout;
 
@@ -31,7 +33,11 @@ const HomeLayout: React.FC = () => {
   } = theme.useToken();
   const navigate = useNavigate();
   const username = CurrentUser();
-
+  const { data } = useQuery(FETCH_USER_BY_USERNAME, {
+    variables: { username: username },
+  });
+  const base64Url = data?.username?.image_path;
+  const defaultIcon="../../../assets/images/user.png"
   const logoutUser = () => {
     localStorage.removeItem("access_token");
     localStorage.removeItem("refresh_token");
@@ -143,7 +149,7 @@ const HomeLayout: React.FC = () => {
           <Dropdown menu={{ items }} placement="bottomRight" arrow>
             <Avatar
               size={{ xs: 24, sm: 32, md: 32, lg: 36, xl: 40, xxl: 54 }}
-              icon={<UserOutlined />}
+              src={base64Url ? base64Url : defaultIcon}
             />
           </Dropdown>
         </Header>
