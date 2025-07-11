@@ -9,6 +9,8 @@ import CreateNewUser from "./components/CreateNewUser";
 import UpdateUser from "./components/UpdateUser";
 import DeleteUser from "./components/DeleteUser";
 import { DELETE_USER } from "./graphql/mutations";
+import { currentUserDataAtom } from "../store/atoms";
+import { useAtom } from "jotai";
 
 const UsersContainer = styled.section`
   width: 100%;
@@ -49,6 +51,8 @@ const Index = () => {
   const [selectedUserId, setSelectedUserId] = useState("");
   const { data, loading, error } = useQuery(FETCH_ALL_USERS);
   const [removeUser] = useMutation(DELETE_USER);
+  const [currentUser] = useAtom(currentUserDataAtom);
+  const userRole = currentUser?.role;
 
   const handleEditUserClick = (userID: string) => {
     setSelectedUserId(userID);
@@ -77,9 +81,15 @@ const Index = () => {
     <UsersContainer>
       <Title>Users</Title>
       <Wrapper>
-        <AddNewUser onClick={() => setOpen(true)}>
-          Add new user <UserAddOutlined />{" "}
-        </AddNewUser>
+        {userRole ? (
+          (userRole === "admin" || userRole === "super-admin") && (
+            <AddNewUser onClick={() => setOpen(true)}>
+              Add new user <UserAddOutlined />{" "}
+            </AddNewUser>
+          )
+        ) : (
+          <></>
+        )}
       </Wrapper>
 
       {error ? (
