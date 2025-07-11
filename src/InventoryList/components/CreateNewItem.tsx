@@ -7,10 +7,12 @@ import {
   Row,
   Col,
   Switch,
+  Select,
 } from "antd";
 import styled from "styled-components";
-import { useMutation } from "@apollo/client";
+import { useMutation, useQuery } from "@apollo/client";
 import { CREATE_NEW_ITEM } from "../graphql/mutations";
+import { FETCH_ALL_CATEGORIES, FETCH_ALL_LOCATIONS } from "../graphql/queries";
 
 type ItemType = {
   name?: string;
@@ -22,8 +24,8 @@ type ItemType = {
   is_high_value?: boolean;
   brand?: string;
   barcode?: string;
-  category_name?: string;
-  location_name?: string;
+  category?: string;
+  location?: string;
 };
 
 const StyledForm = styled(Form<ItemType>)`
@@ -44,11 +46,31 @@ const StyledForm = styled(Form<ItemType>)`
 interface Props {
   setOpen: (arg: boolean) => void;
 }
+interface CategoryProps {
+  categoryId?: string;
+  name?: string;
+}
+
+interface LocationProps {
+  locationId?: string;
+  location_name?: string;
+}
 
 const CreateNewItem = ({ setOpen }: Props) => {
   const [form] = Form.useForm();
   const [createItem, { loading }] = useMutation(CREATE_NEW_ITEM);
+  const { data: catData } = useQuery(FETCH_ALL_CATEGORIES);
+  const { data: locData } = useQuery(FETCH_ALL_LOCATIONS);
 
+const categoryOptions = catData?.categories.map((category: CategoryProps) => ({
+  value: category?.categoryId,
+  label: category?.name,
+}));
+const locationOptions = locData?.locations.map((location: LocationProps) => ({
+  value: location?.locationId,
+  label: location?.location_name,
+}));
+  
   const onFinish: FormProps<ItemType>["onFinish"] = (values) => {
     createItem({
       variables: {
@@ -61,8 +83,8 @@ const CreateNewItem = ({ setOpen }: Props) => {
         is_high_value: values.is_high_value,
         brand: values.brand,
         barcode: values.barcode,
-        category_name: values.category_name,
-        location_name: values.location_name,
+        categoryId: values.category,
+        locationId: values.location,
       },
     }).then(() => {
       form.resetFields();
@@ -170,21 +192,44 @@ const CreateNewItem = ({ setOpen }: Props) => {
         </Col>
       </Row>
 
-      <Form.Item<ItemType>
-        label="Category Name"
-        name="category_name"
-        rules={[{ required: true, message: "Please input the category name!" }]}
-      >
-        <Input placeholder="Enter category name" />
-      </Form.Item>
-
-      <Form.Item<ItemType>
-        label="Location Name"
-        name="location_name"
-        rules={[{ required: true, message: "Please input the location name!" }]}
-      >
-        <Input placeholder="Enter location name" />
-      </Form.Item>
+      <Row gutter={12}>
+        <Col span={12}>
+          <Form.Item
+            name="category"
+            label="Category"
+            rules={[
+              {
+                required: true,
+                message: "Please input the relevant category!",
+              },
+            ]}
+          >
+            <Select
+              style={{ height: "44px" }}
+              options={categoryOptions}
+              placeholder="Select category"
+            />
+          </Form.Item>
+        </Col>
+        <Col span={12}>
+          <Form.Item
+            name="location"
+            label="Location"
+            rules={[
+              {
+                required: true,
+                message: "Please input the relevant location!",
+              },
+            ]}
+          >
+            <Select
+              style={{ height: "44px" }}
+              options={locationOptions}
+              placeholder="Select location"
+            />
+          </Form.Item>
+        </Col>
+      </Row>
 
       <Form.Item>
         <Button type="primary" htmlType="submit">

@@ -9,8 +9,8 @@ export const CREATE_NEW_ITEM = gql`
     $is_high_value: Boolean
     $brand: String
     $barcode: String
-    $category_name: String
-    $location_name: String
+    $categoryId: String
+    $locationId: String
   ) {
     createItem(
       itemCreateInput: {
@@ -21,8 +21,8 @@ export const CREATE_NEW_ITEM = gql`
         is_high_value: $is_high_value
         brand: $brand
         barcode: $barcode
-        category: { create: { name: $category_name } }
-        location: { create: { location_name: $location_name } }
+        category: { connect: { categoryId: $categoryId } }
+        location: { connect: { locationId: $locationId } }
       }
     ) {
       name
