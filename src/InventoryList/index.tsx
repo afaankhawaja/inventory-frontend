@@ -1,4 +1,4 @@
-import { useQuery } from "@apollo/client";
+import { useMutation, useQuery } from "@apollo/client";
 import { FETCH_ALL_ITEMS } from "./graphql/queries";
 import ItemsTable from "./components/ItemsTable";
 import styled from "styled-components";
@@ -6,6 +6,9 @@ import { Button, Modal } from "antd";
 import { PlusOutlined } from "@ant-design/icons";
 import { useState } from "react";
 import CreateNewItem from "./components/CreateNewItem";
+import { DELETE_ITEM } from "./graphql/mutations";
+import DeleteItem from "./components/DeleteItem";
+import UpdateItem from "./components/UpdateItem";
 
 const UsersContainer = styled.section`
   width: 100%;
@@ -41,7 +44,35 @@ const TableWrapper = styled.div`
 
 const Index = () => {
   const [open, setOpen] = useState(false);
+  const [selectedItemId, setSelectedItemId] = useState("");
+  const [updateModal, setUpdateModal] = useState(false);
+  const [deleteModal, setDeleteModal] = useState(false);
+
   const { data, loading, error } = useQuery(FETCH_ALL_ITEMS);
+  const [removeItem] = useMutation(DELETE_ITEM);
+
+  const handleEditItemClick = (itemId: string) => {
+    setSelectedItemId(itemId);
+    setUpdateModal(true);
+  };
+  const handleDeleteItem = (itemId: string) => {
+    setSelectedItemId(itemId);
+    setDeleteModal(true);
+  };
+  const deleteItem = () => {
+    removeItem({
+      variables: {
+        itemID: selectedItemId,
+      },
+    })
+      .then(() => {
+        alert("sucessfully deleted");
+        setDeleteModal(false);
+      })
+      .catch((error) => {
+        alert(error?.message);
+      });
+  };
   return (
     <UsersContainer>
       <Title>Items</Title>
@@ -59,7 +90,11 @@ const Index = () => {
             <div>loading inventory...</div>
           ) : (
             <TableWrapper>
-              <ItemsTable dataSource={data?.items} />
+              <ItemsTable
+                dataSource={data?.items}
+                onEditItem={handleEditItemClick}
+                onDeleteItem={handleDeleteItem}
+              />
             </TableWrapper>
           )}
         </>
@@ -92,6 +127,62 @@ const Index = () => {
         height={"90%"}
       >
         <CreateNewItem setOpen={setOpen} />
+      </Modal>
+      <Modal
+        title={
+          <div
+            style={{
+              textAlign: "center",
+              color: "#1890ff",
+              fontWeight: "bold",
+              fontSize: "20px",
+            }}
+          >
+            Update Item
+          </div>
+        }
+        centered
+        open={updateModal}
+        footer={null}
+        onCancel={() => setUpdateModal(false)}
+        width={{
+          xs: "90%",
+          sm: "80%",
+          md: "70%",
+          lg: "60%",
+          xl: "50%",
+          xxl: "40%",
+        }}
+        height={"90%"}
+      >
+        <UpdateItem
+          selectedItemId={selectedItemId}
+          setUpdateModal={setUpdateModal}
+        />
+      </Modal>
+      <Modal
+        onOk={deleteItem}
+        okText="Delete"
+        okButtonProps={{
+          style: {
+            backgroundColor: "#FF4D4F",
+            borderColor: "#FF4D4F",
+          },
+        }}
+        centered
+        open={deleteModal}
+        onCancel={() => setDeleteModal(false)}
+        width={{
+          xs: "90%",
+          sm: "80%",
+          md: "70%",
+          lg: "60%",
+          xl: "50%",
+          xxl: "40%",
+        }}
+        height={"90%"}
+      >
+        <DeleteItem />
       </Modal>
     </UsersContainer>
   );
