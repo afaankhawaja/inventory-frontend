@@ -16,6 +16,7 @@ import {
   Dropdown,
   Layout,
   Menu,
+  Switch,
   theme,
   type MenuProps,
 } from "antd";
@@ -27,6 +28,7 @@ import { FETCH_USER_BY_USERNAME } from "../graphql/queries";
 import styled from "styled-components";
 import { currentUserDataAtom } from "../../store/atoms";
 import { useAtom } from "jotai";
+import { selectedTheme } from "../../store/themeAtom";
 
 const UserWrapper = styled.div`
   padding: 8px 0;
@@ -34,7 +36,21 @@ const UserWrapper = styled.div`
   flex-direction: column;
   gap: 2px;
 `;
+const Wrapper = styled.div`
+  display: flex;
+  gap: 0px 50px;
+  justify-content:center;
+  justify-items:center;
+  align-items:center;
+`;
 
+const ThemeWrapper = styled.div`
+  display: flex;
+  align-items: center;
+  gap:0 10px;
+  font-size:14px;
+  font-weight:600;
+`;
 const UserName = styled.strong``;
 const UserEmail = styled.div``;
 const { Header, Sider, Content } = Layout;
@@ -50,6 +66,7 @@ const HomeLayout: React.FC = () => {
     variables: { username: username },
   });
   const [userData, setUserData] = useAtom(currentUserDataAtom);
+  const [currentTheme, setCurrentTheme] = useAtom(selectedTheme);
   useEffect(() => {
     if (!data) return;
     updateUser();
@@ -183,13 +200,25 @@ const HomeLayout: React.FC = () => {
               height: 64,
             }}
           />
-
-          <Dropdown menu={{ items }} placement="bottomRight" arrow>
-            <Avatar
-              size={{ xs: 24, sm: 32, md: 32, lg: 36, xl: 40, xxl: 54 }}
-              src={userData?.image_path ? userData?.image_path : defaultIcon}
-            />
-          </Dropdown>
+          <Wrapper>
+            <ThemeWrapper>
+              Theme
+              <Switch
+                size="small"
+                onClick={() =>
+                  setCurrentTheme({
+                    isDark: !currentTheme.isDark,
+                  })
+                }
+              />
+            </ThemeWrapper>
+            <Dropdown menu={{ items }} placement="bottomRight" arrow>
+              <Avatar
+                size={{ xs: 24, sm: 32, md: 32, lg: 36, xl: 40, xxl: 54 }}
+                src={userData?.image_path ? userData?.image_path : defaultIcon}
+              />
+            </Dropdown>
+          </Wrapper>
         </Header>
         <Content
           style={{
