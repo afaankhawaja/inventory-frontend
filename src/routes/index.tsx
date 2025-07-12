@@ -8,6 +8,7 @@ import Dashboard from "../Dashboard";
 import Users from "../Users/index";
 import InventoryList from "../InventoryList";
 import EditUserDetails from "../EditUserDetails";
+import RoleProtectedRoute from "../utils/RoleProtectedRoute";
 
 const router = createBrowserRouter([
   {
@@ -30,16 +31,23 @@ const router = createBrowserRouter([
             element: <Dashboard />,
           },
           {
-            path: "users",
-            element: <Users />,
-          },
-          {
             path: "inventory-list",
             element: <InventoryList />,
           },
           {
             path: "edit-user-details",
             element: <EditUserDetails />,
+          },
+          {
+            element: (
+              <RoleProtectedRoute allowedRoles={["admin", "super-admin"]} />
+            ),
+            children: [
+              {
+                path: "users",
+                element: <Users />,
+              },
+            ],
           },
         ],
       },
