@@ -1,5 +1,9 @@
+import InventoryValuationCards from "./components/InventoryValuationCards";
+
 const index = () => {
-  return <div>index of dashboard</div>;
+    return <div>
+      <InventoryValuationCards/>
+  </div>;
 };
 
 export default index;
