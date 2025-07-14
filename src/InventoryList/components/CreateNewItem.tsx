@@ -8,16 +8,19 @@ import {
   Col,
   Switch,
   Select,
+  DatePicker,
 } from "antd";
 import styled from "styled-components";
 import { useMutation, useQuery } from "@apollo/client";
 import { CREATE_NEW_ITEM } from "../graphql/mutations";
 import { FETCH_ALL_CATEGORIES, FETCH_ALL_LOCATIONS } from "../graphql/queries";
+import type { Dayjs } from "dayjs";
 
 type ItemType = {
   name?: string;
-  //   expiry_date?: string;
-  //   price?: string;
+  expiry_date?: Dayjs | null;
+  manufacturing_date?: Dayjs | null;
+  price?: string;
   condition?: string;
   quantity_in_stock?: number;
   reorder_threshold?: number;
@@ -77,8 +80,9 @@ const CreateNewItem = ({ setOpen }: Props) => {
     createItem({
       variables: {
         name: values.name,
-        // expiry_date: values.expiry_date,
-        // price: values.price,
+        manufacturing_date: values?.manufacturing_date?.toISOString(),
+        price: values.price,
+        expiry_date: values?.expiry_date?.toISOString() || undefined,
         condition: values.condition,
         quantity_in_stock: values.quantity_in_stock,
         reorder_threshold: values.reorder_threshold,
@@ -115,17 +119,20 @@ const CreateNewItem = ({ setOpen }: Props) => {
         <Input placeholder="Enter item name" />
       </Form.Item>
 
-      {/* <Form.Item<ItemType> label="Expiry Date" name="expiry_date">
-        <Input placeholder="YYYY-MM-DD" />
-      </Form.Item>
-
       <Form.Item<ItemType>
         label="Price"
         name="price"
         rules={[{ required: true, message: "Please input the price!" }]}
       >
         <InputNumber placeholder="Enter price" />
-      </Form.Item> */}
+      </Form.Item>
+      <Form.Item name="expiry_date" label="Expiry Date">
+        <DatePicker showTime format="YYYY-MM-DD HH:mm:ss" />
+      </Form.Item>
+
+      <Form.Item name="manufacturing_date" label="Manufacturing Date">
+        <DatePicker showTime format="YYYY-MM-DD HH:mm:ss" />
+      </Form.Item>
 
       <Form.Item<ItemType>
         label="Condition"

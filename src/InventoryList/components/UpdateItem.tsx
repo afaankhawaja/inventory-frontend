@@ -21,6 +21,7 @@ import { UPDATE_ITEM } from "../graphql/mutations";
 
 type FieldType = {
   name?: string;
+  price?: string;
   condition?: string;
   quantity_in_stock?: number;
   reorder_threshold?: number;
@@ -85,6 +86,7 @@ const UpdateItem = ({ selectedItemId, setUpdateModal }: PropsType) => {
     if (item) {
       form.setFieldsValue({
         name: item.name,
+        price: item.price,
         condition: item.condition,
         quantity_in_stock: item.quantity_in_stock,
         reorder_threshold: item.reorder_threshold,
@@ -106,6 +108,7 @@ const UpdateItem = ({ selectedItemId, setUpdateModal }: PropsType) => {
       variables: {
         itemID: selectedItemId,
         name: values.name,
+        price: values.price,
         condition: values.condition,
         quantity_in_stock: values.quantity_in_stock,
         reorder_threshold: values.reorder_threshold,
@@ -162,9 +165,30 @@ const UpdateItem = ({ selectedItemId, setUpdateModal }: PropsType) => {
           </Col>
         </Row>
 
-        <Form.Item name="is_high_value" label="High Value">
-          <Switch />
-        </Form.Item>
+        <Row gutter={12}>
+          <Col span={5}>
+            <Form.Item
+              label="Price"
+              name="price"
+              rules={[{ required: true, message: "Please input the price!" }]}
+            >
+              <InputNumber placeholder="Enter price" />
+            </Form.Item>
+          </Col>
+
+          <Col
+            style={{
+              justifyContent: "center",
+              justifyItems: "center",
+              alignContent: "center",
+            }}
+            span={5}
+          >
+            <Form.Item name="is_high_value" label="High Value">
+              <Switch />
+            </Form.Item>
+          </Col>
+        </Row>
 
         <Form.Item name="brand" label="Brand">
           <Input placeholder="Brand" />

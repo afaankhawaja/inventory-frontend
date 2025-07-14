@@ -14,6 +14,7 @@ export const FETCH_ALL_ITEMS = gql`
         is_high_value
         brand
         barcode
+        manufacturing_date
         category {
           name
         }
@@ -35,7 +36,10 @@ export const FETCH_ITEM_BY_ID = gql`
       reorder_threshold
       is_high_value
       brand
+      price
       barcode
+      expiry_date
+      manufacturing_date
       category {
         name
         categoryId

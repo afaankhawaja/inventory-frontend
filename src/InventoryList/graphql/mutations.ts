@@ -8,6 +8,9 @@ export const CREATE_NEW_ITEM = gql`
     $reorder_threshold: Int
     $is_high_value: Boolean
     $brand: String
+    $expiry_date: DateTime
+    $manufacturing_date: DateTime
+    $price: Decimal
     $barcode: String
     $categoryId: String
     $locationId: String
@@ -20,6 +23,9 @@ export const CREATE_NEW_ITEM = gql`
         reorder_threshold: $reorder_threshold
         is_high_value: $is_high_value
         brand: $brand
+        expiry_date: $expiry_date
+        manufacturing_date: $manufacturing_date
+        price: $price
         barcode: $barcode
         category: { connect: { categoryId: $categoryId } }
         location: { connect: { locationId: $locationId } }
@@ -28,6 +34,8 @@ export const CREATE_NEW_ITEM = gql`
       name
       brand
       itemId
+      expiry_date
+      manufacturing_date
       category {
         name
       }
@@ -50,6 +58,7 @@ export const UPDATE_ITEM = gql`
     $barcode: String
     $categoryId: String
     $locationId: String
+    $price: Decimal
   ) {
     updateItem(
       itemID: $itemID
@@ -63,10 +72,12 @@ export const UPDATE_ITEM = gql`
         barcode: { set: $barcode }
         category: { connect: { categoryId: $categoryId } }
         location: { connect: { locationId: $locationId } }
+        price: { set: $price }
       }
     ) {
       name
       brand
+      price
       condition
       quantity_in_stock
       reorder_threshold

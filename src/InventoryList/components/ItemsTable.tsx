@@ -90,6 +90,11 @@ const ItemsTable = ({
       key: "expiry_date",
     },
     {
+      title: "Mfg Date",
+      dataIndex: "manufacturing_date",
+      key: "manufacturing_date",
+    },
+    {
       title: "Location",
       dataIndex: "location",
       key: "location",
