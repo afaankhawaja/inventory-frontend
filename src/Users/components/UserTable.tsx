@@ -40,9 +40,16 @@ interface Role {
   name: string;
   description: string | null;
 }
+interface paginationProps {
+  current: number;
+  pageSize: number;
+  total: number;
+  onChange: (current: number, pageSize: number) => void;
+}
 
 interface UserTableProps {
   dataSource?: User[];
+  pagination: paginationProps;
   onEditUser: (userID: string) => void;
   onDeleteUser: (userID: string) => void;
 }
@@ -61,6 +68,7 @@ const UserTable = ({
   dataSource,
   onEditUser,
   onDeleteUser,
+  pagination,
 }: UserTableProps) => {
   const [userData] = useAtom(currentUserDataAtom);
   const columns = [
@@ -159,7 +167,13 @@ const UserTable = ({
   };
   const visibleColumns = getVisibleColumns(userData?.role);
 
-  return <Table dataSource={dataSource} columns={visibleColumns} />;
+  return (
+    <Table
+      pagination={pagination}
+      dataSource={dataSource}
+      columns={visibleColumns}
+    />
+  );
 };
 
 export default UserTable;

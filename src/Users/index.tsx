@@ -49,7 +49,16 @@ const Index = () => {
   const [updateModal, setUpdateModal] = useState(false);
   const [deleteModal, setDeleteModal] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState("");
-  const { data, loading, error } = useQuery(FETCH_ALL_USERS);
+  const [pagination, setPagination] = useState({
+    current: 1,
+    pageSize: 10,
+  });
+  const { data, loading, error } = useQuery(FETCH_ALL_USERS, {
+    variables: {
+      skip: (pagination.current - 1) * pagination.pageSize,
+      take: pagination.pageSize,
+    },
+  });
   const [removeUser] = useMutation(DELETE_USER);
   const [currentUser] = useAtom(currentUserDataAtom);
   const userRole = currentUser?.role;
@@ -101,7 +110,19 @@ const Index = () => {
           ) : (
             <TableWrapper>
               <UserTable
-                dataSource={data?.users}
+                dataSource={data?.users.users}
+                pagination={{
+                  current: pagination.current,
+                  pageSize: pagination.pageSize,
+                  total: data?.users.total,
+                  onChange: (page, pageSize) => {
+                    setPagination({
+                      ...pagination,
+                      current: page,
+                      pageSize,
+                    });
+                  },
+                }}
                 onEditUser={handleEditUserClick}
                 onDeleteUser={handleDeleteUser}
               />
