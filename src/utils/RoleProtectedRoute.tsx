@@ -10,11 +10,10 @@ const RoleProtectedRoute = ({ allowedRoles }: RoleProps) => {
   const [currentUser] = useAtom(currentUserDataAtom);
 
   if (!token) return <Navigate to="/signin" replace />;
-  if (currentUser?.role !== null && currentUser.role !== undefined)
-  {
-      if (allowedRoles.includes(currentUser?.role)) {
-        return <Outlet />;
-      }
+  if (currentUser?.role !== null && currentUser.role !== undefined) {
+    if (allowedRoles.includes(currentUser?.role)) {
+      return <Outlet />;
+    }
   }
 
   return <Navigate to="/" replace />;

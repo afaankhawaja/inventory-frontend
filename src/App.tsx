@@ -9,7 +9,7 @@ import { selectedTheme } from "./store/themeAtom";
 import { useAtom } from "jotai";
 
 function App() {
-  const [theme] = useAtom(selectedTheme)
+  const [theme] = useAtom(selectedTheme);
   return (
     <ConfigProvider theme={theme.isDark ? darkTheme : customTheme}>
       <ApolloProvider client={apolloClient}>

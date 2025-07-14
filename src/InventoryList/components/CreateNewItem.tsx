@@ -62,15 +62,17 @@ const CreateNewItem = ({ setOpen }: Props) => {
   const { data: catData } = useQuery(FETCH_ALL_CATEGORIES);
   const { data: locData } = useQuery(FETCH_ALL_LOCATIONS);
 
-const categoryOptions = catData?.categories.map((category: CategoryProps) => ({
-  value: category?.categoryId,
-  label: category?.name,
-}));
-const locationOptions = locData?.locations.map((location: LocationProps) => ({
-  value: location?.locationId,
-  label: location?.location_name,
-}));
-  
+  const categoryOptions = catData?.categories.map(
+    (category: CategoryProps) => ({
+      value: category?.categoryId,
+      label: category?.name,
+    }),
+  );
+  const locationOptions = locData?.locations.map((location: LocationProps) => ({
+    value: location?.locationId,
+    label: location?.location_name,
+  }));
+
   const onFinish: FormProps<ItemType>["onFinish"] = (values) => {
     createItem({
       variables: {

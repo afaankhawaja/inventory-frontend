@@ -39,17 +39,17 @@ const UserWrapper = styled.div`
 const Wrapper = styled.div`
   display: flex;
   gap: 0px 50px;
-  justify-content:center;
-  justify-items:center;
-  align-items:center;
+  justify-content: center;
+  justify-items: center;
+  align-items: center;
 `;
 
 const ThemeWrapper = styled.div`
   display: flex;
   align-items: center;
-  gap:0 10px;
-  font-size:14px;
-  font-weight:600;
+  gap: 0 10px;
+  font-size: 14px;
+  font-weight: 600;
 `;
 const UserName = styled.strong``;
 const UserEmail = styled.div``;

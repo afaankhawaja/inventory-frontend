@@ -42,16 +42,24 @@ interface Item {
   location: Location;
   category: Category;
 }
+interface PaginationType {
+  current: number;
+  pageSize: number;
+  total: number;
+  onChange: (page: number, pageSize: number) => void;
+}
 interface ItemsTableProps {
   dataSource: Item[];
   onEditItem: (itemId: string) => void;
   onDeleteItem: (itemId: string) => void;
+  pagination: PaginationType;
 }
 
 const ItemsTable = ({
   dataSource,
   onEditItem,
   onDeleteItem,
+  pagination,
 }: ItemsTableProps) => {
   const [userData] = useAtom(currentUserDataAtom);
 
@@ -134,7 +142,13 @@ const ItemsTable = ({
   };
   const visibleColumns = getVisibleColumns(userData?.role);
 
-  return <Table columns={visibleColumns} dataSource={dataSource} />;
+  return (
+    <Table
+      columns={visibleColumns}
+      dataSource={dataSource}
+      pagination={pagination}
+    />
+  );
 };
 
 export default ItemsTable;

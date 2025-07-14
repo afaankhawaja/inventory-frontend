@@ -47,8 +47,17 @@ const Index = () => {
   const [selectedItemId, setSelectedItemId] = useState("");
   const [updateModal, setUpdateModal] = useState(false);
   const [deleteModal, setDeleteModal] = useState(false);
+  const [pagination, setPagination] = useState({
+    current: 1,
+    pageSize: 10,
+  });
 
-  const { data, loading, error } = useQuery(FETCH_ALL_ITEMS);
+  const { data, loading, error } = useQuery(FETCH_ALL_ITEMS, {
+    variables: {
+      skip: (pagination.current - 1) * pagination.pageSize,
+      take: pagination.pageSize,
+    },
+  });
   const [removeItem] = useMutation(DELETE_ITEM);
 
   const handleEditItemClick = (itemId: string) => {
@@ -91,7 +100,15 @@ const Index = () => {
           ) : (
             <TableWrapper>
               <ItemsTable
-                dataSource={data?.items}
+                dataSource={data?.items.items || []}
+                pagination={{
+                  current: pagination.current,
+                  pageSize: pagination.pageSize,
+                  total: data?.items.total,
+                  onChange: (page, pageSize) => {
+                    setPagination({ ...pagination, current: page, pageSize });
+                  },
+                }}
                 onEditItem={handleEditItemClick}
                 onDeleteItem={handleDeleteItem}
               />
