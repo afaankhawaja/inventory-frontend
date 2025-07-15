@@ -39,3 +39,29 @@ export const FETCH_ITEMS_BY_YESTERDAY = gql`
     }
   }
 `;
+
+export const GET_TRANSACTIONS = gql`
+  query transactionsWithItems {
+    transactionsWithItems {
+      transactions {
+        transactionId
+        transaction_type
+        quantity
+        transaction_date
+        user {
+          userId
+          username
+        }
+        transactionItems {
+          item {
+            itemId
+            name
+            price
+            is_high_value
+          }
+        }
+      }
+      total
+    }
+  }
+`;

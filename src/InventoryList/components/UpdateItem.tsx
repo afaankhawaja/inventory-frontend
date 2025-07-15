@@ -198,10 +198,7 @@ const UpdateItem = ({ selectedItemId, setUpdateModal }: PropsType) => {
     }
   };
 
-  function isLatestCheckIn(
-    transactions: Transaction[],
-    targetItemId: string,
-  ): boolean {
+  function isLatestCheckIn(transactions: Transaction[], targetItemId: string) {
     if (!transactions) return true;
     const forThisItem = transactions.filter((tx) =>
       tx.transactionItems.some((ti) => ti.item.itemId === targetItemId),
@@ -220,7 +217,7 @@ const UpdateItem = ({ selectedItemId, setUpdateModal }: PropsType) => {
   }
 
   const isCheckedIn = isLatestCheckIn(
-    transactionData?.transactionsWithItems,
+    transactionData?.transactionsWithItems?.transactions,
     selectedItemId,
   );
   return (
