@@ -48,57 +48,57 @@ const InventoryValuationCards: React.FC = () => {
   }, 0);
   if (error) return <div>{error.message}</div>;
 
-    const totalInventoryValueToday = todayData?.todayItems?.reduce(
-      //@ts-expect-error curr
-      (acc: number, curr) => {
-        return acc + curr.price * curr.quantity_in_stock;
-      },
-      0
-    );
-    const totalInventoryValueYesterday = yesterdayData?.yesterdayItems?.reduce(
-      //@ts-expect-error curr
-      (acc: number, curr) => {
-        return acc + curr.price * curr.quantity_in_stock;
-      },
-      0
-    );
-    const totalInventoryStockYesterday = yesterdayData?.yesterdayItems?.reduce(
-      //@ts-expect-error curr
-      (acc: number, curr) => {
-        return acc + curr.quantity_in_stock;
-      },
-      0
-    );
-    const totalInventoryStockToday = todayData?.todayItems?.reduce(
-      //@ts-expect-error curr
-      (acc: number, curr) => {
-        return acc + curr.quantity_in_stock;
-      },
-      0
-    );
-    const highValueAssetToday = todayData?.todayItems?.reduce(
-      //@ts-expect-error curr
-      (acc: number, curr) => {
-        if (curr.is_high_value) return acc + 1;
-        return acc;
-      },
-      0
-    );
-    const highValueAssetYesterday = yesterdayData?.yesterdayItems?.reduce(
-      //@ts-expect-error curr
-      (acc: number, curr) => {
-        if (curr.is_high_value) return acc + 1;
-        return acc;
-      },
-      0
-    );
+  const totalInventoryValueToday = todayData?.todayItems?.reduce(
+    //@ts-expect-error curr
+    (acc: number, curr) => {
+      return acc + curr.price * curr.quantity_in_stock;
+    },
+    0,
+  );
+  const totalInventoryValueYesterday = yesterdayData?.yesterdayItems?.reduce(
+    //@ts-expect-error curr
+    (acc: number, curr) => {
+      return acc + curr.price * curr.quantity_in_stock;
+    },
+    0,
+  );
+  const totalInventoryStockYesterday = yesterdayData?.yesterdayItems?.reduce(
+    //@ts-expect-error curr
+    (acc: number, curr) => {
+      return acc + curr.quantity_in_stock;
+    },
+    0,
+  );
+  const totalInventoryStockToday = todayData?.todayItems?.reduce(
+    //@ts-expect-error curr
+    (acc: number, curr) => {
+      return acc + curr.quantity_in_stock;
+    },
+    0,
+  );
+  const highValueAssetToday = todayData?.todayItems?.reduce(
+    //@ts-expect-error curr
+    (acc: number, curr) => {
+      if (curr.is_high_value) return acc + 1;
+      return acc;
+    },
+    0,
+  );
+  const highValueAssetYesterday = yesterdayData?.yesterdayItems?.reduce(
+    //@ts-expect-error curr
+    (acc: number, curr) => {
+      if (curr.is_high_value) return acc + 1;
+      return acc;
+    },
+    0,
+  );
 
   const inventoryValueDifference =
     totalInventoryValueToday - totalInventoryValueYesterday;
   const inventoryStockDifference =
-      totalInventoryStockToday - totalInventoryStockYesterday;
-    const highValueAssetDifference =
-        highValueAssetToday - highValueAssetYesterday;
+    totalInventoryStockToday - totalInventoryStockYesterday;
+  const highValueAssetDifference =
+    highValueAssetToday - highValueAssetYesterday;
 
   return (
     <Wrapper>
