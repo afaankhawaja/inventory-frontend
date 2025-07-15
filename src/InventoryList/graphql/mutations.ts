@@ -100,3 +100,53 @@ export const DELETE_ITEM = gql`
     }
   }
 `;
+
+export const CHECK_IN_ITEM = gql`
+  mutation CHECK_IN_ITEM(
+    $userId: String!
+    $itemId: String!
+    $quantity: Float!
+  ) {
+    checkIn(userId: $userId, itemId: $itemId, quantity: $quantity) {
+      transactionId
+      transaction_type
+      quantity
+      transaction_date
+      user {
+        userId
+        username
+      }
+      transactionItems {
+        item {
+          itemId
+          name
+        }
+      }
+    }
+  }
+`;
+
+export const CHECK_OUT_ITEM = gql`
+  mutation CHECK_OUT_ITEM(
+    $userId: String!
+    $itemId: String!
+    $quantity: Float!
+  ) {
+    checkOut(userId: $userId, itemId: $itemId, quantity: $quantity) {
+      transactionId
+      transaction_type
+      quantity
+      transaction_date
+      user {
+        userId
+        username
+      }
+      transactionItems {
+        item {
+          itemId
+          name
+        }
+      }
+    }
+  }
+`;

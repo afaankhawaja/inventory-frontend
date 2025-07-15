@@ -17,7 +17,13 @@ import {
   FETCH_ALL_CATEGORIES,
   FETCH_ALL_LOCATIONS,
 } from "../graphql/queries";
-import { UPDATE_ITEM } from "../graphql/mutations";
+import {
+  CHECK_IN_ITEM,
+  UPDATE_ITEM,
+  CHECK_OUT_ITEM,
+} from "../graphql/mutations";
+import { useAtom } from "jotai";
+import { currentUserDataAtom } from "../../store/atoms";
 
 type FieldType = {
   name?: string;
@@ -54,20 +60,36 @@ const StyledForm = styled(Form<FieldType>)`
     transition: all 0.3s ease;
   }
 `;
-
+const ButtonContainer = styled.div`
+  display: flex;
+  gap: 0px 10px;
+  justify-content: end;
+  margin-bottom: 24px;
+  margin-top:30px;
+`;
 interface PropsType {
   selectedItemId: string;
   setUpdateModal: (state: boolean) => void;
 }
 
 const UpdateItem = ({ selectedItemId, setUpdateModal }: PropsType) => {
+  const [user] = useAtom(currentUserDataAtom);
+  const currentUserId = user?.userID;
   const [form] = Form.useForm();
   const { data, loading, error } = useQuery(FETCH_ITEM_BY_ID, {
     variables: { itemID: selectedItemId },
   });
   const { data: catData } = useQuery(FETCH_ALL_CATEGORIES);
   const { data: locData } = useQuery(FETCH_ALL_LOCATIONS);
+  const [
+    checkInItemMutation,
+    { loading: checkinLoading, error: checkinError, data: checkinData },
+  ] = useMutation(CHECK_IN_ITEM);
 
+  const [
+    checkOutItemMutation,
+    { loading: checkOutLoading, error: checkOutError, data: checkoutData },
+  ] = useMutation(CHECK_OUT_ITEM);
   const categoryOptions = catData?.categories.map(
     (category: CategoryProps) => ({
       value: category?.categoryId,
@@ -134,6 +156,37 @@ const UpdateItem = ({ selectedItemId, setUpdateModal }: PropsType) => {
     errorInfo,
   ) => {
     console.log("Failed:", errorInfo);
+  };
+  const handleCheckIn = async () => {
+    try {
+      const response = await checkInItemMutation({
+        variables: {
+          userId: currentUserId,
+          itemId: selectedItemId,
+          quantity: 1.0,
+        },
+      });
+      console.log("Check-in successful", response.data);
+    } catch (e) {
+      console.error("Check-in failed", e);
+      alert(checkinError);
+    }
+  };
+
+  const handleCheckOut = async () => {
+    try {
+      const response = await checkOutItemMutation({
+        variables: {
+          userId: currentUserId,
+          itemId: selectedItemId,
+          quantity: 1.0,
+        },
+      });
+      console.log("Check-in successful", response.data);
+    } catch (e) {
+      console.error("Check-in failed", e);
+      alert(checkOutError);
+    }
   };
   return (
     <div>
@@ -225,6 +278,24 @@ const UpdateItem = ({ selectedItemId, setUpdateModal }: PropsType) => {
           </Button>
         </Form.Item>
       </StyledForm>
+      <ButtonContainer>
+        <Button
+          loading={checkinLoading}
+          color="cyan"
+          variant={checkinData?"filled": "outlined" }
+          onClick={handleCheckIn}
+        >
+          {checkinLoading ? "checking in..." : "check in"}
+        </Button>
+        <Button
+          loading={checkOutLoading}
+          color="danger"
+          variant={checkoutData?"filled":"outlined"}
+          onClick={handleCheckOut}
+        >
+          {checkOutLoading ? "checking out..." : "check out"}
+        </Button>
+      </ButtonContainer>
     </div>
   );
 };
