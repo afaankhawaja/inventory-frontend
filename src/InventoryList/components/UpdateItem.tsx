@@ -16,6 +16,7 @@ import {
   FETCH_ITEM_BY_ID,
   FETCH_ALL_CATEGORIES,
   FETCH_ALL_LOCATIONS,
+  GET_TRANSACTIONS,
 } from "../graphql/queries";
 import {
   CHECK_IN_ITEM,
@@ -48,6 +49,12 @@ interface LocationProps {
   location_name?: string;
 }
 
+interface Transaction {
+  transaction_type: string;
+  transaction_date: string;
+  transactionItems: { item: { itemId: string } }[];
+}
+
 const StyledForm = styled(Form<FieldType>)`
   width: 100%;
   .ant-form-item-label > label {
@@ -65,7 +72,7 @@ const ButtonContainer = styled.div`
   gap: 0px 10px;
   justify-content: end;
   margin-bottom: 24px;
-  margin-top:30px;
+  margin-top: 30px;
 `;
 interface PropsType {
   selectedItemId: string;
@@ -83,13 +90,15 @@ const UpdateItem = ({ selectedItemId, setUpdateModal }: PropsType) => {
   const { data: locData } = useQuery(FETCH_ALL_LOCATIONS);
   const [
     checkInItemMutation,
-    { loading: checkinLoading, error: checkinError, data: checkinData },
+    { loading: checkinLoading, error: checkinError },
   ] = useMutation(CHECK_IN_ITEM);
 
   const [
     checkOutItemMutation,
-    { loading: checkOutLoading, error: checkOutError, data: checkoutData },
+    { loading: checkOutLoading, error: checkOutError },
   ] = useMutation(CHECK_OUT_ITEM);
+
+  const { data: transactionData } = useQuery(GET_TRANSACTIONS);
   const categoryOptions = catData?.categories.map(
     (category: CategoryProps) => ({
       value: category?.categoryId,
@@ -188,6 +197,32 @@ const UpdateItem = ({ selectedItemId, setUpdateModal }: PropsType) => {
       alert(checkOutError);
     }
   };
+
+  function isLatestCheckIn(
+    transactions: Transaction[],
+    targetItemId: string,
+  ): boolean {
+    if (!transactions) return true;
+    const forThisItem = transactions.filter((tx) =>
+      tx.transactionItems.some((ti) => ti.item.itemId === targetItemId),
+    );
+
+    if (forThisItem.length === 0) {
+      return false;
+    }
+
+    const latest = forThisItem.reduce((prev, curr) => {
+      return new Date(prev.transaction_date) > new Date(curr.transaction_date)
+        ? prev
+        : curr;
+    });
+    return latest.transaction_type === "CHECK_IN";
+  }
+
+  const isCheckedIn = isLatestCheckIn(
+    transactionData?.transactionsWithItems,
+    selectedItemId,
+  );
   return (
     <div>
       <StyledForm
@@ -280,20 +315,18 @@ const UpdateItem = ({ selectedItemId, setUpdateModal }: PropsType) => {
       </StyledForm>
       <ButtonContainer>
         <Button
-          loading={checkinLoading}
-          color="cyan"
-          variant={checkinData?"filled": "outlined" }
-          onClick={handleCheckIn}
+          loading={isCheckedIn ? checkOutLoading : checkinLoading}
+          color={isCheckedIn ? "danger" : "cyan"}
+          variant={isCheckedIn ? "filled" : "outlined"}
+          onClick={isCheckedIn ? handleCheckOut : handleCheckIn}
         >
-          {checkinLoading ? "checking in..." : "check in"}
-        </Button>
-        <Button
-          loading={checkOutLoading}
-          color="danger"
-          variant={checkoutData?"filled":"outlined"}
-          onClick={handleCheckOut}
-        >
-          {checkOutLoading ? "checking out..." : "check out"}
+          {isCheckedIn
+            ? checkOutLoading
+              ? "checking out..."
+              : "check out"
+            : checkinLoading
+              ? "checking in..."
+              : "check in"}
         </Button>
       </ButtonContainer>
     </div>

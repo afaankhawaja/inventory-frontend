@@ -69,3 +69,24 @@ export const FETCH_ALL_LOCATIONS = gql`
     }
   }
 `;
+
+export const GET_TRANSACTIONS = gql`
+  query {
+    transactionsWithItems {
+      transactionId
+      transaction_type
+      quantity
+      transaction_date
+      user {
+        userId
+        username
+      }
+      transactionItems {
+        item {
+          itemId
+          name
+        }
+      }
+    }
+  }
+`;
