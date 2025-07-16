@@ -80,10 +80,10 @@ const CreateNewItem = ({ setOpen }: Props) => {
       label: category?.name,
     }),
   );
-    const treeData = useMemo(() => {
-      if (!locData?.locations) return [];
-      return convertLocationsToTreeData(locData.locations);
-    }, [locData]);
+  const treeData = useMemo(() => {
+    if (!locData?.locations) return [];
+    return convertLocationsToTreeData(locData.locations);
+  }, [locData]);
 
   const onFinish: FormProps<ItemType>["onFinish"] = (values) => {
     createItem({
@@ -246,7 +246,7 @@ const CreateNewItem = ({ setOpen }: Props) => {
               loading={loading}
               treeDefaultExpandAll
               allowClear
-              style={{  height: "44px" }}
+              style={{ height: "44px" }}
             />
           </Form.Item>
         </Col>

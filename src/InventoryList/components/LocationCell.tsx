@@ -6,7 +6,7 @@ interface LocationCellProps {
   locationId: string;
 }
 interface LocationName {
-    location_name: string;
+  location_name: string;
 }
 
 export function LocationCell({ locationId }: LocationCellProps) {

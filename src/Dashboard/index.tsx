@@ -4,6 +4,7 @@ import InventoryValuationCards from "./components/InventoryValuationCards";
 import { useState } from "react";
 import { GET_TRANSACTIONS } from "./graphql/queries";
 import { useQuery } from "@apollo/client";
+import AlertsTable from "./components/AlertsTable";
 
 const Container = styled.section`
   display: flex;
@@ -25,9 +26,12 @@ const Index = () => {
 
   const transaction = data?.transactionsWithItems?.transactions;
   const hightValueAssetTransaction = transaction?.filter(
-    (fil: {transaction_type: string, transactionItems: { item: { is_high_value: boolean } }[] }) =>
+    (fil: {
+      transaction_type: string;
+      transactionItems: { item: { is_high_value: boolean } }[];
+    }) =>
       fil.transaction_type === "CHECK_OUT" &&
-      fil.transactionItems[0]?.item?.is_high_value === true
+      fil.transactionItems[0]?.item?.is_high_value === true,
   );
 
   return (
@@ -51,6 +55,16 @@ const Index = () => {
           }}
         />
       )}
+      <AlertsTable
+        pagination={{
+          current: pagination.current,
+          pageSize: pagination.pageSize,
+          total: data?.items?.total,
+          onChange: (page, pageSize) => {
+            setPagination({ ...pagination, current: page, pageSize });
+          },
+        }}
+      />
     </Container>
   );
 };

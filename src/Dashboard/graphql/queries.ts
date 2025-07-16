@@ -65,3 +65,22 @@ export const GET_TRANSACTIONS = gql`
     }
   }
 `;
+
+export const GET_ALL_ALERTS = gql`
+  query findAllAlerts {
+    alerts {
+      alerts {
+        alert_type
+        alert_date
+        alertId
+        severity
+        message
+        itemAlerts {
+          item {
+            name
+          }
+        }
+      }
+    }
+  }
+`;
