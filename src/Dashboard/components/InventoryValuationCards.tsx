@@ -14,6 +14,7 @@ const Wrapper = styled.section`
   flex-direction: column;
   gap: 20px 10px;
   font-weight: 600;
+  margin-bottom:10px;
 `;
 
 const PlusContainer = styled.div`
@@ -108,7 +109,13 @@ const InventoryValuationCards: React.FC = () => {
         <>
           <Row gutter={16}>
             <Col span={12}>
-              <Card hoverable>
+              <Card
+                style={{
+                  backgroundColor: "#fafafa",
+                  border: "solid 1px #c6edec",
+                }}
+                hoverable
+              >
                 <PlusContainer>
                   {" "}
                   {differ > 0 ? `+ ${differ}` : ` ${differ}`}
@@ -123,7 +130,13 @@ const InventoryValuationCards: React.FC = () => {
               </Card>
             </Col>
             <Col span={12}>
-              <Card hoverable>
+              <Card
+                style={{
+                  backgroundColor: "#fafafa",
+                  border: "solid 1px #c6edec",
+                }}
+                hoverable
+              >
                 <PlusContainer>
                   {" "}
                   {inventoryValueDifference > 0
@@ -143,7 +156,13 @@ const InventoryValuationCards: React.FC = () => {
           </Row>
           <Row gutter={16}>
             <Col span={12}>
-              <Card hoverable>
+              <Card
+                style={{
+                  backgroundColor: "#fafafa",
+                  border: "solid 1px #c6edec",
+                }}
+                hoverable
+              >
                 <PlusContainer>
                   {" "}
                   {inventoryStockDifference > 0
@@ -160,7 +179,13 @@ const InventoryValuationCards: React.FC = () => {
               </Card>
             </Col>
             <Col span={12}>
-              <Card hoverable>
+              <Card
+                style={{
+                  backgroundColor: "#fafafa",
+                  border: "solid 1px #c6edec",
+                }}
+                hoverable
+              >
                 <PlusContainer>
                   {" "}
                   {highValueAssetDifference > 0

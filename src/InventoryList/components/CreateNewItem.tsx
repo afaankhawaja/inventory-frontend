@@ -73,12 +73,25 @@ const CreateNewItem = ({ setOpen }: Props) => {
   const [createItem, { loading }] = useMutation(CREATE_NEW_ITEM);
   const { data: catData } = useQuery(FETCH_ALL_CATEGORIES);
   const { data: locData } = useQuery(FETCH_ALL_LOCATIONS);
-
+  const conditionOptions = [
+    {
+      value: "NEW",
+      label: "NEW",
+    },
+    {
+      value: "IN_USE",
+      label: "IN_USE",
+    },
+    {
+      value: "DAMAGED",
+      label: "DAMAGED",
+    },
+  ];
   const categoryOptions = catData?.categories.map(
     (category: CategoryProps) => ({
       value: category?.categoryId,
       label: category?.name,
-    }),
+    })
   );
   const treeData = useMemo(() => {
     if (!locData?.locations) return [];
@@ -128,40 +141,71 @@ const CreateNewItem = ({ setOpen }: Props) => {
         <Input placeholder="Enter item name" />
       </Form.Item>
 
-      <Form.Item<ItemType>
-        label="Price"
-        name="price"
-        rules={[{ required: true, message: "Please input the price!" }]}
-      >
-        <InputNumber placeholder="Enter price" />
-      </Form.Item>
-      <Form.Item name="expiry_date" label="Expiry Date">
-        <DatePicker showTime format="YYYY-MM-DD HH:mm:ss" />
-      </Form.Item>
-
-      <Form.Item name="manufacturing_date" label="Manufacturing Date">
-        <DatePicker showTime format="YYYY-MM-DD HH:mm:ss" />
-      </Form.Item>
-
-      <Form.Item<ItemType>
-        label="Condition"
-        name="condition"
-        rules={[{ required: true, message: "Please input the condition!" }]}
-      >
-        <Input placeholder="Enter condition" />
-      </Form.Item>
-
-      <Row gutter={10}>
-        <Col span={8}>
+      <Row gutter={12}>
+        <Col span={12}>
           <Form.Item<ItemType>
-            label="Brand"
-            name="brand"
-            rules={[{ required: true, message: "Please input the brand!" }]}
+            label="Condition"
+            name="condition"
+            rules={[{ required: true, message: "Please input the condition!" }]}
           >
-            <Input placeholder="Enter brand" />
+            <Select
+              style={{ height: "44px" }}
+              options={conditionOptions}
+              placeholder="Select category"
+            />
           </Form.Item>
         </Col>
-        <Col span={16}>
+        <Col span={12}>
+          <Form.Item<ItemType>
+            label="Price"
+            name="price"
+            rules={[{ required: true, message: "Please input the price!" }]}
+          >
+            <InputNumber placeholder="Enter price" style={{ width: "50%" }} />
+          </Form.Item>
+        </Col>
+      </Row>
+      <Row gutter={12}>
+        <Col span={12}>
+          <Form.Item name="expiry_date" label="Expiry Date">
+            <DatePicker
+              style={{ height: "44px", width: "100%" }}
+              showTime
+              format="YYYY-MM-DD HH:mm:ss"
+            />
+          </Form.Item>
+        </Col>
+
+        <Col span={12}>
+          <Form.Item name="manufacturing_date" label="Manufacturing Date">
+            <DatePicker
+              style={{ height: "44px", width: "100%" }}
+              showTime
+              format="YYYY-MM-DD HH:mm:ss"
+            />
+          </Form.Item>
+        </Col>
+      </Row>
+
+      <Row gutter={12}>
+        <Col span={12}>
+          <Form.Item<ItemType>
+            label="Reorder Threshold"
+            name="reorder_threshold"
+            rules={[
+              {
+                required: true,
+                message: "Please input the reorder threshold!",
+              },
+            ]}
+          >
+            <InputNumber
+              style={{ width: "50%" }}
+              placeholder="Enter reorder threshold"
+            />
+          </Form.Item>
+        </Col>
+        <Col span={12}>
           <Form.Item<ItemType>
             label="Quantity in Stock"
             name="quantity_in_stock"
@@ -172,24 +216,22 @@ const CreateNewItem = ({ setOpen }: Props) => {
               },
             ]}
           >
-            <InputNumber placeholder="Enter quantity" />
+            <InputNumber
+              style={{ width: "50%" }}
+              placeholder="Enter quantity"
+            />
           </Form.Item>
         </Col>
       </Row>
       <Form.Item<ItemType>
-        label="Reorder Threshold"
-        name="reorder_threshold"
-        rules={[
-          {
-            required: true,
-            message: "Please input the reorder threshold!",
-          },
-        ]}
+        label="Brand"
+        name="brand"
+        rules={[{ required: true, message: "Please input the brand!" }]}
       >
-        <InputNumber placeholder="Enter reorder threshold" />
+        <Input placeholder="Enter brand" />
       </Form.Item>
 
-      <Row gutter={38}>
+      <Row gutter={12}>
         <Col span={12}>
           <Form.Item<ItemType>
             label="Barcode"

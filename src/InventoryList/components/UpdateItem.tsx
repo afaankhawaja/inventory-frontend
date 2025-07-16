@@ -99,11 +99,25 @@ const UpdateItem = ({ selectedItemId, setUpdateModal }: PropsType) => {
   ] = useMutation(CHECK_OUT_ITEM);
 
   const { data: transactionData } = useQuery(GET_TRANSACTIONS);
+  const conditionOptions = [
+    {
+      value: "NEW",
+      label: "NEW",
+    },
+    {
+      value: "IN_USE",
+      label: "IN_USE",
+    },
+    {
+      value: "DAMAGED",
+      label: "DAMAGED",
+    },
+  ];
   const categoryOptions = catData?.categories.map(
     (category: CategoryProps) => ({
       value: category?.categoryId,
       label: category?.name,
-    }),
+    })
   );
   const locationOptions = locData?.locations.map((location: LocationProps) => ({
     value: location?.locationId,
@@ -162,7 +176,7 @@ const UpdateItem = ({ selectedItemId, setUpdateModal }: PropsType) => {
   };
 
   const onFinishFailed: FormProps<FieldType>["onFinishFailed"] = (
-    errorInfo,
+    errorInfo
   ) => {
     console.log("Failed:", errorInfo);
   };
@@ -201,7 +215,7 @@ const UpdateItem = ({ selectedItemId, setUpdateModal }: PropsType) => {
   function isLatestCheckIn(transactions: Transaction[], targetItemId: string) {
     if (!transactions) return true;
     const forThisItem = transactions.filter((tx) =>
-      tx.transactionItems.some((ti) => ti.item.itemId === targetItemId),
+      tx.transactionItems.some((ti) => ti.item.itemId === targetItemId)
     );
 
     if (forThisItem.length === 0) {
@@ -218,7 +232,7 @@ const UpdateItem = ({ selectedItemId, setUpdateModal }: PropsType) => {
 
   const isCheckedIn = isLatestCheckIn(
     transactionData?.transactionsWithItems?.transactions,
-    selectedItemId,
+    selectedItemId
   );
   return (
     <div>
@@ -233,9 +247,32 @@ const UpdateItem = ({ selectedItemId, setUpdateModal }: PropsType) => {
           <Input placeholder="Item name" />
         </Form.Item>
 
-        <Form.Item name="condition" label="Condition">
-          <Input placeholder="Condition" />
-        </Form.Item>
+        <Row gutter={12}>
+          <Col span={12}>
+            <Form.Item
+              label="Condition"
+              name="condition"
+              rules={[
+                { required: true, message: "Please input the condition!" },
+              ]}
+            >
+              <Select
+                style={{ height: "44px" }}
+                options={conditionOptions}
+                placeholder="Select category"
+              />
+            </Form.Item>
+          </Col>
+          <Col span={12}>
+            <Form.Item
+              label="Price"
+              name="price"
+              rules={[{ required: true, message: "Please input the price!" }]}
+            >
+              <InputNumber placeholder="Enter price" />
+            </Form.Item>
+          </Col>
+        </Row>
 
         <Row gutter={12}>
           <Col span={12}>
@@ -251,33 +288,24 @@ const UpdateItem = ({ selectedItemId, setUpdateModal }: PropsType) => {
         </Row>
 
         <Row gutter={12}>
-          <Col span={5}>
-            <Form.Item
-              label="Price"
-              name="price"
-              rules={[{ required: true, message: "Please input the price!" }]}
-            >
-              <InputNumber placeholder="Enter price" />
+          <Col span={12}>
+            <Form.Item name="brand" label="Brand">
+              <Input placeholder="Brand" />
             </Form.Item>
           </Col>
 
           <Col
             style={{
               justifyContent: "center",
-              justifyItems: "center",
               alignContent: "center",
             }}
-            span={5}
+            span={12}
           >
             <Form.Item name="is_high_value" label="High Value">
               <Switch />
             </Form.Item>
           </Col>
         </Row>
-
-        <Form.Item name="brand" label="Brand">
-          <Input placeholder="Brand" />
-        </Form.Item>
 
         <Form.Item name="barcode" label="Barcode">
           <Input placeholder="Barcode" />
@@ -322,8 +350,8 @@ const UpdateItem = ({ selectedItemId, setUpdateModal }: PropsType) => {
               ? "checking out..."
               : "check out"
             : checkinLoading
-              ? "checking in..."
-              : "check in"}
+            ? "checking in..."
+            : "check in"}
         </Button>
       </ButtonContainer>
     </div>
