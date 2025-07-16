@@ -4,6 +4,7 @@ import { useAtom } from "jotai";
 import { Space } from "antd";
 import styled from "styled-components";
 import { DeleteOutlined, EditOutlined } from "@ant-design/icons";
+import { LocationCell } from "./LocationCell";
 
 const EditButton = styled.div`
   display: flex;
@@ -26,6 +27,7 @@ const DeleteButton = styled.div`
 
 interface Location {
   location_name: string;
+  locationId: string;
 }
 
 interface Category {
@@ -96,11 +98,11 @@ const ItemsTable = ({
     },
     {
       title: "Location",
-      dataIndex: "location",
       key: "location",
-      render: (val: Location) => {
-        if (!val) return;
-        return val.location_name;
+      render: (record: Item) => {
+        if (!record) return;
+        const leafId = record?.location?.locationId;
+        return leafId ? <LocationCell locationId={leafId} /> : "—";
       },
     },
     {

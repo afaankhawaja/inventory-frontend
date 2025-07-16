@@ -20,6 +20,7 @@ export const FETCH_ALL_ITEMS = gql`
         }
         location {
           location_name
+          locationId
         }
       }
       total
@@ -62,10 +63,18 @@ export const FETCH_ALL_CATEGORIES = gql`
 `;
 
 export const FETCH_ALL_LOCATIONS = gql`
-  query locations {
-    locations {
+  query LocationsRoot {
+    locations(rootsOnly: true) {
       locationId
       location_name
+      subLocations {
+        locationId
+        location_name
+        subLocations {
+          locationId
+          location_name
+        }
+      }
     }
   }
 `;
@@ -89,6 +98,14 @@ export const GET_TRANSACTIONS = gql`
           }
         }
       }
+    }
+  }
+`;
+export const GET_LOCATION_PATH = gql`
+  query GetLocationPath($locationID: String!) {
+    locationPath(locationID: $locationID) {
+      location_name
+      locationId
     }
   }
 `;

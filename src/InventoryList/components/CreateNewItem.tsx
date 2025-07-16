@@ -9,12 +9,14 @@ import {
   Switch,
   Select,
   DatePicker,
+  TreeSelect,
 } from "antd";
 import styled from "styled-components";
 import { useMutation, useQuery } from "@apollo/client";
 import { CREATE_NEW_ITEM } from "../graphql/mutations";
 import { FETCH_ALL_CATEGORIES, FETCH_ALL_LOCATIONS } from "../graphql/queries";
 import type { Dayjs } from "dayjs";
+import { useMemo } from "react";
 
 type ItemType = {
   name?: string;
@@ -53,10 +55,17 @@ interface CategoryProps {
   categoryId?: string;
   name?: string;
 }
-
-interface LocationProps {
-  locationId?: string;
-  location_name?: string;
+// @ts-expect-error locations
+function convertLocationsToTreeData(locations) {
+  // @ts-expect-error locations
+  return locations.map((location) => ({
+    title: location.location_name || "Unnamed Location",
+    value: location.locationId,
+    children:
+      location.subLocations && location.subLocations.length > 0
+        ? convertLocationsToTreeData(location.subLocations)
+        : undefined,
+  }));
 }
 
 const CreateNewItem = ({ setOpen }: Props) => {
@@ -71,10 +80,10 @@ const CreateNewItem = ({ setOpen }: Props) => {
       label: category?.name,
     }),
   );
-  const locationOptions = locData?.locations.map((location: LocationProps) => ({
-    value: location?.locationId,
-    label: location?.location_name,
-  }));
+    const treeData = useMemo(() => {
+      if (!locData?.locations) return [];
+      return convertLocationsToTreeData(locData.locations);
+    }, [locData]);
 
   const onFinish: FormProps<ItemType>["onFinish"] = (values) => {
     createItem({
@@ -231,10 +240,13 @@ const CreateNewItem = ({ setOpen }: Props) => {
               },
             ]}
           >
-            <Select
-              style={{ height: "44px" }}
-              options={locationOptions}
-              placeholder="Select location"
+            <TreeSelect
+              treeData={treeData}
+              placeholder="Select a location"
+              loading={loading}
+              treeDefaultExpandAll
+              allowClear
+              style={{  height: "44px" }}
             />
           </Form.Item>
         </Col>
