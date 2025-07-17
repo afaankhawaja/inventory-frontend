@@ -41,8 +41,8 @@ export const FETCH_ITEMS_BY_YESTERDAY = gql`
 `;
 
 export const GET_TRANSACTIONS = gql`
-  query transactionsWithItems {
-    transactionsWithItems {
+  query transactionsWithItems($skip: Int, $take: Int) {
+    transactionsWithItems(skip: $skip, take: $take) {
       transactions {
         transactionId
         transaction_type
@@ -67,8 +67,8 @@ export const GET_TRANSACTIONS = gql`
 `;
 
 export const GET_ALL_ALERTS = gql`
-  query findAllAlerts {
-    alerts {
+  query findAllAlerts($skip: Int, $take: Int) {
+    alerts(skip: $skip, take: $take) {
       alerts {
         alert_type
         alert_date
@@ -81,6 +81,7 @@ export const GET_ALL_ALERTS = gql`
           }
         }
       }
+      total
     }
   }
 `;

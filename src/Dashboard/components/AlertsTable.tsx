@@ -1,17 +1,7 @@
 import { Table, Tag, Alert } from "antd";
 import { useQuery } from "@apollo/client";
 import { GET_ALL_ALERTS } from "../graphql/queries";
-
-interface PaginationType {
-  current: number;
-  pageSize: number;
-  total: number;
-  onChange: (page: number, pageSize: number) => void;
-}
-
-interface AlertsTableProps {
-  pagination: PaginationType;
-}
+import { useState } from "react";
 
 const getTagColor = (type: string) => {
   switch (type) {
@@ -61,13 +51,20 @@ const columns = [
   },
 ];
 
-const AlertsTable = ({ pagination }: AlertsTableProps) => {
+const AlertsTable = () => {
+  const [pagination, setPagination] = useState({
+    current: 1,
+    pageSize: 5,
+  });
   const { loading, error, data } = useQuery(GET_ALL_ALERTS, {
+    variables: {
+      skip: (pagination.current - 1) * pagination.pageSize,
+      take: pagination.pageSize,
+    },
     pollInterval: 60000,
     fetchPolicy: "network-only",
   });
   const alertsData = data?.alerts?.alerts;
-
   return (
     <>
       {loading && <>loading...</>}
@@ -80,7 +77,14 @@ const AlertsTable = ({ pagination }: AlertsTableProps) => {
           loading={loading}
           dataSource={alertsData}
           columns={columns}
-          pagination={pagination}
+          pagination={{
+            current: pagination.current,
+            pageSize: pagination.pageSize,
+            total: data?.alerts?.total,
+            onChange: (page, pageSize) => {
+              setPagination({ ...pagination, current: page, pageSize });
+            },
+          }}
           scroll={{ x: "max-content" }}
           sticky={true}
         />

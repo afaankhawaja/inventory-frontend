@@ -59,16 +59,7 @@ const Index = () => {
           }}
         />
       )}
-      <AlertsTable
-        pagination={{
-          current: pagination.current,
-          pageSize: pagination.pageSize,
-          total: data?.items?.total,
-          onChange: (page, pageSize) => {
-            setPagination({ ...pagination, current: page, pageSize });
-          },
-        }}
-      />
+      <AlertsTable />
     </Container>
   );
 };
