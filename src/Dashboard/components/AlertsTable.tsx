@@ -81,6 +81,8 @@ const AlertsTable = ({ pagination }: AlertsTableProps) => {
           dataSource={alertsData}
           columns={columns}
           pagination={pagination}
+          scroll={{ x: "max-content" }}
+          sticky={true}
         />
       )}
     </>

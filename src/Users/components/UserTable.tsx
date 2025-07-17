@@ -173,6 +173,7 @@ const UserTable = ({
       dataSource={dataSource}
       columns={visibleColumns}
       sticky={true}
+      scroll={{ x: "max-content" }}
     />
   );
 };

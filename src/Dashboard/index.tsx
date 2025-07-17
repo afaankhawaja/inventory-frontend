@@ -7,9 +7,13 @@ import { useQuery } from "@apollo/client";
 import AlertsTable from "./components/AlertsTable";
 
 const Container = styled.section`
+  width: 100%;
+  height: 100%;
   display: flex;
   flex-direction: column;
   gap: 10px 10px;
+  padding: 0 10px;
+  overflow: auto scroll;
 `;
 const Index = () => {
   const [pagination, setPagination] = useState({

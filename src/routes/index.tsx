@@ -9,7 +9,7 @@ import Users from "../Users/index";
 import InventoryList from "../InventoryList";
 import EditUserDetails from "../EditUserDetails";
 import RoleProtectedRoute from "../utils/RoleProtectedRoute";
-import Maintenance from "../maintenance";
+import Maintenance from "../Maintenance";
 
 const router = createBrowserRouter([
   {

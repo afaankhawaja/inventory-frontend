@@ -51,7 +51,13 @@ const HighValueAssetTable = ({
   ];
 
   return (
-    <Table columns={columns} dataSource={dataSource} pagination={pagination} />
+    <Table
+      columns={columns}
+      dataSource={dataSource}
+      pagination={pagination}
+      scroll={{ x: "max-content" }}
+      sticky={true}
+    />
   );
 };
 

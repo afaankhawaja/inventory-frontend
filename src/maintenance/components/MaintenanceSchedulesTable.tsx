@@ -136,6 +136,7 @@ const MaintenanceSchedulesTable = () => {
           dataSource={schedules}
           columns={columns}
           sticky={true}
+          scroll={{ x: "max-content" }}
           pagination={{
             current: pagination.current,
             pageSize: pagination.pageSize,
