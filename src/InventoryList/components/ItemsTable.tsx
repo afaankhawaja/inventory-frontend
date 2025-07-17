@@ -156,7 +156,7 @@ const ItemsTable = ({
       dataSource={dataSource}
       pagination={pagination}
       sticky={true}
-      scroll={{ x: "max-content" }}
+      scroll={{ x: "max-content", y: "45vh" }}
     />
   );
 };

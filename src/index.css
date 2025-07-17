@@ -2,3 +2,17 @@ body {
   margin: 0;
   padding: 0;
 }
+/* For Chrome, Safari, and Edge */
+.ant-table-body::-webkit-scrollbar {
+  display: none;
+}
+
+/* For Firefox */
+.ant-table-body {
+  scrollbar-width: none;
+}
+
+/* For IE and Edge (older versions) */
+.ant-table-body {
+  -ms-overflow-style: none;
+}

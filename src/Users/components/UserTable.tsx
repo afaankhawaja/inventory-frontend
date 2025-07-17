@@ -115,6 +115,7 @@ const UserTable = ({
       title: "Age",
       dataIndex: "age",
       key: "age",
+      width: 100,
     },
     {
       title: "Role",
@@ -173,7 +174,7 @@ const UserTable = ({
       dataSource={dataSource}
       columns={visibleColumns}
       sticky={true}
-      scroll={{ x: "max-content" }}
+      scroll={{ x: "max-content", y: "40vh" }}
     />
   );
 };
