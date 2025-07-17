@@ -14,8 +14,9 @@ export const GET_MAINTENANCE_SCHEDULES = gql`
           name
           condition
         }
-          user{
-          username}
+        user {
+          username
+        }
       }
       total
     }

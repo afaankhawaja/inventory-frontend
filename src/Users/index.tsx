@@ -37,7 +37,7 @@ const Wrapper = styled.div`
 
 const TableWrapper = styled.div`
   overflow: auto;
-  flex:1;
+  flex: 1;
 
   &::-webkit-scrollbar {
     width: 0;

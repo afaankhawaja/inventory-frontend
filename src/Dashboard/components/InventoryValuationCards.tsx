@@ -14,7 +14,7 @@ const Wrapper = styled.section`
   flex-direction: column;
   gap: 20px 10px;
   font-weight: 600;
-  margin-bottom:10px;
+  margin-bottom: 10px;
 `;
 
 const PlusContainer = styled.div`

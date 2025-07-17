@@ -91,7 +91,7 @@ const CreateNewItem = ({ setOpen }: Props) => {
     (category: CategoryProps) => ({
       value: category?.categoryId,
       label: category?.name,
-    })
+    }),
   );
   const treeData = useMemo(() => {
     if (!locData?.locations) return [];

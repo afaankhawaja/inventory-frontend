@@ -30,7 +30,7 @@ const MaintenanceSchedulesTable = () => {
       variables: { page: pagination.current, pageSize: pagination.pageSize },
       pollInterval: 600000,
       fetchPolicy: "network-only",
-    }
+    },
   );
 
   const [updateMaintenanceSchedule, { loading: mutLoading }] = useMutation(
@@ -41,7 +41,7 @@ const MaintenanceSchedulesTable = () => {
         refetch();
       },
       onError: (err) => message.error(`Update failed: ${err.message}`),
-    }
+    },
   );
 
   const schedules = data?.maintenanceSchedules?.maintenanceSchedules || [];
@@ -134,8 +134,8 @@ const MaintenanceSchedulesTable = () => {
         <Table
           loading={loading || mutLoading}
           dataSource={schedules}
-                  columns={columns}
-                  sticky={true}
+          columns={columns}
+          sticky={true}
           pagination={{
             current: pagination.current,
             pageSize: pagination.pageSize,

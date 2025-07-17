@@ -117,7 +117,7 @@ const UpdateItem = ({ selectedItemId, setUpdateModal }: PropsType) => {
     (category: CategoryProps) => ({
       value: category?.categoryId,
       label: category?.name,
-    })
+    }),
   );
   const locationOptions = locData?.locations.map((location: LocationProps) => ({
     value: location?.locationId,
@@ -176,7 +176,7 @@ const UpdateItem = ({ selectedItemId, setUpdateModal }: PropsType) => {
   };
 
   const onFinishFailed: FormProps<FieldType>["onFinishFailed"] = (
-    errorInfo
+    errorInfo,
   ) => {
     console.log("Failed:", errorInfo);
   };
@@ -215,7 +215,7 @@ const UpdateItem = ({ selectedItemId, setUpdateModal }: PropsType) => {
   function isLatestCheckIn(transactions: Transaction[], targetItemId: string) {
     if (!transactions) return true;
     const forThisItem = transactions.filter((tx) =>
-      tx.transactionItems.some((ti) => ti.item.itemId === targetItemId)
+      tx.transactionItems.some((ti) => ti.item.itemId === targetItemId),
     );
 
     if (forThisItem.length === 0) {
@@ -232,7 +232,7 @@ const UpdateItem = ({ selectedItemId, setUpdateModal }: PropsType) => {
 
   const isCheckedIn = isLatestCheckIn(
     transactionData?.transactionsWithItems?.transactions,
-    selectedItemId
+    selectedItemId,
   );
   return (
     <div>
@@ -350,8 +350,8 @@ const UpdateItem = ({ selectedItemId, setUpdateModal }: PropsType) => {
               ? "checking out..."
               : "check out"
             : checkinLoading
-            ? "checking in..."
-            : "check in"}
+              ? "checking in..."
+              : "check in"}
         </Button>
       </ButtonContainer>
     </div>

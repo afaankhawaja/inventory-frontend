@@ -233,7 +233,7 @@ const HomeLayout: React.FC = () => {
             minHeight: 280,
             background: colorBgContainer,
             borderRadius: borderRadiusLG,
-            height:'calc(100vh - 112px)'
+            height: "calc(100vh - 112px)",
           }}
         >
           <Outlet />
