@@ -99,6 +99,7 @@ const ItemsTable = ({
     {
       title: "Location",
       key: "location",
+      width: 150,
       render: (record: Item) => {
         if (!record) return;
         const leafId = record?.location?.locationId;

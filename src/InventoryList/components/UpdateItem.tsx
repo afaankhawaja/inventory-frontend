@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import {
   Form,
   Input,
@@ -9,6 +9,7 @@ import {
   Select,
   Button,
   type FormProps,
+  TreeSelect,
 } from "antd";
 import { useQuery, useMutation } from "@apollo/client";
 import styled from "styled-components";
@@ -42,11 +43,6 @@ type FieldType = {
 interface CategoryProps {
   categoryId?: string;
   name?: string;
-}
-
-interface LocationProps {
-  locationId?: string;
-  location_name?: string;
 }
 
 interface Transaction {
@@ -97,7 +93,10 @@ const UpdateItem = ({ selectedItemId, setUpdateModal }: PropsType) => {
     checkOutItemMutation,
     { loading: checkOutLoading, error: checkOutError },
   ] = useMutation(CHECK_OUT_ITEM);
-
+  const treeData = useMemo(() => {
+    if (!locData?.locations) return [];
+    return convertLocationsToTreeData(locData.locations);
+  }, [locData]);
   const { data: transactionData } = useQuery(GET_TRANSACTIONS);
   const conditionOptions = [
     {
@@ -119,10 +118,6 @@ const UpdateItem = ({ selectedItemId, setUpdateModal }: PropsType) => {
       label: category?.name,
     }),
   );
-  const locationOptions = locData?.locations.map((location: LocationProps) => ({
-    value: location?.locationId,
-    label: location?.location_name,
-  }));
 
   const [updateItem, { loading: updating }] = useMutation(UPDATE_ITEM);
   const item = data?.item;
@@ -139,7 +134,7 @@ const UpdateItem = ({ selectedItemId, setUpdateModal }: PropsType) => {
         brand: item.brand,
         barcode: item.barcode,
         category: item.category?.categoryId || "",
-        location: item.location?.locationId || "",
+        location: item.location?.location_name || "",
       });
     }
   }, [item, form]);
@@ -234,6 +229,19 @@ const UpdateItem = ({ selectedItemId, setUpdateModal }: PropsType) => {
     transactionData?.transactionsWithItems?.transactions,
     selectedItemId,
   );
+  // @ts-expect-error locations
+  function convertLocationsToTreeData(locations) {
+    // @ts-expect-error locations
+    return locations.map((location) => ({
+      title: location.location_name || "Unnamed Location",
+      value: location.locationId,
+      children:
+        location.subLocations && location.subLocations.length > 0
+          ? convertLocationsToTreeData(location.subLocations)
+          : undefined,
+    }));
+  }
+
   return (
     <div>
       <StyledForm
@@ -323,10 +331,13 @@ const UpdateItem = ({ selectedItemId, setUpdateModal }: PropsType) => {
           </Col>
           <Col span={12}>
             <Form.Item name="location" label="Location">
-              <Select
+              <TreeSelect
+                treeData={treeData}
+                placeholder="Select a location"
+                loading={loading}
+                treeDefaultExpandAll
+                allowClear
                 style={{ height: "44px" }}
-                options={locationOptions}
-                placeholder="Select location"
               />
             </Form.Item>
           </Col>
