@@ -3,7 +3,7 @@ import { createBrowserRouter } from "react-router-dom";
 import SignIn from "../SignIn";
 import SignUp from "../SignUp";
 import ProtectedRoute from "../utils/ProtectedRoute";
-import HomeLayout from "../Layout/components/HomeLayout";
+import Layout from "../Layout";
 import Dashboard from "../Dashboard";
 import Users from "../Users/index";
 import InventoryList from "../InventoryList";
@@ -25,7 +25,7 @@ const router = createBrowserRouter([
     children: [
       {
         path: "/",
-        element: <HomeLayout />,
+        element: <Layout />,
         children: [
           {
             index: true,
