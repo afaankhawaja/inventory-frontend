@@ -172,6 +172,7 @@ const UserTable = ({
       pagination={pagination}
       dataSource={dataSource}
       columns={visibleColumns}
+      sticky={true}
     />
   );
 };

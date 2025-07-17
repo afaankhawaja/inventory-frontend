@@ -15,6 +15,8 @@ import { useAtom } from "jotai";
 const UsersContainer = styled.section`
   width: 100%;
   height: 100%;
+  display: flex;
+  flex-direction: column;
 `;
 const Title = styled.h1`
   font-size: 24px;
@@ -34,7 +36,8 @@ const Wrapper = styled.div`
 `;
 
 const TableWrapper = styled.div`
-  overflow: scroll;
+  overflow: auto;
+  flex:1;
 
   &::-webkit-scrollbar {
     width: 0;

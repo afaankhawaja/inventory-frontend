@@ -13,6 +13,8 @@ import UpdateItem from "./components/UpdateItem";
 const UsersContainer = styled.section`
   width: 100%;
   height: 100%;
+  display: flex;
+  flex-direction: column;
 `;
 const Title = styled.h1`
   font-size: 24px;
@@ -21,7 +23,7 @@ const Title = styled.h1`
   border-bottom: 1px solid lightgray;
 `;
 
-const AddNewUser = styled(Button)`
+const AddNewItem = styled(Button)`
   font-size: 16px;
 `;
 const Wrapper = styled.div`
@@ -32,7 +34,8 @@ const Wrapper = styled.div`
 `;
 
 const TableWrapper = styled.div`
-  overflow: scroll;
+  flex: 1;
+  overflow: auto;
 
   &::-webkit-scrollbar {
     width: 0;
@@ -86,9 +89,9 @@ const Index = () => {
     <UsersContainer>
       <Title>Items</Title>
       <Wrapper>
-        <AddNewUser onClick={() => setOpen(true)}>
+        <AddNewItem onClick={() => setOpen(true)}>
           Add new Item <PlusOutlined />{" "}
-        </AddNewUser>
+        </AddNewItem>
       </Wrapper>
 
       {error ? (

@@ -154,6 +154,7 @@ const ItemsTable = ({
       columns={visibleColumns}
       dataSource={dataSource}
       pagination={pagination}
+      sticky={true}
     />
   );
 };

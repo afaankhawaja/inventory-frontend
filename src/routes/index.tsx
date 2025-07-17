@@ -9,6 +9,7 @@ import Users from "../Users/index";
 import InventoryList from "../InventoryList";
 import EditUserDetails from "../EditUserDetails";
 import RoleProtectedRoute from "../utils/RoleProtectedRoute";
+import Maintenance from "../maintenance";
 
 const router = createBrowserRouter([
   {
@@ -37,6 +38,10 @@ const router = createBrowserRouter([
           {
             path: "edit-user-details",
             element: <EditUserDetails />,
+          },
+          {
+            path: "maintenance",
+            element: <Maintenance />,
           },
           {
             element: (

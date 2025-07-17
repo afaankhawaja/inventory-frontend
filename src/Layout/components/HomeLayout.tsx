@@ -7,6 +7,7 @@ import {
   MenuFoldOutlined,
   MenuUnfoldOutlined,
   PlusOutlined,
+  SettingOutlined,
   UnorderedListOutlined,
   UserOutlined,
 } from "@ant-design/icons";
@@ -168,6 +169,11 @@ const HomeLayout: React.FC = () => {
               label: "Reports",
             },
             {
+              key: "/maintenance",
+              icon: <SettingOutlined />,
+              label: "Maintenance",
+            },
+            {
               key: "/users",
               icon: <UserOutlined />,
               label: "Users",
@@ -227,6 +233,7 @@ const HomeLayout: React.FC = () => {
             minHeight: 280,
             background: colorBgContainer,
             borderRadius: borderRadiusLG,
+            height:'calc(100vh - 112px)'
           }}
         >
           <Outlet />
