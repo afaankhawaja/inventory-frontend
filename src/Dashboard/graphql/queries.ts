@@ -85,3 +85,25 @@ export const GET_ALL_ALERTS = gql`
     }
   }
 `;
+
+export const GET_ALL_PURCHASE_HISTORY = gql`
+  query purchaseHistories($skip: Int, $take: Int) {
+    purchaseHistories(skip: $skip, take: $take) {
+      purchases {
+        purchaseId
+        purchase_date
+        total_cost
+        unit_price
+        quantity
+        item {
+          name
+          brand
+        }
+        vendor {
+          name
+        }
+      }
+      total
+    }
+  }
+`;

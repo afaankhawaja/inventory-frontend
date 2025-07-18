@@ -5,6 +5,7 @@ import { useState } from "react";
 import { GET_TRANSACTIONS } from "./graphql/queries";
 import { useQuery } from "@apollo/client";
 import AlertsTable from "./components/AlertsTable";
+import PurchaseHistoryTable from "./components/PurchaseHistoryTable";
 
 const Container = styled.section`
   width: 100%;
@@ -60,6 +61,7 @@ const Index = () => {
         />
       )}
       <AlertsTable />
+      <PurchaseHistoryTable />
     </Container>
   );
 };
