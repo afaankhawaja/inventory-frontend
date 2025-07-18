@@ -150,3 +150,40 @@ export const CHECK_OUT_ITEM = gql`
     }
   }
 `;
+
+export const CREATE_PURCHASE_HISTORY = gql`
+  mutation CREATE_PURCHASE_HISTORY(
+    $quantity: Int!
+    $unit_price: Decimal!
+    $purchase_date: DateTime!
+    $total_cost: Decimal!
+    $itemId: String!
+    $vendorId: String!
+  ) {
+    createPurchaseHistory(
+      purchaseHistoryCreateInput: {
+        quantity: $quantity
+        unit_price: $unit_price
+        purchase_date: $purchase_date
+        total_cost: $total_cost
+        item: { connect: { itemId: $itemId } }
+        vendor: { connect: { vendorId: $vendorId } }
+      }
+    ) {
+      purchaseId
+      purchase_date
+      quantity
+      unit_price
+      total_cost
+      item {
+        name
+        brand
+        itemId
+      }
+      vendor {
+        name
+        vendorId
+      }
+    }
+  }
+`;

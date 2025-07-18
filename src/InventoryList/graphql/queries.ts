@@ -109,3 +109,11 @@ export const GET_LOCATION_PATH = gql`
     }
   }
 `;
+export const FETCH_ALL_VENDORS = gql`
+  query vendors {
+    vendors {
+      name
+      vendorId
+    }
+  }
+`;

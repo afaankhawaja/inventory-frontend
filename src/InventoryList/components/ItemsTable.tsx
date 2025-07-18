@@ -3,7 +3,11 @@ import { currentUserDataAtom } from "../../store/atoms";
 import { useAtom } from "jotai";
 import { Space } from "antd";
 import styled from "styled-components";
-import { DeleteOutlined, EditOutlined } from "@ant-design/icons";
+import {
+  DeleteOutlined,
+  EditOutlined,
+  PlusCircleOutlined,
+} from "@ant-design/icons";
 import { LocationCell } from "./LocationCell";
 
 const EditButton = styled.div`
@@ -22,6 +26,16 @@ const DeleteButton = styled.div`
   cursor: pointer;
   &:hover {
     color: #8b0000;
+  }
+`;
+
+const RestockButton = styled.div`
+  display: flex;
+  gap: 0px 10px;
+  color: rgb(163, 47, 132);
+  cursor: pointer;
+  &:hover {
+    color: rgb(216, 121, 156);
   }
 `;
 
@@ -54,6 +68,7 @@ interface ItemsTableProps {
   dataSource: Item[];
   onEditItem: (itemId: string) => void;
   onDeleteItem: (itemId: string) => void;
+  onRestockItem: (itemId: string) => void;
   pagination: PaginationType;
 }
 
@@ -61,6 +76,7 @@ const ItemsTable = ({
   dataSource,
   onEditItem,
   onDeleteItem,
+  onRestockItem,
   pagination,
 }: ItemsTableProps) => {
   const [userData] = useAtom(currentUserDataAtom);
@@ -121,6 +137,9 @@ const ItemsTable = ({
       render: (record: Item) =>
         userData?.role === "super-admin" ? (
           <Space size="middle">
+            <RestockButton onClick={() => onRestockItem(record.itemId)}>
+              <>Restock</> <PlusCircleOutlined />
+            </RestockButton>
             <EditButton onClick={() => onEditItem(record.itemId)}>
               <>Edit</> <EditOutlined />
             </EditButton>

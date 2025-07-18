@@ -9,6 +9,7 @@ import CreateNewItem from "./components/CreateNewItem";
 import { DELETE_ITEM } from "./graphql/mutations";
 import DeleteItem from "./components/DeleteItem";
 import UpdateItem from "./components/UpdateItem";
+import CreatePurchaseHistory from "./components/CreatePurchaseHistory";
 
 const UsersContainer = styled.section`
   width: 100%;
@@ -50,6 +51,7 @@ const Index = () => {
   const [selectedItemId, setSelectedItemId] = useState("");
   const [updateModal, setUpdateModal] = useState(false);
   const [deleteModal, setDeleteModal] = useState(false);
+  const [restockModal, setRestockModal] = useState(false);
   const [pagination, setPagination] = useState({
     current: 1,
     pageSize: 10,
@@ -70,6 +72,10 @@ const Index = () => {
   const handleDeleteItem = (itemId: string) => {
     setSelectedItemId(itemId);
     setDeleteModal(true);
+  };
+  const handleRestockItem = (itemId: string) => {
+    setSelectedItemId(itemId);
+    setRestockModal(true);
   };
   const deleteItem = () => {
     removeItem({
@@ -114,6 +120,7 @@ const Index = () => {
                 }}
                 onEditItem={handleEditItemClick}
                 onDeleteItem={handleDeleteItem}
+                onRestockItem={handleRestockItem}
               />
             </TableWrapper>
           )}
@@ -203,6 +210,26 @@ const Index = () => {
         height={"90%"}
       >
         <DeleteItem />
+      </Modal>
+      <Modal
+        centered
+        open={restockModal}
+        footer={null}
+        onCancel={() => setRestockModal(false)}
+        width={{
+          xs: "90%",
+          sm: "80%",
+          md: "70%",
+          lg: "60%",
+          xl: "50%",
+          xxl: "40%",
+        }}
+        height={"90%"}
+      >
+        <CreatePurchaseHistory
+          selectedItemId={selectedItemId}
+          setRestockModal={setRestockModal}
+        />
       </Modal>
     </UsersContainer>
   );
