@@ -33,7 +33,6 @@ const InventoryValuationCards: React.FC = () => {
   const itemsData = data?.items?.items;
   const total = data?.items?.total;
   const icon = differ > 0 ? <ArrowUpOutlined /> : <ArrowDownOutlined />;
-  const color = differ > 0 ? "#3f8600" : "#cf1322";
   if (!itemsData) return; //@ts-expect-error curr
   const totalInventory = itemsData.reduce((acc: number, curr) => {
     return acc + curr.price * curr.quantity_in_stock;
@@ -124,7 +123,7 @@ const InventoryValuationCards: React.FC = () => {
                   title="Total Items"
                   value={total}
                   precision={0}
-                  valueStyle={{ color: color }}
+                  valueStyle={{ color: "#3f8600" }}
                   prefix={<ArrowUpOutlined />}
                 />
               </Card>

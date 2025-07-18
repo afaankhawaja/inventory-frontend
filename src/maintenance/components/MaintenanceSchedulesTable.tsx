@@ -28,7 +28,7 @@ const MaintenanceSchedulesTable = () => {
     GET_MAINTENANCE_SCHEDULES,
     {
       variables: { page: pagination.current, pageSize: pagination.pageSize },
-      pollInterval: 600000,
+      pollInterval: 60000,
       fetchPolicy: "network-only",
     },
   );

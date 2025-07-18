@@ -134,7 +134,7 @@ const UpdateItem = ({ selectedItemId, setUpdateModal }: PropsType) => {
         brand: item.brand,
         barcode: item.barcode,
         category: item.category?.categoryId || "",
-        location: item.location?.location_name || "",
+        location: item.location?.locationId || "",
       });
     }
   }, [item, form]);
