@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import {
   Form,
   InputNumber,
@@ -12,7 +12,10 @@ import {
 import styled from "styled-components";
 import { useMutation, useQuery } from "@apollo/client";
 import { CREATE_PURCHASE_HISTORY } from "../graphql/mutations";
-import { FETCH_ALL_VENDORS } from "../graphql/queries";
+import {
+  FETCH_ALL_VENDORS,
+  FETCH_LATEST_PURCHASE_BY_ITEM,
+} from "../graphql/queries";
 import type { Dayjs } from "dayjs";
 
 const StyledForm = styled(Form<FormTypes>)`
@@ -54,6 +57,22 @@ const CreatePurchaseHistory: React.FC<Props> = ({
   const [createPurchase, { loading, error }] = useMutation(
     CREATE_PURCHASE_HISTORY,
   );
+  const { data: purchaseData } = useQuery(FETCH_LATEST_PURCHASE_BY_ITEM, {
+    variables: {
+      itemID: selectedItemId,
+    },
+  });
+  const itemHistoryData = purchaseData?.purchaseHistory;
+  useEffect(() => {
+    if (itemHistoryData) {
+      form.setFieldsValue({
+        quantity: itemHistoryData.quantity,
+        unit_price: itemHistoryData.unit_price,
+        total_cost: itemHistoryData.total_cost,
+        vendor: itemHistoryData.vendorId,
+      });
+    }
+  });
 
   const vendorOptions = vendorData?.vendors?.map((v: VendorTypes) => ({
     label: v.name,

@@ -117,3 +117,21 @@ export const FETCH_ALL_VENDORS = gql`
     }
   }
 `;
+export const FETCH_LATEST_PURCHASE_BY_ITEM = gql`
+  query purchaseHistory($itemID: String!) {
+    purchaseHistory(itemID: $itemID) {
+      item {
+        name
+        brand
+      }
+      quantity
+      purchase_date
+      unit_price
+      total_cost
+      vendorId
+      vendor {
+        name
+      }
+    }
+  }
+`;
