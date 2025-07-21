@@ -4,6 +4,7 @@ import {
   HomeOutlined,
   LogoutOutlined,
   SettingOutlined,
+  ShoppingCartOutlined,
   UnorderedListOutlined,
   UserOutlined,
 } from "@ant-design/icons";
@@ -55,6 +56,11 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed, logoutUser }) => {
             key: "/inventory-list",
             icon: <UnorderedListOutlined />,
             label: "Inventory List",
+          },
+          {
+            key: "/purchase-history",
+            icon: <ShoppingCartOutlined />,
+            label: "Purchase History",
           },
           {
             key: "/reports",

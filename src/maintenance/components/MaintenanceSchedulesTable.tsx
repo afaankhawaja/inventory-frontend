@@ -27,7 +27,10 @@ const MaintenanceSchedulesTable = () => {
   const { loading, error, data, refetch } = useQuery(
     GET_MAINTENANCE_SCHEDULES,
     {
-      variables: { page: pagination.current, pageSize: pagination.pageSize },
+      variables: {
+        skip: (pagination.current - 1) * pagination.pageSize,
+        take: pagination.pageSize,
+      },
       pollInterval: 60000,
       fetchPolicy: "network-only",
     },

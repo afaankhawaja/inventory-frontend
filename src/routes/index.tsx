@@ -10,6 +10,7 @@ import InventoryList from "../InventoryList";
 import EditUserDetails from "../EditUserDetails";
 import RoleProtectedRoute from "../utils/RoleProtectedRoute";
 import Maintenance from "../Maintenance";
+import Purchase from "../Purchase";
 
 const router = createBrowserRouter([
   {
@@ -42,6 +43,10 @@ const router = createBrowserRouter([
           {
             path: "maintenance",
             element: <Maintenance />,
+          },
+          {
+            path: "purchase-history",
+            element: <Purchase />,
           },
           {
             element: (
