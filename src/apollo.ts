@@ -43,7 +43,7 @@ const refreshAccessToken = async (): Promise<string | null> => {
 
     return access_token;
   } catch (error) {
-    console.log('error.message', error)
+    console.log("error.message", error);
     localStorage.clear();
     window.location.href = "/signin";
     return null;

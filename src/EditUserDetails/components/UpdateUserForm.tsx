@@ -37,6 +37,7 @@ type FieldType = {
 
 const StyledForm = styled(Form<FieldType>)`
   width: 60%;
+  overflow-y:auto;
   
   padding:10px 20px;
   border-radius:20px;
@@ -45,6 +46,8 @@ const StyledForm = styled(Form<FieldType>)`
     font-weight: 500;
   }
 
+  &::-webkit-scrollbar{
+  display:none;}
   .ant-btn-primary {
     width: 100%;
     border: none;
@@ -56,6 +59,7 @@ const StyledForm = styled(Form<FieldType>)`
 `;
 const Wrapper = styled.section`
   width: 100%;
+  height: 100%;
   display: flex;
   margin: auto auto;
   justify-content: start;
