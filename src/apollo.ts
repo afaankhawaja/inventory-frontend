@@ -1,71 +1,65 @@
 import { ApolloClient, InMemoryCache, createHttpLink } from "@apollo/client";
-import { setContext } from "@apollo/client/link/context";
+
+const GRAPHQL_URL = "http://localhost:3000/graphql";
+
+const isUnauthorized = async (response: Response): Promise<boolean> => {
+  try {
+    const body = await response.clone().json();
+    return (body?.errors ?? []).some(
+      (e: { message?: string; extensions?: { code?: string } }) =>
+        e.message === "Unauthorized" || e.extensions?.code === "UNAUTHENTICATED",
+    );
+  } catch {
+    return false;
+  }
+};
+
+let refreshPromise: Promise<boolean> | null = null;
+
+const refreshSession = (): Promise<boolean> => {
+  if (!refreshPromise) {
+    refreshPromise = fetch(GRAPHQL_URL, {
+      method: "POST",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ query: "mutation { refreshToken }" }),
+    })
+      .then(async (res) => {
+        const body = await res.json();
+        return body?.data?.refreshToken === true;
+      })
+      .catch(() => false)
+      .finally(() => {
+        refreshPromise = null;
+      });
+  }
+  return refreshPromise;
+};
+
+const fetchWithRefresh: typeof fetch = async (input, init) => {
+  const response = await fetch(input, init);
+  if (!(await isUnauthorized(response))) return response;
+
+  const reqBody = typeof init?.body === "string" ? init.body : "";
+  if (/refreshToken|signin|logout/.test(reqBody)) return response;
+
+  if (await refreshSession()) {
+    return fetch(input, init);
+  }
+  if (window.location.pathname !== "/signin") {
+    window.location.href = "/signin";
+  }
+  return response;
+};
 
 const httpLink = createHttpLink({
-  uri: "http://localhost:3000/graphql",
+  uri: GRAPHQL_URL,
   credentials: "include",
-});
-
-const isTokenExpiring = (token: string): boolean => {
-  try {
-    const payload = JSON.parse(atob(token.split(".")[1]));
-    const now = Math.floor(Date.now() / 1000);
-    return payload.exp - now < 60;
-  } catch {
-    return true;
-  }
-};
-
-const refreshAccessToken = async (): Promise<string | null> => {
-  try {
-    const refreshToken = localStorage.getItem("refresh_token");
-    if (!refreshToken) return null;
-
-    const response = await fetch("http://localhost:3000/graphql", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        query: `mutation RefreshToken($refresh_token: String!) {
-            refreshToken(refresh_token: $refresh_token) {
-              access_token
-              refresh_token
-            }
-          }`,
-        variables: { refresh_token: refreshToken },
-      }),
-    });
-
-    const { data } = await response.json();
-    const { access_token, refresh_token } = data.refreshToken;
-
-    localStorage.setItem("access_token", access_token);
-    localStorage.setItem("refresh_token", refresh_token);
-
-    return access_token;
-  } catch (error) {
-    console.log("error.message", error);
-    localStorage.clear();
-    window.location.href = "/signin";
-    return null;
-  }
-};
-
-const authLink = setContext(async (_, { headers }) => {
-  let token = localStorage.getItem("access_token");
-
-  if (token && isTokenExpiring(token)) {
-    token = await refreshAccessToken();
-  }
-  return {
-    headers: {
-      ...headers,
-      authorization: token ? `Bearer ${token}` : "",
-    },
-  };
+  fetch: fetchWithRefresh,
 });
 
 export const apolloClient = new ApolloClient({
-  link: authLink.concat(httpLink),
+  link: httpLink,
   cache: new InMemoryCache(),
   defaultOptions: {
     watchQuery: {

@@ -1,8 +1,8 @@
 import { gql } from "@apollo/client";
 
 export const FETCH_USER_BY_USERNAME = gql`
-  query finduser($username: String!) {
-    username(username: $username) {
+  query me {
+    me {
       userId
       image_path
       email
@@ -11,5 +11,11 @@ export const FETCH_USER_BY_USERNAME = gql`
         name
       }
     }
+  }
+`;
+
+export const LOGOUT_MUTATION = gql`
+  mutation Logout {
+    logout
   }
 `;

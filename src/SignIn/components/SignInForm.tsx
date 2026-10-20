@@ -128,9 +128,7 @@ const SignInForm: React.FC = () => {
 
   const [signIn, { loading }] = useMutation(SIGNIN_MUTATION, {
     onCompleted: (data) => {
-      if (data && data.signin) {
-        localStorage.setItem("access_token", data.signin.access_token);
-        localStorage.setItem("refresh_token", data.signin.refresh_token);
+      if (data?.signin) {
         alert("Login Successful!");
         navigate("/");
       }
