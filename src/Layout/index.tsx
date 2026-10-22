@@ -58,8 +58,7 @@ const HomeLayout: React.FC = () => {
   };
 
   return (
-    <Layout>
-      <Sidebar collapsed={collapsed} logoutUser={logoutUser} />
+    <Layout style={{ minHeight: "100vh" }}>`n      <Sidebar collapsed={collapsed} logoutUser={logoutUser} />
       <Layout>
         <HeaderComponent
           collapsed={collapsed}

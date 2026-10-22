@@ -13,6 +13,7 @@
     "@apollo/client": "^3.13.8",
     "antd": "^5.26.3",
     "dayjs": "^1.11.13",
+    "framer-motion": "^14.5.0",
     "graphql": "^16.11.0",
     "jotai": "^2.12.5",
     "jwt-decode": "^4.0.0",
@@ -20,6 +21,7 @@
     "react-dom": "^19.1.0",
     "react-hook-form": "^7.59.0",
     "react-router-dom": "^7.6.3",
+    "recharts": "^3.10.1",
     "styled-components": "^6.1.19"
   },
   "devDependencies": {

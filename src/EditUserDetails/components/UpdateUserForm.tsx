@@ -11,8 +11,7 @@ import {
   type FormProps,
   Avatar,
   type UploadFile,
-  Upload,
-} from "antd";
+  Upload, message } from "antd";
 import { useEffect, useState } from "react";
 import styled from "styled-components";
 import { UPDATE_USER } from "../graphql/mutations";
@@ -51,7 +50,7 @@ const StyledForm = styled(Form<FieldType>)`
   .ant-btn-primary {
     width: 100%;
     border: none;
-    box-shadow: 0 4px 15px #1890ff;
+    box-shadow: none;
     transition: all 0.3s ease;
   }
 
@@ -148,11 +147,11 @@ const UpdateUser = ({ selectedUserId }: PropsType) => {
     })
       .then(() => {
         form.resetFields();
-        alert("updated user sucessfully");
+        message.success("updated user sucessfully");
         navigate("/");
       })
       .catch((error) => {
-        alert(error.message);
+        message.error(error.message);
         console.log("error", error);
       });
   };

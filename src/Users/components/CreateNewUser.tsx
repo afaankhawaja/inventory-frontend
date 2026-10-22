@@ -6,8 +6,7 @@ import {
   InputNumber,
   Row,
   Select,
-  type FormProps,
-} from "antd";
+  type FormProps, message } from "antd";
 import styled from "styled-components";
 import { useMutation, useQuery } from "@apollo/client";
 import { CREATE_USER_WITH_ROLE } from "../graphql/mutations";
@@ -37,7 +36,7 @@ const StyledForm = styled(Form<FieldType>)`
   .ant-btn-primary {
     width: 100%;
     border: none;
-    box-shadow: 0 4px 15px #1890ff;
+    box-shadow: none;
     transition: all 0.3s ease;
   }
 
@@ -77,7 +76,7 @@ const CreateNewUser = ({ setOpen }: Props) => {
     })
       .then(() => {
         form.resetFields();
-        alert("created user sucessfully");
+        message.success("created user sucessfully");
         setOpen(false);
       })
       .catch((error) => {

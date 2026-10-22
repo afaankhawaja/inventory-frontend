@@ -58,11 +58,11 @@ const MaintenanceSchedulesTable = () => {
       render: (text: string) => (
         <Tag
           style={{
-            fontSize: "16px",
-            width: "140px",
-            height: "30px",
-            alignContent: "center",
-            textAlign: "center",
+            fontSize: "12px",
+            fontWeight: 600,
+            borderRadius: 999,
+            border: "none",
+            padding: "2px 12px",
           }}
         >
           {text}

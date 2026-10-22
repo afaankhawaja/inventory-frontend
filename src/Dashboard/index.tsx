@@ -1,4 +1,5 @@
 import styled from "styled-components";
+import { Card, Skeleton, Tabs } from "antd";
 import HighValueAssetTable from "./components/HighValueAssetTable";
 import InventoryValuationCards from "./components/InventoryValuationCards";
 import { useState } from "react";
@@ -6,16 +7,26 @@ import { GET_TRANSACTIONS } from "./graphql/queries";
 import { useQuery } from "@apollo/client";
 import AlertsTable from "./components/AlertsTable";
 import PurchaseHistoryTable from "./components/PurchaseHistoryTable";
+import { PurchaseSpendChart, TransactionsChart } from "./components/Charts";
 
 const Container = styled.section`
   width: 100%;
-  height: 100%;
   display: flex;
   flex-direction: column;
-  gap: 10px 10px;
-  padding: 0 10px;
-  overflow: auto scroll;
+  gap: 16px;
 `;
+
+const Title = styled.h1`
+  margin: 0 0 4px;
+  font-size: 28px;
+`;
+
+const TwoCol = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+  gap: 16px;
+`;
+
 const Index = () => {
   const [pagination, setPagination] = useState({
     current: 1,
@@ -41,27 +52,47 @@ const Index = () => {
 
   return (
     <Container>
+      <Title>Overview</Title>
+      <AlertsTable />
       <InventoryValuationCards />
 
-      {error ? (
-        <>error {error.message}</>
-      ) : loading ? (
-        <>loading table data...</>
-      ) : (
-        <HighValueAssetTable
-          dataSource={hightValueAssetTransaction}
-          pagination={{
-            current: pagination.current,
-            pageSize: pagination.pageSize,
-            total: data?.items?.total,
-            onChange: (page, pageSize) => {
-              setPagination({ ...pagination, current: page, pageSize });
+      <TwoCol>
+        <TransactionsChart />
+        <PurchaseSpendChart />
+      </TwoCol>
+
+      <Card styles={{ body: { paddingTop: 4 } }}>
+        <Tabs
+          items={[
+            {
+              key: "high",
+              label: "High value check-outs",
+              children: error ? (
+                <>error {error.message}</>
+              ) : loading ? (
+                <Skeleton active />
+              ) : (
+                <HighValueAssetTable
+                  dataSource={hightValueAssetTransaction}
+                  pagination={{
+                    current: pagination.current,
+                    pageSize: pagination.pageSize,
+                    total: data?.items?.total,
+                    onChange: (page, pageSize) => {
+                      setPagination({ ...pagination, current: page, pageSize });
+                    },
+                  }}
+                />
+              ),
             },
-          }}
+            {
+              key: "purchases",
+              label: "Recent purchases",
+              children: <PurchaseHistoryTable />,
+            },
+          ]}
         />
-      )}
-      <AlertsTable />
-      <PurchaseHistoryTable />
+      </Card>
     </Container>
   );
 };

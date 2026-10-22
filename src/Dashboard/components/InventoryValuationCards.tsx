@@ -1,210 +1,213 @@
 import React from "react";
 import { ArrowDownOutlined, ArrowUpOutlined } from "@ant-design/icons";
-import { Card, Col, Row, Statistic } from "antd";
+import { Card, Skeleton, theme } from "antd";
 import { useQuery } from "@apollo/client";
+import { animate, motion } from "framer-motion";
+import { useNavigate } from "react-router";
 import {
   FETCH_ALL_ITEMS,
   FETCH_ITEMS_BY_TODAY,
   FETCH_ITEMS_BY_YESTERDAY,
 } from "../graphql/queries";
 import styled from "styled-components";
+import { palette } from "../../theme/tokens";
 
-const Wrapper = styled.section`
+interface ItemLite {
+  price: number;
+  quantity_in_stock: number;
+  is_high_value: boolean;
+}
+
+const Grid = styled.section`
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+`;
+
+const Label = styled.div`
+  font-size: 13px;
+  font-weight: 500;
+  opacity: 0.65;
+  margin-bottom: 8px;
+`;
+
+const ValueRow = styled.div`
   display: flex;
-  flex-direction: column;
-  gap: 20px 10px;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+`;
+
+const Value = styled.div`
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+`;
+
+const Delta = styled.span<{ $color: string }>`
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
   font-weight: 600;
-  margin-bottom: 10px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  color: ${(p) => p.$color};
+  background: ${(p) => p.$color}1f;
 `;
 
-const PlusContainer = styled.div`
-  display: flex;
-  justify-content: end;
-`;
+const CountUp: React.FC<{ value: number; decimals?: number; prefix?: string }> = ({
+  value,
+  decimals = 0,
+  prefix = "",
+}) => {
+  const ref = React.useRef<HTMLSpanElement>(null);
+  React.useEffect(() => {
+    const controls = animate(0, value, {
+      duration: 0.6,
+      ease: "easeOut",
+      onUpdate: (v) => {
+        if (ref.current)
+          ref.current.textContent =
+            prefix +
+            v.toLocaleString(undefined, {
+              minimumFractionDigits: decimals,
+              maximumFractionDigits: decimals,
+            });
+      },
+    });
+    return () => controls.stop();
+  }, [value, decimals, prefix]);
+  return <span ref={ref}>{prefix + (0).toFixed(decimals)}</span>;
+};
+
+const sum = (list: ItemLite[] | undefined, fn: (i: ItemLite) => number) =>
+  (list ?? []).reduce((acc, curr) => acc + fn(curr), 0);
+
+interface StatProps {
+  label: string;
+  value: number;
+  diff: number;
+  decimals?: number;
+  prefix?: string;
+  to: string;
+  index: number;
+}
+
+const StatCard: React.FC<StatProps> = ({
+  label,
+  value,
+  diff,
+  decimals,
+  prefix,
+  to,
+  index,
+}) => {
+  const navigate = useNavigate();
+  const color =
+    diff > 0
+      ? palette.status.success
+      : diff < 0
+        ? palette.status.critical
+        : "#8e8e93";
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3, delay: index * 0.04 }}
+      whileTap={{ scale: 0.98 }}
+    >
+      <Card
+        hoverable
+        style={{ cursor: "pointer" }}
+        onClick={() => navigate(to)}
+        styles={{ body: { padding: 20 } }}
+      >
+        <Label>{label}</Label>
+        <ValueRow>
+          <Value>
+            <CountUp value={value} decimals={decimals} prefix={prefix} />
+          </Value>
+          <Delta $color={color}>
+            {diff > 0 ? (
+              <ArrowUpOutlined />
+            ) : diff < 0 ? (
+              <ArrowDownOutlined />
+            ) : null}
+            {diff > 0 ? `+${diff}` : diff}
+          </Delta>
+        </ValueRow>
+      </Card>
+    </motion.div>
+  );
+};
 
 const InventoryValuationCards: React.FC = () => {
+  const { token } = theme.useToken();
   const { data, loading, error } = useQuery(FETCH_ALL_ITEMS);
   const { data: yesterdayData } = useQuery(FETCH_ITEMS_BY_YESTERDAY);
   const { data: todayData } = useQuery(FETCH_ITEMS_BY_TODAY);
 
-  const yesterdayItems = yesterdayData?.yesterdayItems?.length;
-  const todayItems = todayData?.todayItems?.length;
-  const differ = todayItems - yesterdayItems;
-  const itemsData = data?.items?.items;
-  const total = data?.items?.total;
-  const icon = differ > 0 ? <ArrowUpOutlined /> : <ArrowDownOutlined />;
-  if (!itemsData) return; //@ts-expect-error curr
-  const totalInventory = itemsData.reduce((acc: number, curr) => {
-    return acc + curr.price * curr.quantity_in_stock;
-  }, 0);
+  if (error) return <div style={{ color: token.colorError }}>{error.message}</div>;
 
-  //@ts-expect-error curr
-  const totalInventoryStock = itemsData.reduce((acc: number, curr) => {
-    return acc + curr.quantity_in_stock;
-  }, 0); //@ts-expect-error curr
-  const highValueAsset = itemsData.reduce((acc: number, curr) => {
-    if (curr.is_high_value) return acc + 1;
-    return acc;
-  }, 0);
-  if (error) return <div>{error.message}</div>;
+  if (loading || !data?.items?.items) {
+    return (
+      <Grid>
+        {[0, 1, 2, 3].map((i) => (
+          <Card key={i}>
+            <Skeleton active paragraph={{ rows: 1 }} title={{ width: "40%" }} />
+          </Card>
+        ))}
+      </Grid>
+    );
+  }
 
-  const totalInventoryValueToday = todayData?.todayItems?.reduce(
-    //@ts-expect-error curr
-    (acc: number, curr) => {
-      return acc + curr.price * curr.quantity_in_stock;
-    },
-    0,
-  );
-  const totalInventoryValueYesterday = yesterdayData?.yesterdayItems?.reduce(
-    //@ts-expect-error curr
-    (acc: number, curr) => {
-      return acc + curr.price * curr.quantity_in_stock;
-    },
-    0,
-  );
-  const totalInventoryStockYesterday = yesterdayData?.yesterdayItems?.reduce(
-    //@ts-expect-error curr
-    (acc: number, curr) => {
-      return acc + curr.quantity_in_stock;
-    },
-    0,
-  );
-  const totalInventoryStockToday = todayData?.todayItems?.reduce(
-    //@ts-expect-error curr
-    (acc: number, curr) => {
-      return acc + curr.quantity_in_stock;
-    },
-    0,
-  );
-  const highValueAssetToday = todayData?.todayItems?.reduce(
-    //@ts-expect-error curr
-    (acc: number, curr) => {
-      if (curr.is_high_value) return acc + 1;
-      return acc;
-    },
-    0,
-  );
-  const highValueAssetYesterday = yesterdayData?.yesterdayItems?.reduce(
-    //@ts-expect-error curr
-    (acc: number, curr) => {
-      if (curr.is_high_value) return acc + 1;
-      return acc;
-    },
-    0,
-  );
+  const items: ItemLite[] = data.items.items;
+  const today: ItemLite[] | undefined = todayData?.todayItems;
+  const yesterday: ItemLite[] | undefined = yesterdayData?.yesterdayItems;
 
-  const inventoryValueDifference =
-    totalInventoryValueToday - totalInventoryValueYesterday;
-  const inventoryStockDifference =
-    totalInventoryStockToday - totalInventoryStockYesterday;
-  const highValueAssetDifference =
-    highValueAssetToday - highValueAssetYesterday;
+  const value = (i: ItemLite) => i.price * i.quantity_in_stock;
+  const stock = (i: ItemLite) => i.quantity_in_stock;
+  const high = (i: ItemLite) => (i.is_high_value ? 1 : 0);
+
+  const diff = (fn: (i: ItemLite) => number) =>
+    sum(today, fn) - sum(yesterday, fn);
+
+  const cards: Omit<StatProps, "index">[] = [
+    {
+      label: "Total Items",
+      value: data.items.total ?? items.length,
+      diff: (today?.length ?? 0) - (yesterday?.length ?? 0),
+      to: "/inventory-list",
+    },
+    {
+      label: "Inventory Value",
+      value: sum(items, value),
+      diff: Math.round(diff(value) * 100) / 100,
+      decimals: 2,
+      prefix: "$",
+      to: "/inventory-list",
+    },
+    {
+      label: "Total Inventory Stock",
+      value: sum(items, stock),
+      diff: diff(stock),
+      to: "/inventory-list",
+    },
+    {
+      label: "High Value Assets",
+      value: sum(items, high),
+      diff: diff(high),
+      to: "/inventory-list",
+    },
+  ];
 
   return (
-    <Wrapper>
-      {loading ? (
-        <div>loading...</div>
-      ) : (
-        <>
-          <Row gutter={16}>
-            <Col span={12}>
-              <Card
-                style={{
-                  backgroundColor: "#fafafa",
-                  border: "solid 1px #c6edec",
-                }}
-                hoverable
-              >
-                <PlusContainer>
-                  {" "}
-                  {differ > 0 ? `+ ${differ}` : ` ${differ}`}
-                </PlusContainer>
-                <Statistic
-                  title="Total Items"
-                  value={total}
-                  precision={0}
-                  valueStyle={{ color: "#3f8600" }}
-                  prefix={<ArrowUpOutlined />}
-                />
-              </Card>
-            </Col>
-            <Col span={12}>
-              <Card
-                style={{
-                  backgroundColor: "#fafafa",
-                  border: "solid 1px #c6edec",
-                }}
-                hoverable
-              >
-                <PlusContainer>
-                  {" "}
-                  {inventoryValueDifference > 0
-                    ? `+ ${inventoryValueDifference}`
-                    : `${inventoryValueDifference}`}
-                </PlusContainer>
-                <Statistic
-                  title="Inventory Value"
-                  value={totalInventory}
-                  precision={2}
-                  valueStyle={{ color: "#3f8600" }}
-                  prefix={icon}
-                  suffix="$"
-                />
-              </Card>
-            </Col>
-          </Row>
-          <Row gutter={16}>
-            <Col span={12}>
-              <Card
-                style={{
-                  backgroundColor: "#fafafa",
-                  border: "solid 1px #c6edec",
-                }}
-                hoverable
-              >
-                <PlusContainer>
-                  {" "}
-                  {inventoryStockDifference > 0
-                    ? `+ ${inventoryStockDifference}`
-                    : `${inventoryStockDifference}`}
-                </PlusContainer>
-                <Statistic
-                  title="Total Inventory Stock"
-                  value={totalInventoryStock}
-                  precision={0}
-                  valueStyle={{ color: "#3f8600" }}
-                  prefix={<ArrowUpOutlined />}
-                />
-              </Card>
-            </Col>
-            <Col span={12}>
-              <Card
-                style={{
-                  backgroundColor: "#fafafa",
-                  border: "solid 1px #c6edec",
-                }}
-                hoverable
-              >
-                <PlusContainer>
-                  {" "}
-                  {highValueAssetDifference > 0
-                    ? `+ ${highValueAssetDifference}`
-                    : `${highValueAssetDifference}`}
-                </PlusContainer>
-                <Statistic
-                  title="High Value Asset"
-                  value={highValueAsset}
-                  precision={0}
-                  valueStyle={{ color: "#3f8600" }}
-                  prefix={<ArrowUpOutlined />}
-                  suffix=""
-                />
-              </Card>
-            </Col>
-          </Row>
-        </>
-      )}
-    </Wrapper>
+    <Grid>
+      {cards.map((c, i) => (
+        <StatCard key={c.label} index={i} {...c} />
+      ))}
+    </Grid>
   );
 };
 

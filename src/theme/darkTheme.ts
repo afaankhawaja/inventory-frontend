@@ -1,35 +1,41 @@
 import { theme } from "antd";
+import { palette, fontFamily, sharedComponents } from "./tokens";
 
 const { darkAlgorithm } = theme;
+const p = palette.dark;
 
 export const darkTheme = {
   algorithm: darkAlgorithm,
   token: {
-    colorPrimary: "#177ddc",
-    borderRadius: 8,
-    fontSize: 16,
-    colorTextBase: "#ffffff",
-    colorBgContainer: "#141414",
+    colorPrimary: p.accent,
+    colorTextBase: p.text,
+    colorBgLayout: p.page,
+    colorBgContainer: p.card,
+    colorBorder: p.separator,
+    colorBorderSecondary: p.hairline,
+    colorSuccess: palette.status.success,
+    colorWarning: palette.status.warning,
+    colorError: palette.status.critical,
+    colorInfo: p.accent,
+    borderRadius: 10,
+    borderRadiusLG: 16,
+    fontSize: 14,
+    fontFamily,
+    boxShadow: "none",
   },
   components: {
-    Form: {},
-    Input: {
-      paddingBlock: 10,
-      paddingInline: 15,
-    },
-    Button: {
-      controlHeight: 45,
-      fontSize: 18,
-      fontWeight: 600,
-    },
-    InputNumber: {
-      paddingBlock: 10,
-      paddingInline: 15,
-    },
+    ...sharedComponents,
     Layout: {
-      headerBg: "#141414",
-      siderBg: "#001529",
-      bodyBg: "#000000",
+      headerBg: "rgba(28, 28, 30, 0.8)",
+      siderBg: p.card,
+      bodyBg: p.page,
+    },
+    Menu: {
+      ...sharedComponents.Menu,
+      itemSelectedBg: p.sidebarActive,
+      itemSelectedColor: p.accent,
+      darkItemSelectedBg: p.sidebarActive,
+      darkItemBg: p.card,
     },
   },
 };

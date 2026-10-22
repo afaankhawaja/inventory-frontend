@@ -11,7 +11,7 @@ import {
   Button,
   Dropdown,
   Layout,
-  Switch,
+  Segmented,
   theme,
   type MenuProps,
 } from "antd";
@@ -30,18 +30,9 @@ const UserWrapper = styled.div`
 `;
 const Wrapper = styled.div`
   display: flex;
-  gap: 0px 50px;
+  gap: 0px 16px;
   justify-content: center;
-  justify-items: center;
   align-items: center;
-`;
-
-const ThemeWrapper = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 0 10px;
-  font-size: 14px;
-  font-weight: 600;
 `;
 const UserName = styled.strong``;
 const UserEmail = styled.div``;
@@ -66,7 +57,7 @@ const HeaderComponent: React.FC<HeaderProps> = ({
   logoutUser,
 }) => {
   const {
-    token: { colorBgContainer },
+    token: { colorBorderSecondary },
   } = theme.useToken();
   const navigate = useNavigate();
   const [currentTheme, setCurrentTheme] = useAtom(selectedTheme);
@@ -93,9 +84,7 @@ const HeaderComponent: React.FC<HeaderProps> = ({
         navigate("/edit-user-details");
       },
     },
-    {
-      type: "divider",
-    },
+    { type: "divider" },
     {
       key: "logout",
       icon: <LogoutOutlined />,
@@ -110,8 +99,17 @@ const HeaderComponent: React.FC<HeaderProps> = ({
   return (
     <Header
       style={{
-        padding: 10,
-        background: colorBgContainer,
+        position: "sticky",
+        top: 0,
+        zIndex: 10,
+        height: 64,
+        padding: "0 16px",
+        background: currentTheme.isDark
+          ? "rgba(28, 28, 30, 0.8)"
+          : "rgba(245, 245, 247, 0.8)",
+        backdropFilter: "saturate(180%) blur(20px)",
+        WebkitBackdropFilter: "saturate(180%) blur(20px)",
+        borderBottom: `1px solid ${colorBorderSecondary}`,
         display: "flex",
         justifyContent: "space-between",
         alignItems: "center",
@@ -121,27 +119,19 @@ const HeaderComponent: React.FC<HeaderProps> = ({
         type="text"
         icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
         onClick={() => setCollapsed(!collapsed)}
-        style={{
-          fontSize: "16px",
-          width: 64,
-          height: 64,
-        }}
+        style={{ fontSize: 16, width: 40, height: 40 }}
       />
       <Wrapper>
-        <ThemeWrapper>
-          Theme
-          <Switch
-            size="small"
-            onClick={() =>
-              setCurrentTheme({
-                isDark: !currentTheme.isDark,
-              })
-            }
-          />
-        </ThemeWrapper>
+        <Segmented
+          size="middle"
+          value={currentTheme.isDark ? "Dark" : "Light"}
+          options={["Light", "Dark"]}
+          onChange={(v) => setCurrentTheme({ isDark: v === "Dark" })}
+        />
         <Dropdown menu={{ items }} placement="bottomRight" arrow>
           <Avatar
-            size={{ xs: 24, sm: 32, md: 32, lg: 36, xl: 40, xxl: 54 }}
+            size={34}
+            style={{ cursor: "pointer" }}
             src={userData?.image_path ? userData?.image_path : defaultIcon}
           />
         </Dropdown>

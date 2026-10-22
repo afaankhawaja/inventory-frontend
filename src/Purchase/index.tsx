@@ -8,7 +8,10 @@ const Section = styled.section`
   width: 100%;
 `;
 
-const Heading = styled.h1``;
+const Heading = styled.h1`
+  font-size: 28px;
+  margin: 0 0 16px;
+`;
 const TableWrapper = styled.div`
   flex: 1;
   overflow: auto;

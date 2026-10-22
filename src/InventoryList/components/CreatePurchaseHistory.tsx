@@ -7,8 +7,7 @@ import {
   Button,
   type FormProps,
   Row,
-  Col,
-} from "antd";
+  Col, message } from "antd";
 import styled from "styled-components";
 import { useMutation, useQuery } from "@apollo/client";
 import { CREATE_PURCHASE_HISTORY } from "../graphql/mutations";
@@ -26,7 +25,7 @@ const StyledForm = styled(Form<FormTypes>)`
   .ant-btn-primary {
     width: 100%;
     border: none;
-    box-shadow: 0 4px 15px #1890ff;
+    box-shadow: none;
     transition: all 0.3s ease;
   }
 `;
@@ -93,11 +92,11 @@ const CreatePurchaseHistory: React.FC<Props> = ({
         },
       });
       form.resetFields();
-      alert(`Purchase history created`);
+      message.success(`Purchase history created`);
       setRestockModal(false);
     } catch (error) {
       console.error(error);
-      alert(error);
+      message.error(String(error));
     }
   };
 

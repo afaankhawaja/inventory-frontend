@@ -9,8 +9,7 @@ import {
   Switch,
   Select,
   DatePicker,
-  TreeSelect,
-} from "antd";
+  TreeSelect, message } from "antd";
 import styled from "styled-components";
 import { useMutation, useQuery } from "@apollo/client";
 import { CREATE_NEW_ITEM } from "../graphql/mutations";
@@ -43,7 +42,7 @@ const StyledForm = styled(Form<ItemType>)`
   .ant-btn-primary {
     width: 100%;
     border: none;
-    box-shadow: 0 4px 15px #1890ff;
+    box-shadow: none;
     transition: all 0.3s ease;
   }
 `;
@@ -116,7 +115,7 @@ const CreateNewItem = ({ setOpen }: Props) => {
       },
     }).then(() => {
       form.resetFields();
-      alert("created item successfully");
+      message.success("created item successfully");
       setOpen(false);
     });
   };

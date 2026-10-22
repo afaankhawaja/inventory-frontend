@@ -9,8 +9,7 @@ import {
   Select,
   Button,
   type FormProps,
-  TreeSelect,
-} from "antd";
+  TreeSelect, message } from "antd";
 import { useQuery, useMutation } from "@apollo/client";
 import styled from "styled-components";
 import {
@@ -59,7 +58,7 @@ const StyledForm = styled(Form<FieldType>)`
   .ant-btn-primary {
     width: 100%;
     border: none;
-    box-shadow: 0 4px 15px #1890ff;
+    box-shadow: none;
     transition: all 0.3s ease;
   }
 `;
@@ -161,11 +160,11 @@ const UpdateItem = ({ selectedItemId, setUpdateModal }: PropsType) => {
     })
       .then(() => {
         form.resetFields();
-        alert("Updated item successfully");
+        message.success("Updated item successfully");
         setUpdateModal(false);
       })
       .catch((err) => {
-        alert(err.message);
+        message.error(err.message);
         console.log("err.message", err.message);
       });
   };
@@ -187,7 +186,7 @@ const UpdateItem = ({ selectedItemId, setUpdateModal }: PropsType) => {
       console.log("Check-in successful", response.data);
     } catch (e) {
       console.error("Check-in failed", e);
-      alert(checkinError);
+      message.error(String(checkinError));
     }
   };
 
@@ -203,7 +202,7 @@ const UpdateItem = ({ selectedItemId, setUpdateModal }: PropsType) => {
       console.log("Check-in successful", response.data);
     } catch (e) {
       console.error("Check-in failed", e);
-      alert(checkOutError);
+      message.error(String(checkOutError));
     }
   };
 

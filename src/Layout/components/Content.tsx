@@ -1,26 +1,34 @@
 import React from "react";
-import { Layout, theme } from "antd";
-import { Outlet } from "react-router";
+import { Layout } from "antd";
+import { Outlet, useLocation } from "react-router";
+import { motion } from "framer-motion";
 
 const { Content } = Layout;
 
 const ContentComponent: React.FC = () => {
-  const {
-    token: { colorBgContainer, borderRadiusLG },
-  } = theme.useToken();
+  const location = useLocation();
 
   return (
     <Content
       style={{
-        margin: "24px 16px",
-        padding: 24,
-        minHeight: 280,
-        background: colorBgContainer,
-        borderRadius: borderRadiusLG,
-        height: "calc(100vh - 112px)",
+        margin: "0 auto",
+        padding: "24px",
+        width: "100%",
+        maxWidth: 1400,
+        boxSizing: "border-box",
+        overflow: "auto",
+        height: "calc(100vh - 64px)",
       }}
     >
-      <Outlet />
+      <motion.div
+        key={location.pathname}
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.22, ease: [0.25, 0.1, 0.25, 1] }}
+        style={{ minHeight: "100%" }}
+      >
+        <Outlet />
+      </motion.div>
     </Content>
   );
 };

@@ -1,6 +1,6 @@
 import React from "react";
 import type { FormProps } from "antd";
-import { Button, Checkbox, Form, Input } from "antd";
+import { Button, Checkbox, Form, Input, message } from "antd";
 import styled from "styled-components";
 import { useNavigate } from "react-router-dom";
 import SignInIcon from "../../../assets/svgs/sign_in_icon.svg?react";
@@ -13,7 +13,7 @@ const PageWrapper = styled.div`
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  background: linear-gradient(135deg, #f0f2f5 0%, #e0e5ec 100%);
+  background: #f5f5f7;
   font-family: "Inter", sans-serif;
   padding: 20px;
   box-sizing: border-box;
@@ -89,14 +89,14 @@ const BottomText = styled.p`
 `;
 
 const SignUP = styled.p`
-  color: #1890ff;
+  color: #007aff;
   cursor: pointer;
 `;
 
 const PasswordReset = styled.div`
   width: full;
   text-align: end;
-  color: #1890ff;
+  color: #007aff;
   cursor: pointer;
   font-size: 14px;
   margin-top: -10px;
@@ -112,7 +112,7 @@ const StyledForm = styled(Form<FieldType>)`
   .ant-btn-primary {
     width: 100%;
     border: none;
-    box-shadow: 0 4px 15px #1890ff;
+    box-shadow: none;
     transition: all 0.3s ease;
   }
 `;
@@ -131,12 +131,12 @@ const SignInForm: React.FC = () => {
     onCompleted: (data) => {
       if (data?.signin) {
         broadcastLogin();
-        alert("Login Successful!");
+        message.success("Signed in");
         navigate("/");
       }
     },
     onError: (error) => {
-      alert(error.message);
+      message.error(error.message);
     },
   });
 

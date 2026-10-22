@@ -2,7 +2,7 @@ import { useMutation, useQuery } from "@apollo/client";
 import { FETCH_ALL_ITEMS } from "./graphql/queries";
 import ItemsTable from "./components/ItemsTable";
 import styled from "styled-components";
-import { Button, Modal } from "antd";
+import { Button, Modal, message } from "antd";
 import { PlusOutlined } from "@ant-design/icons";
 import { useState } from "react";
 import CreateNewItem from "./components/CreateNewItem";
@@ -18,10 +18,8 @@ const UsersContainer = styled.section`
   flex-direction: column;
 `;
 const Title = styled.h1`
-  font-size: 24px;
-  color: #1890ff;
-  padding-bottom: 20px;
-  border-bottom: 1px solid lightgray;
+  font-size: 28px;
+  margin: 0 0 16px;
 `;
 
 const AddNewItem = styled(Button)`
@@ -84,11 +82,11 @@ const Index = () => {
       },
     })
       .then(() => {
-        alert("sucessfully deleted");
+        message.success("sucessfully deleted");
         setDeleteModal(false);
       })
       .catch((error) => {
-        alert(error?.message);
+        message.error(error?.message);
       });
   };
   return (
@@ -131,7 +129,7 @@ const Index = () => {
           <div
             style={{
               textAlign: "center",
-              color: "#1890ff",
+              color: "inherit",
               fontWeight: "bold",
               fontSize: "20px",
             }}
@@ -160,7 +158,7 @@ const Index = () => {
           <div
             style={{
               textAlign: "center",
-              color: "#1890ff",
+              color: "inherit",
               fontWeight: "bold",
               fontSize: "20px",
             }}

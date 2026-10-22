@@ -14,7 +14,7 @@ const PageWrapper = styled.div`
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  background: linear-gradient(135deg, #f0f2f5 0%, #e0e5ec 100%);
+  background: #f5f5f7;
   font-family: "Inter", sans-serif;
   padding: 20px;
   box-sizing: border-box;
@@ -90,7 +90,7 @@ const BottomText = styled.p`
 `;
 
 const SignIn = styled.p`
-  color: #1890ff;
+  color: #007aff;
   cursor: pointer;
 `;
 
@@ -104,7 +104,7 @@ const StyledForm = styled(Form<FieldType>)`
   .ant-btn-primary {
     width: 100%;
     border: none;
-    box-shadow: 0 4px 15px #1890ff;
+    box-shadow: none;
     transition: all 0.3s ease;
   }
 

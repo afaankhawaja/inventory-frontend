@@ -9,8 +9,7 @@ import {
   InputNumber,
   Button,
   type FormProps,
-  Select,
-} from "antd";
+  Select, message } from "antd";
 import { useEffect } from "react";
 import styled from "styled-components";
 import { UPDATE_USER } from "../graphql/mutations";
@@ -44,7 +43,7 @@ const StyledForm = styled(Form<FieldType>)`
   .ant-btn-primary {
     width: 100%;
     border: none;
-    box-shadow: 0 4px 15px #1890ff;
+    box-shadow: none;
     transition: all 0.3s ease;
   }
 
@@ -105,11 +104,11 @@ const UpdateUser = ({ selectedUserId, setUpdateModal }: PropsType) => {
     })
       .then(() => {
         form.resetFields();
-        alert("updated user sucessfully");
+        message.success("updated user sucessfully");
         setUpdateModal(false);
       })
       .catch((error) => {
-        alert(error.message);
+        message.error(error.message);
       });
   };
   const onFinishFailed: FormProps<FieldType>["onFinishFailed"] = (
