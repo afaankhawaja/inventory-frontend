@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 import SignInIcon from "../../../assets/svgs/sign_in_icon.svg?react";
 import { SIGNIN_MUTATION } from "../graphql/mutations";
 import { useMutation } from "@apollo/client";
+import { broadcastLogin } from "../../utils/authBroadcast";
 
 const PageWrapper = styled.div`
   display: flex;
@@ -129,6 +130,7 @@ const SignInForm: React.FC = () => {
   const [signIn, { loading }] = useMutation(SIGNIN_MUTATION, {
     onCompleted: (data) => {
       if (data?.signin) {
+        broadcastLogin();
         alert("Login Successful!");
         navigate("/");
       }

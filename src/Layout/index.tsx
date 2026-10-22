@@ -6,6 +6,7 @@ import { apolloClient } from "../apollo";
 import { FETCH_USER_BY_USERNAME, LOGOUT_MUTATION } from "./graphql/queries";
 import { currentUserDataAtom } from ".././store/atoms";
 import { useAtom } from "jotai";
+import { broadcastLogout } from "../utils/authBroadcast";
 import Sidebar from "./components/Sidebar";
 import HeaderComponent from "./components/Header";
 import ContentComponent from "./components/Content";
@@ -35,10 +36,24 @@ const HomeLayout: React.FC = () => {
 
   const logoutUser = async () => {
     try {
-      await logout(); // revokes all tokens server-side + clears cookies
+      await logout();
+    } catch (err) {
+      console.error("Logout mutation failed:", err);
     } finally {
-      await apolloClient.clearStore();
-      navigate("/signin");
+      broadcastLogout();
+      try {
+        await apolloClient.clearStore();
+      } catch (err) {
+        console.error("Error clearing Apollo store:", err);
+      }
+      setUserData({
+        username: "",
+        email: "",
+        userID: "",
+        image_path: "",
+        role: "",
+      });
+      navigate("/signin", { replace: true });
     }
   };
 

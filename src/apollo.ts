@@ -1,4 +1,5 @@
 import { ApolloClient, InMemoryCache, createHttpLink } from "@apollo/client";
+import { broadcastLogout } from "./utils/authBroadcast";
 
 const GRAPHQL_URL = "http://localhost:3000/graphql";
 
@@ -46,6 +47,7 @@ const fetchWithRefresh: typeof fetch = async (input, init) => {
   if (await refreshSession()) {
     return fetch(input, init);
   }
+  broadcastLogout();
   if (window.location.pathname !== "/signin") {
     window.location.href = "/signin";
   }

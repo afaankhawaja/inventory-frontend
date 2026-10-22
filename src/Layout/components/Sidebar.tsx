@@ -31,9 +31,7 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed, logoutUser }) => {
       collapsed={collapsed}
       style={{
         backgroundColor: colorBgContainer,
-        border: "1px solid lightblue",
         borderRadius: "0px 8px 8px 0px",
-        boxShadow: "5px 5px lightblue",
       }}
     >
       <div className="demo-logo-vertical" />
