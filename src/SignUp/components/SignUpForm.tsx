@@ -1,115 +1,23 @@
 import React, { useState } from "react";
 import type { FormProps } from "antd";
-import { Button, Form, Input, InputNumber, Upload } from "antd";
-import styled from "styled-components";
+import {
+  Button,
+  Col,
+  Form,
+  Input,
+  InputNumber,
+  Row,
+  Upload,
+  message,
+} from "antd";
 import { useNavigate } from "react-router-dom";
 import SignUpIcon from "../../../assets/svgs/sign_up_user.svg?react";
 import { useMutation } from "@apollo/client";
 import { CREATE_USER } from "../graphql/mutations";
 import { UploadOutlined } from "@ant-design/icons";
 import type { UploadFile } from "antd/es/upload/interface";
-
-const PageWrapper = styled.div`
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 100vh;
-  background: #f5f5f7;
-  font-family: "Inter", sans-serif;
-  padding: 20px;
-  box-sizing: border-box;
-  width: 100dvw;
-`;
-
-const FormContainer = styled.div`
-  background-color: #ffffff;
-  padding: 40px;
-  border-radius: 15px;
-  box-shadow:
-    0 10px 30px rgba(0, 0, 0, 0.1),
-    0 4px 12px rgba(0, 0, 0, 0.05);
-  border: 1px solid #e0e0e0;
-  max-width: 500px;
-  width: 100%;
-  box-sizing: border-box;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-
-  @media (max-width: 768px) {
-    padding: 30px;
-    max-width: 90%;
-  }
-
-  @media (max-width: 480px) {
-    padding: 20px;
-  }
-`;
-
-const HeaderSection = styled.div`
-  text-align: center;
-  margin-bottom: 30px;
-  width: 100%;
-`;
-
-const WelcomeTitle = styled.h2`
-  font-size: 1.8em;
-  color: #333;
-  margin-bottom: 10px;
-  font-weight: 700;
-
-  @media (max-width: 768px) {
-    font-size: 1.8em;
-  }
-`;
-
-const Subtitle = styled.p`
-  font-size: 0.8em;
-  color: #666;
-  line-height: 1.5;
-  margin-bottom: 0;
-
-  @media (max-width: 768px) {
-    font-size: 1em;
-  }
-`;
-
-const BottomText = styled.p`
-  font-size: 0.8em;
-  color: #666;
-  line-height: 1.5;
-  margin-bottom: 0;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 5px;
-
-  @media (max-width: 768px) {
-    font-size: 1em;
-  }
-`;
-
-const SignIn = styled.p`
-  color: #007aff;
-  cursor: pointer;
-`;
-
-const StyledForm = styled(Form<FieldType>)`
-  width: 100%;
-
-  .ant-form-item-label > label {
-    font-weight: 500;
-  }
-
-  .ant-btn-primary {
-    width: 100%;
-    border: none;
-    box-shadow: none;
-    transition: all 0.3s ease;
-  }
-
-  }
-`;
+import AuthShell, { authLinkStyle } from "../../components/AuthShell";
+import { palette } from "../../theme/tokens";
 
 type FieldType = {
   username?: string;
@@ -122,15 +30,32 @@ type FieldType = {
   cnic?: string;
 };
 
+/** Flat strength meter: 0-4 segments, no gradient. */
+const strengthOf = (pw: string) => {
+  let s = 0;
+  if (pw.length >= 8) s++;
+  if (/[A-Z]/.test(pw) && /[a-z]/.test(pw)) s++;
+  if (/\d/.test(pw)) s++;
+  if (/[^A-Za-z0-9]/.test(pw)) s++;
+  return s;
+};
+const strengthColors = [
+  "#8e8e93",
+  palette.status.critical,
+  palette.status.warning,
+  palette.light.accent,
+  palette.status.success,
+];
+const strengthLabels = ["", "Weak", "Fair", "Good", "Strong"];
+
 const SignUpForm: React.FC = () => {
   const [fileList, setFileList] = useState<UploadFile[]>([]);
+  const [password, setPassword] = useState("");
   const navigate = useNavigate();
   const [CreateUser, { loading }] = useMutation(CREATE_USER);
   const [form] = Form.useForm();
 
-  const navigateToSignIn = () => {
-    navigate("/");
-  };
+  const strength = strengthOf(password);
 
   const getBase64 = (file: File): Promise<string> =>
     new Promise((resolve, reject) => {
@@ -160,9 +85,11 @@ const SignUpForm: React.FC = () => {
     })
       .then(() => {
         form.resetFields();
+        message.success("Account created");
         navigate("/");
       })
       .catch((error) => {
+        message.error(error.message);
         console.error(error);
       });
   };
@@ -174,96 +101,146 @@ const SignUpForm: React.FC = () => {
   };
 
   return (
-    <PageWrapper>
-      <FormContainer>
-        <HeaderSection>
-          <SignUpIcon style={{ width: "42", height: "42" }} />
-          <WelcomeTitle>Welcome to Inventory</WelcomeTitle>
-          <Subtitle>
-            Manage your stock, sales, and optimize operations with ease.
-          </Subtitle>
-        </HeaderSection>
-
-        <StyledForm
-          form={form}
-          name="signup"
-          layout="vertical"
-          initialValues={{ remember: true }}
-          onFinish={onFinish}
-          onFinishFailed={onFinishFailed}
-        >
-          <Form.Item<FieldType>
-            label="Username"
-            name="username"
-            rules={[{ required: true, message: "Please input your username!" }]}
-          >
-            <Input placeholder="Enter your username" />
-          </Form.Item>
-
-          <Form.Item<FieldType> label="firstName" name="firstName">
-            <Input placeholder="first name" />
-          </Form.Item>
-
-          <Form.Item<FieldType> label="lastName" name="lastName">
-            <Input placeholder="last name" />
-          </Form.Item>
-
-          <Form.Item<FieldType>
-            label="age"
-            name="age"
-            rules={[{ required: true }]}
-          >
-            <InputNumber placeholder="22 e.g." />
-          </Form.Item>
-
-          <Form.Item<FieldType> label="cnic" name="cnic">
-            <Input placeholder="your identity" />
-          </Form.Item>
-
-          <Form.Item<FieldType>
-            label="email"
-            name="email"
-            rules={[
-              { required: true, message: " enter your email!" },
-              {
-                type: "email",
-                message: "The input is not a valid email!",
-              },
-            ]}
-          >
-            <Input placeholder="jeff@mail.com" />
-          </Form.Item>
-
-          <Form.Item<FieldType>
-            label="Password"
-            name="password"
-            rules={[{ required: true, message: "Please input your password!" }]}
-          >
-            <Input.Password placeholder="Enter your password" />
-          </Form.Item>
-          <Form.Item<FieldType> label="Profile Picture" name="image">
-            <Upload
-              accept="image/*"
-              beforeUpload={() => false}
-              fileList={fileList}
-              onChange={({ fileList }) => setFileList(fileList)}
-            >
-              <Button icon={<UploadOutlined />}>Select Image</Button>
-            </Upload>
-          </Form.Item>
-
-          <Form.Item>
-            <Button type="primary" htmlType="submit">
-              {!loading ? "Sign up" : "signing..."}
-            </Button>
-          </Form.Item>
-        </StyledForm>
-        <BottomText>
+    <AuthShell
+      maxWidth={520}
+      icon={<SignUpIcon style={{ width: 42, height: 42 }} />}
+      title="Create your account"
+      subtitle="Manage your stock, sales, and optimize operations with ease."
+      footer={
+        <>
           Already have an account?{" "}
-          <SignIn onClick={navigateToSignIn}>Sign in</SignIn>
-        </BottomText>
-      </FormContainer>
-    </PageWrapper>
+          <button style={authLinkStyle} onClick={() => navigate("/")}>
+            Sign in
+          </button>
+        </>
+      }
+    >
+      <Form
+        form={form}
+        name="signup"
+        layout="vertical"
+        size="large"
+        requiredMark={false}
+        onFinish={onFinish}
+        onFinishFailed={onFinishFailed}
+      >
+        <Form.Item<FieldType>
+          label="Username"
+          name="username"
+          rules={[{ required: true, message: "Please input your username!" }]}
+        >
+          <Input placeholder="Enter your username" autoComplete="username" />
+        </Form.Item>
+
+        <Row gutter={12}>
+          <Col xs={24} sm={12}>
+            <Form.Item<FieldType> label="First name" name="firstName">
+              <Input placeholder="First name" />
+            </Form.Item>
+          </Col>
+          <Col xs={24} sm={12}>
+            <Form.Item<FieldType> label="Last name" name="lastName">
+              <Input placeholder="Last name" />
+            </Form.Item>
+          </Col>
+        </Row>
+
+        <Row gutter={12}>
+          <Col xs={24} sm={8}>
+            <Form.Item<FieldType>
+              label="Age"
+              name="age"
+              rules={[{ required: true, message: "Required" }]}
+            >
+              <InputNumber placeholder="22" style={{ width: "100%" }} />
+            </Form.Item>
+          </Col>
+          <Col xs={24} sm={16}>
+            <Form.Item<FieldType> label="CNIC" name="cnic">
+              <Input placeholder="Your identity number" />
+            </Form.Item>
+          </Col>
+        </Row>
+
+        <Form.Item<FieldType>
+          label="Email"
+          name="email"
+          rules={[
+            { required: true, message: "Enter your email!" },
+            { type: "email", message: "The input is not a valid email!" },
+          ]}
+        >
+          <Input placeholder="jeff@mail.com" autoComplete="email" />
+        </Form.Item>
+
+        <Form.Item<FieldType>
+          label="Password"
+          name="password"
+          rules={[{ required: true, message: "Please input your password!" }]}
+          style={{ marginBottom: 8 }}
+        >
+          <Input.Password
+            placeholder="Enter your password"
+            autoComplete="new-password"
+            onChange={(e) => setPassword(e.target.value)}
+          />
+        </Form.Item>
+        {password && (
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 6,
+              marginBottom: 20,
+            }}
+          >
+            {[1, 2, 3, 4].map((i) => (
+              <div
+                key={i}
+                style={{
+                  flex: 1,
+                  height: 4,
+                  borderRadius: 2,
+                  background:
+                    i <= strength
+                      ? strengthColors[strength]
+                      : "rgba(128,128,128,0.25)",
+                  transition: "background 200ms ease",
+                }}
+              />
+            ))}
+            <span
+              style={{
+                fontSize: 12,
+                width: 48,
+                textAlign: "right",
+                color: strengthColors[strength],
+              }}
+            >
+              {strengthLabels[strength]}
+            </span>
+          </div>
+        )}
+
+        <Form.Item<FieldType> label="Profile picture" name="image">
+          <Upload
+            accept="image/*"
+            beforeUpload={() => false}
+            fileList={fileList}
+            maxCount={1}
+            onChange={({ fileList }) => setFileList(fileList)}
+          >
+            <Button icon={<UploadOutlined />}>Select image</Button>
+          </Upload>
+        </Form.Item>
+
+        <Form.Item style={{ marginBottom: 16 }}>
+          <Button type="primary" htmlType="submit" loading={loading} block>
+            Sign up
+          </Button>
+        </Form.Item>
+      </Form>
+    </AuthShell>
   );
 };
 

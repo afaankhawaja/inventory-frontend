@@ -42,7 +42,6 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed, logoutUser }) => {
   const navigate = useNavigate();
   const { pathname } = useLocation();
 
-  // Highlight the nav item matching the current route (longest prefix wins)
   const selectedKey =
     navItems
       .map((i) => i.key)

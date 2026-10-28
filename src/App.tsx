@@ -71,7 +71,10 @@ function App() {
   }, [setUserData]);
 
   return (
-    <ConfigProvider theme={theme.isDark ? darkTheme : customTheme}>
+    <ConfigProvider
+      variant="filled"
+      theme={theme.isDark ? darkTheme : customTheme}
+    >
       <ApolloProvider client={apolloClient}>
         <RouterProvider router={router} />
       </ApolloProvider>

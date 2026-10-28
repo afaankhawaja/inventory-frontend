@@ -1,121 +1,12 @@
 import React from "react";
 import type { FormProps } from "antd";
 import { Button, Checkbox, Form, Input, message } from "antd";
-import styled from "styled-components";
 import { useNavigate } from "react-router-dom";
 import SignInIcon from "../../../assets/svgs/sign_in_icon.svg?react";
 import { SIGNIN_MUTATION } from "../graphql/mutations";
 import { useMutation } from "@apollo/client";
 import { broadcastLogin } from "../../utils/authBroadcast";
-
-const PageWrapper = styled.div`
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 100vh;
-  background: #f5f5f7;
-  font-family: "Inter", sans-serif;
-  padding: 20px;
-  box-sizing: border-box;
-  width: 100dvw;
-`;
-
-const FormContainer = styled.div`
-  background-color: #ffffff;
-  padding: 40px;
-  border-radius: 15px;
-  box-shadow:
-    0 10px 30px rgba(0, 0, 0, 0.1),
-    0 4px 12px rgba(0, 0, 0, 0.05);
-  border: 1px solid #e0e0e0;
-  max-width: 450px;
-  width: 100%;
-  box-sizing: border-box;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-
-  @media (max-width: 768px) {
-    padding: 30px;
-    max-width: 90%;
-  }
-
-  @media (max-width: 480px) {
-    padding: 20px;
-  }
-`;
-
-const HeaderSection = styled.div`
-  text-align: center;
-  margin-bottom: 30px;
-  width: 100%;
-`;
-
-const WelcomeTitle = styled.h2`
-  font-size: 1.8em;
-  color: #333;
-  margin-bottom: 10px;
-  font-weight: 700;
-
-  @media (max-width: 768px) {
-    font-size: 1.8em;
-  }
-`;
-
-const Subtitle = styled.p`
-  font-size: 0.8em;
-  color: #666;
-  line-height: 1.5;
-  margin-bottom: 0;
-
-  @media (max-width: 768px) {
-    font-size: 1em;
-  }
-`;
-
-const BottomText = styled.p`
-  font-size: 0.8em;
-  color: #666;
-  line-height: 1.5;
-  margin-bottom: 0;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 5px;
-
-  @media (max-width: 768px) {
-    font-size: 1em;
-  }
-`;
-
-const SignUP = styled.p`
-  color: #007aff;
-  cursor: pointer;
-`;
-
-const PasswordReset = styled.div`
-  width: full;
-  text-align: end;
-  color: #007aff;
-  cursor: pointer;
-  font-size: 14px;
-  margin-top: -10px;
-`;
-
-const StyledForm = styled(Form<FieldType>)`
-  width: 100%;
-
-  .ant-form-item-label > label {
-    font-weight: 500;
-  }
-
-  .ant-btn-primary {
-    width: 100%;
-    border: none;
-    box-shadow: none;
-    transition: all 0.3s ease;
-  }
-`;
+import AuthShell, { authLinkStyle } from "../../components/AuthShell";
 
 type FieldType = {
   username?: string;
@@ -159,62 +50,84 @@ const SignInForm: React.FC = () => {
     console.log("Failed:", errorInfo);
   };
 
-  const navigateToSignUp = () => {
-    navigate("/signup");
-  };
-
   return (
-    <PageWrapper>
-      <FormContainer>
-        <HeaderSection>
-          <SignInIcon style={{ width: "42", height: "42" }} />
-          <WelcomeTitle>Welcome to Inventory</WelcomeTitle>
-          <Subtitle>
-            Manage your stock, sales, and optimize operations with ease.
-          </Subtitle>
-        </HeaderSection>
+    <AuthShell
+      icon={<SignInIcon style={{ width: 42, height: 42 }} />}
+      title="Welcome to Inventory"
+      subtitle="Manage your stock, sales, and optimize operations with ease."
+      footer={
+        <>
+          Don't have an account yet?{" "}
+          <button style={authLinkStyle} onClick={() => navigate("/signup")}>
+            Sign up
+          </button>
+        </>
+      }
+    >
+      <Form
+        form={form}
+        name="signin"
+        layout="vertical"
+        size="large"
+        requiredMark={false}
+        initialValues={{ remember: true }}
+        onFinish={onFinish}
+        onFinishFailed={onFinishFailed}
+      >
+        <Form.Item<FieldType>
+          label="Username"
+          name="username"
+          rules={[{ required: true, message: "Please input your username!" }]}
+        >
+          <Input placeholder="Enter your username" autoComplete="username" />
+        </Form.Item>
 
-        <StyledForm
-          form={form}
-          name="signin"
-          layout="vertical"
-          initialValues={{ remember: true }}
-          onFinish={onFinish}
-          onFinishFailed={onFinishFailed}
+        <Form.Item<FieldType>
+          label="Password"
+          name="password"
+          rules={[{ required: true, message: "Please input your password!" }]}
+          style={{ marginBottom: 12 }}
+        >
+          <Input.Password
+            placeholder="Enter your password"
+            autoComplete="current-password"
+          />
+        </Form.Item>
+
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            marginBottom: 20,
+            fontSize: 14,
+          }}
         >
           <Form.Item<FieldType>
-            label="Username"
-            name="username"
-            rules={[{ required: true, message: "Please input your username!" }]}
+            name="remember"
+            valuePropName="checked"
+            style={{ margin: 0 }}
           >
-            <Input placeholder="Enter your username" />
-          </Form.Item>
-
-          <Form.Item<FieldType>
-            label="Password"
-            name="password"
-            rules={[{ required: true, message: "Please input your password!" }]}
-          >
-            <Input.Password placeholder="Enter your password" />
-          </Form.Item>
-          <PasswordReset>Forgot password?</PasswordReset>
-
-          <Form.Item<FieldType> name="remember" valuePropName="checked">
             <Checkbox>Remember me</Checkbox>
           </Form.Item>
+          <button
+            type="button"
+            style={authLinkStyle}
+            onClick={() =>
+              message.info("Please contact an administrator to reset your password.")
+            }
+          >
+            Forgot password?
+          </button>
+        </div>
 
-          <Form.Item>
-            <Button type="primary" htmlType="submit" loading={loading}>
-              Sign In
-            </Button>
-          </Form.Item>
-        </StyledForm>
-        <BottomText>
-          Don't have an account yet?{" "}
-          <SignUP onClick={navigateToSignUp}>Sign up</SignUP>
-        </BottomText>
-      </FormContainer>
-    </PageWrapper>
+        <Form.Item style={{ marginBottom: 16 }}>
+          <Button type="primary" htmlType="submit" loading={loading} block>
+            Sign In
+          </Button>
+        </Form.Item>
+      </Form>
+    </AuthShell>
   );
 };
 

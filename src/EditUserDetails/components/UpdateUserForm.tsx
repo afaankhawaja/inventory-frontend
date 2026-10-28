@@ -11,14 +11,19 @@ import {
   type FormProps,
   Avatar,
   type UploadFile,
-  Upload, message } from "antd";
+  Upload,
+  Card,
+  Skeleton,
+  message,
+} from "antd";
 import { useEffect, useState } from "react";
 import styled from "styled-components";
 import { UPDATE_USER } from "../graphql/mutations";
-import { RollbackOutlined, UploadOutlined } from "@ant-design/icons";
+import { UploadOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
 import { currentUserDataAtom } from "../../store/atoms";
 import { useAtom } from "jotai";
+import { motion } from "framer-motion";
 
 type FieldType = {
   username?: string;
@@ -34,46 +39,50 @@ type FieldType = {
   is_active?: boolean;
 };
 
-const StyledForm = styled(Form<FieldType>)`
-  width: 60%;
-  overflow-y:auto;
-  
-  padding:10px 20px;
-  border-radius:20px;
-
-  .ant-form-item-label > label {
-    font-weight: 500;
-  }
-
-  &::-webkit-scrollbar{
-  display:none;}
-  .ant-btn-primary {
-    width: 100%;
-    border: none;
-    box-shadow: none;
-    transition: all 0.3s ease;
-  }
-
-  }
-`;
-const Wrapper = styled.section`
+const Wrapper = styled(motion.section)`
   width: 100%;
-  height: 100%;
-  display: flex;
-  margin: auto auto;
-  justify-content: start;
-  justify-items: start;
-  gap: 50px 50px;
-`;
-const UserSection = styled.div`
+  max-width: 720px;
+  margin: 0 auto;
   display: flex;
   flex-direction: column;
-  text-align: center;
-  gap: 10px 30px;
+  gap: 20px;
 `;
+
+const UserSection = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 16px;
+`;
+
 const UserNameTitle = styled.div`
-  font-size: 20px;
-  font-weight: bold;
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+`;
+
+const Sub = styled.div`
+  font-size: 13px;
+  opacity: 0.6;
+`;
+
+const SectionLabel = styled.div`
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  opacity: 0.6;
+  margin: 0 0 8px 4px;
+`;
+
+const ActionBar = styled.div`
+  position: sticky;
+  bottom: 0;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 12px 0;
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
 `;
 
 interface PropsType {
@@ -120,7 +129,12 @@ const UpdateUser = ({ selectedUserId }: PropsType) => {
     }
   }, [user, form]);
 
-  if (loading) return <p>Loading user data...</p>;
+  if (loading)
+    return (
+      <Wrapper>
+        <Skeleton active avatar paragraph={{ rows: 8 }} />
+      </Wrapper>
+    );
   if (error) return <p>Error: {error.message}</p>;
   if (!data || !data.user) return <p>No user found</p>;
   const onFinish: FormProps<FieldType>["onFinish"] = async (values) => {
@@ -147,7 +161,7 @@ const UpdateUser = ({ selectedUserId }: PropsType) => {
     })
       .then(() => {
         form.resetFields();
-        message.success("updated user sucessfully");
+        message.success("Profile updated");
         navigate("/");
       })
       .catch((error) => {
@@ -162,117 +176,113 @@ const UpdateUser = ({ selectedUserId }: PropsType) => {
   };
 
   return (
-    <Wrapper>
+    <Wrapper
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.25 }}
+    >
       <UserSection>
-        <Avatar size={74} src={base64Url} />
-        <UserNameTitle>{username} </UserNameTitle>
+        <Avatar size={72} src={base64Url} />
+        <div>
+          <UserNameTitle>{username}</UserNameTitle>
+          <Sub>{user.email}</Sub>
+        </div>
       </UserSection>
-      <StyledForm
+
+      <Form
         form={form}
         name="updateUser"
         layout="vertical"
-        initialValues={{ remember: true }}
+        size="large"
+        requiredMark={false}
         onFinish={onFinish}
         onFinishFailed={onFinishFailed}
       >
-        <Form.Item<FieldType>
-          label="Username"
-          name="username"
-          rules={[{ required: true, message: "Please input your username!" }]}
-        >
-          <Input placeholder="Enter your username" />
-        </Form.Item>
-
-        <Row gutter={12}>
-          <Col span={12}>
-            <Form.Item<FieldType> label="First Name" name="firstName">
-              <Input placeholder="first name" />
-            </Form.Item>
-          </Col>
-
-          <Col span={12}>
-            <Form.Item<FieldType> label="Last Name" name="lastName">
-              <Input placeholder="last name" />
-            </Form.Item>
-          </Col>
-        </Row>
-        <Row gutter={12}>
-          <Col span={12}>
-            <Form.Item<FieldType> label="Phone" name="phone">
-              <Input placeholder="your identity" />
-            </Form.Item>
-          </Col>
-          <Col span={8}>
-            <Form.Item<FieldType>
-              label="Age"
-              name="age"
-              rules={[{ required: true }]}
-            >
-              <InputNumber placeholder="22 e.g." />
-            </Form.Item>
-          </Col>
-        </Row>
-
-        <Row gutter={50}>
-          <Col span={12}>
-            <Form.Item<FieldType>
-              label="Email"
-              name="email"
-              rules={[
-                { required: true, message: " enter your email!" },
-                {
-                  type: "email",
-                  message: "The input is not a valid email!",
-                },
-              ]}
-            >
-              <Input placeholder="jeff@mail.com" />
-            </Form.Item>
-          </Col>
-          <Col span={8}>
-            <Form.Item<FieldType> label="Active" name="is_active">
-              <Switch />
-            </Form.Item>
-          </Col>
-        </Row>
-        <Row gutter={50}>
-          <Col span={12}>
-            <Form.Item<FieldType> label="Cnic" name="cnic">
-              <Input />
-            </Form.Item>
-          </Col>
-        </Row>
-        <Form.Item<FieldType> label="Update Picture" name="image">
-          <Upload
-            accept="image/*"
-            beforeUpload={() => false}
-            fileList={fileList}
-            onChange={({ fileList }) => setFileList(fileList)}
+        <SectionLabel>Account</SectionLabel>
+        <Card styles={{ body: { paddingBottom: 4 } }} style={{ marginBottom: 20 }}>
+          <Form.Item<FieldType>
+            label="Username"
+            name="username"
+            rules={[{ required: true, message: "Please input your username!" }]}
           >
-            <Button icon={<UploadOutlined />}>Select Image</Button>
-          </Upload>
-        </Form.Item>
-        <Row style={{ justifyContent: "end" }} gutter={12}>
-          <Col>
-            <Form.Item>
-              <Button variant="outlined" htmlType="submit">
-                {!updateLoading ? "save" : "saving..."}
-              </Button>
-            </Form.Item>
-          </Col>
-          <Col>
-            <Button
-              color="pink"
-              variant="outlined"
-              onClick={() => {
-                navigate("/");
-              }}
+            <Input placeholder="Enter your username" />
+          </Form.Item>
+          <Form.Item<FieldType>
+            label="Email"
+            name="email"
+            rules={[
+              { required: true, message: "Enter your email!" },
+              { type: "email", message: "The input is not a valid email!" },
+            ]}
+          >
+            <Input placeholder="jeff@mail.com" />
+          </Form.Item>
+          <Form.Item<FieldType>
+            label="Active"
+            name="is_active"
+            valuePropName="checked"
+          >
+            <Switch />
+          </Form.Item>
+        </Card>
+
+        <SectionLabel>Personal</SectionLabel>
+        <Card styles={{ body: { paddingBottom: 4 } }} style={{ marginBottom: 20 }}>
+          <Row gutter={12}>
+            <Col xs={24} sm={12}>
+              <Form.Item<FieldType> label="First name" name="firstName">
+                <Input placeholder="First name" />
+              </Form.Item>
+            </Col>
+            <Col xs={24} sm={12}>
+              <Form.Item<FieldType> label="Last name" name="lastName">
+                <Input placeholder="Last name" />
+              </Form.Item>
+            </Col>
+          </Row>
+          <Row gutter={12}>
+            <Col xs={24} sm={8}>
+              <Form.Item<FieldType>
+                label="Age"
+                name="age"
+                rules={[{ required: true, message: "Required" }]}
+              >
+                <InputNumber placeholder="22" style={{ width: "100%" }} />
+              </Form.Item>
+            </Col>
+            <Col xs={24} sm={16}>
+              <Form.Item<FieldType> label="Phone" name="phone">
+                <Input placeholder="Phone number" />
+              </Form.Item>
+            </Col>
+          </Row>
+          <Form.Item<FieldType> label="CNIC" name="cnic">
+            <Input placeholder="Identity number" />
+          </Form.Item>
+        </Card>
+
+        <SectionLabel>Photo</SectionLabel>
+        <Card style={{ marginBottom: 8 }}>
+          <Form.Item<FieldType> name="image" style={{ marginBottom: 0 }}>
+            <Upload
+              accept="image/*"
+              beforeUpload={() => false}
+              fileList={fileList}
+              maxCount={1}
+              onChange={({ fileList }) => setFileList(fileList)}
             >
-              back <RollbackOutlined />
-            </Button>
-          </Col>
-        </Row>
-      </StyledForm>
+              <Button icon={<UploadOutlined />}>Select image</Button>
+            </Upload>
+          </Form.Item>
+        </Card>
+
+        <ActionBar>
+          <Button onClick={() => navigate("/")}>Cancel</Button>
+          <Button type="primary" htmlType="submit" loading={updateLoading}>
+            Save changes
+          </Button>
+        </ActionBar>
+      </Form>
     </Wrapper>
   );
 };
