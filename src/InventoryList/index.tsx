@@ -18,17 +18,13 @@ const UsersContainer = styled.section`
   height: 100%;
   display: flex;
   flex-direction: column;
+  gap: 15px;
 `;
-const HeaderRow = styled.div`
+const ActionRow = styled.div`
   width: 100%;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  margin-bottom: 16px;
-`;
-const Title = styled.h1`
-  font-size: 28px;
-  margin: 0;
+  justify-content: flex-end;
 `;
 
 const AddNewItem = styled(Button)`
@@ -73,7 +69,6 @@ const Index = () => {
     },
   });
 
-  // Fetch full list for top-level KPI summary cards
   const { data: allStatsData, loading: statsLoading } = useQuery(
     FETCH_ALL_ITEMS,
     {
@@ -165,14 +160,13 @@ const Index = () => {
   };
   return (
     <UsersContainer>
-      <HeaderRow>
-        <Title>Items</Title>
+      <PageStatsCards stats={stats} loading={statsLoading} />
+
+      <ActionRow>
         <AddNewItem type="primary" onClick={() => setOpen(true)}>
           Add new Item <PlusOutlined />
         </AddNewItem>
-      </HeaderRow>
-
-      <PageStatsCards stats={stats} loading={statsLoading} />
+      </ActionRow>
 
       {error ? (
         <>{error.message}</>

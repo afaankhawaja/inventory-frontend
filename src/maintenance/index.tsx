@@ -9,14 +9,11 @@ import { palette } from "../theme/tokens";
 const Section = styled.section`
   display: flex;
   flex-direction: column;
+  gap: 15px;
   height: 100%;
   width: 100%;
 `;
 
-const Heading = styled.h1`
-  font-size: 28px;
-  margin: 0 0 16px;
-`;
 const TableWrapper = styled.div`
   flex: 1;
   overflow: auto;
@@ -89,8 +86,6 @@ const Index = () => {
 
   return (
     <Section>
-      <Heading>Maintenance Schedules</Heading>
-
       <PageStatsCards stats={stats} loading={loading} />
 
       <TableWrapper>

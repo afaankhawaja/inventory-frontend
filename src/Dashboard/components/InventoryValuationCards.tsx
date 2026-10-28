@@ -21,7 +21,7 @@ interface ItemLite {
 const Grid = styled.section`
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 16px;
+  gap: 15px;
 `;
 
 const Label = styled.div`

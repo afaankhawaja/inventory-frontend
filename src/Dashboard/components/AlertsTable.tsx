@@ -116,7 +116,7 @@ const AlertsTable: React.FC = () => {
   const criticalCount = alerts.filter((a) => levelOf(a) === "critical").length;
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+    <div style={{ display: "flex", flexDirection: "column", gap: 15 }}>
       <AnimatePresence>
         {!dismissed && criticalCount > 0 && (
           <Banner

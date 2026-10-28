@@ -68,8 +68,26 @@ h3 {
   display: none !important;
 }
 .ant-table-wrapper .ant-table-tbody > tr > td {
-  padding-block: 14px;
+  padding-block: 12px;
   transition: background-color 150ms ease;
+  vertical-align: top;
+}
+.ant-table-wrapper .ant-table-tbody > tr.ant-table-row {
+  cursor: pointer;
+}
+/* Default collapsed row: strictly 1 line with "..." */
+.ant-table-wrapper .ant-table-tbody > tr.row-inline-collapsed > td .expandable-cell,
+.ant-table-wrapper .ant-table-tbody > tr.row-inline-collapsed > td {
+  white-space: nowrap;
+}
+/* Clicked / expanded row: wrap text onto multiple lines in-place within the exact same column width */
+.ant-table-wrapper .ant-table-tbody > tr.row-inline-expanded > td,
+.ant-table-wrapper .ant-table-tbody > tr.row-inline-expanded > td span,
+.ant-table-wrapper .ant-table-tbody > tr.row-inline-expanded > td .ant-table-cell-ellipsis {
+  white-space: normal !important;
+  overflow: visible !important;
+  text-overflow: clip !important;
+  word-break: break-word;
 }
 .ant-table-wrapper .ant-table-tbody > tr:last-child > td {
   border-bottom: none;

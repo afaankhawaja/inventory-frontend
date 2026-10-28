@@ -6,8 +6,7 @@ import styled from "styled-components";
 const Grid = styled.section`
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
-  gap: 16px;
-  margin-bottom: 20px;
+  gap: 15px;
 `;
 
 const Label = styled.div`

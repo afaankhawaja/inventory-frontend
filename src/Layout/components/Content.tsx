@@ -11,10 +11,11 @@ const ContentComponent: React.FC = () => {
   return (
     <Content
       style={{
-        margin: "0 auto",
-        padding: "24px",
+        margin: 0,
+        padding: "15px",
         width: "100%",
-        maxWidth: 1400,
+        flex: 1,
+        minWidth: 0,
         boxSizing: "border-box",
         overflow: "auto",
         height: "calc(100vh - 64px)",
@@ -25,7 +26,7 @@ const ContentComponent: React.FC = () => {
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.22, ease: [0.25, 0.1, 0.25, 1] }}
-        style={{ minHeight: "100%" }}
+        style={{ minHeight: "100%", width: "100%" }}
       >
         <Outlet />
       </motion.div>

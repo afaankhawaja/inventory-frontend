@@ -15,7 +15,7 @@ import {
   theme,
   type MenuProps,
 } from "antd";
-import { useNavigate } from "react-router";
+import { useLocation, useNavigate } from "react-router";
 import styled from "styled-components";
 import { useAtom } from "jotai";
 import { selectedTheme } from "../.././store/themeAtom";
@@ -28,14 +28,37 @@ const UserWrapper = styled.div`
   flex-direction: column;
   gap: 2px;
 `;
+const LeftWrapper = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 12px;
+`;
+const ScreenTitle = styled.h1`
+  margin: 0;
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+`;
 const Wrapper = styled.div`
   display: flex;
-  gap: 0px 16px;
+  gap: 0px 15px;
   justify-content: center;
   align-items: center;
 `;
 const UserName = styled.strong``;
 const UserEmail = styled.div``;
+
+const getPageTitle = (pathname: string): string => {
+  if (pathname === "/") return "Overview";
+  if (pathname.startsWith("/inventory-list")) return "Inventory List";
+  if (pathname.startsWith("/purchase-history")) return "Purchase History";
+  if (pathname.startsWith("/maintenance")) return "Maintenance Schedules";
+  if (pathname.startsWith("/users")) return "Users";
+  if (pathname.startsWith("/edit-user-details")) return "Edit Profile";
+  if (pathname.startsWith("/reports")) return "Reports";
+  return "Dashboard";
+};
 
 interface HeaderProps {
   collapsed: boolean;
@@ -57,12 +80,14 @@ const HeaderComponent: React.FC<HeaderProps> = ({
   logoutUser,
 }) => {
   const {
-    token: { colorBorderSecondary },
+    token: { colorBorderSecondary, colorText },
   } = theme.useToken();
   const navigate = useNavigate();
+  const { pathname } = useLocation();
   const [currentTheme, setCurrentTheme] = useAtom(selectedTheme);
 
   const defaultIcon = "../../../assets/images/user.png";
+  const pageTitle = getPageTitle(pathname);
 
   const items: MenuProps["items"] = [
     {
@@ -103,7 +128,7 @@ const HeaderComponent: React.FC<HeaderProps> = ({
         top: 0,
         zIndex: 10,
         height: 64,
-        padding: "0 16px",
+        padding: "0 15px",
         background: currentTheme.isDark
           ? "rgba(28, 28, 30, 0.8)"
           : "rgba(245, 245, 247, 0.8)",
@@ -115,12 +140,15 @@ const HeaderComponent: React.FC<HeaderProps> = ({
         alignItems: "center",
       }}
     >
-      <Button
-        type="text"
-        icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
-        onClick={() => setCollapsed(!collapsed)}
-        style={{ fontSize: 16, width: 40, height: 40 }}
-      />
+      <LeftWrapper>
+        <Button
+          type="text"
+          icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
+          onClick={() => setCollapsed(!collapsed)}
+          style={{ fontSize: 16, width: 40, height: 40 }}
+        />
+        <ScreenTitle style={{ color: colorText }}>{pageTitle}</ScreenTitle>
+      </LeftWrapper>
       <Wrapper>
         <Segmented
           size="middle"

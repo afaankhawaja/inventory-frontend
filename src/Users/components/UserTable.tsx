@@ -1,31 +1,48 @@
 import { Space, Table, Tag } from "antd";
+import type { ColumnsType } from "antd/es/table";
 import styled from "styled-components";
 import { DeleteOutlined, EditOutlined } from "@ant-design/icons";
 import { useAtom } from "jotai";
 import { currentUserDataAtom } from "../../store/atoms";
+import {
+  SingleLineCell,
+  useInlineRowExpand,
+} from "../../components/ExpandedRowDetail";
 
 const EditButton = styled.div`
-  display: flex;
-  gap: 0px 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
   color: darkgreen;
   cursor: pointer;
+  white-space: nowrap;
   &:hover {
     color: #32cd32;
   }
 `;
 const DeleteButton = styled.div`
-  display: flex;
-  gap: 0px 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
   color: red;
   cursor: pointer;
+  white-space: nowrap;
   &:hover {
     color: #8b0000;
   }
 `;
 
+interface Role {
+  roleId: string;
+  name: string;
+  description: string | null;
+}
+
 interface User {
   userId: string;
   key: string;
+  first_name?: string;
+  last_name?: string;
   username: string;
   phone: string;
   email: string;
@@ -35,11 +52,6 @@ interface User {
   role: Role | null;
 }
 
-interface Role {
-  roleId: string;
-  name: string;
-  description: string | null;
-}
 interface paginationProps {
   current: number;
   pageSize: number;
@@ -54,15 +66,11 @@ interface UserTableProps {
   onDeleteUser: (userID: string) => void;
 }
 
-interface CreatedAtType {
-  key: string;
-  created_at: string;
-}
-
-interface UserNameType {
-  key: string;
-  username: string;
-}
+const formatDate = (dateStr?: string) => {
+  if (!dateStr) return "—";
+  const d = new Date(dateStr);
+  return isNaN(d.getTime()) ? dateStr : d.toLocaleDateString();
+};
 
 const UserTable = ({
   dataSource,
@@ -71,110 +79,141 @@ const UserTable = ({
   pagination,
 }: UserTableProps) => {
   const [userData] = useAtom(currentUserDataAtom);
-  const columns = [
+  const { getRowProps, getRowClassName } = useInlineRowExpand<User>(
+    (r) => r.userId,
+  );
+
+  const columns: ColumnsType<User> = [
     {
       title: "First Name",
       dataIndex: "first_name",
       key: "first_name",
+      width: 120,
+      render: (text: string) => <SingleLineCell>{text || "—"}</SingleLineCell>,
     },
     {
       title: "Last Name",
       dataIndex: "last_name",
       key: "last_name",
+      width: 120,
+      render: (text: string) => <SingleLineCell>{text || "—"}</SingleLineCell>,
     },
     {
       title: "Username",
       dataIndex: "username",
       key: "username",
-      sorter: (a: UserNameType, b: UserNameType) =>
-        a.username.localeCompare(b.username),
-    },
-    {
-      title: "Phone",
-      dataIndex: "phone",
-      key: "phone",
+      width: 155,
+      sorter: (a, b) => (a.username || "").localeCompare(b.username || ""),
+      render: (text: string) => (
+        <SingleLineCell style={{ fontWeight: 500 }}>
+          {text || "—"}
+        </SingleLineCell>
+      ),
     },
     {
       title: "Email",
       dataIndex: "email",
       key: "email",
+      width: 215,
+      render: (text: string) => <SingleLineCell>{text || "—"}</SingleLineCell>,
     },
     {
-      title: "Status",
-      dataIndex: "is_active",
-      key: "is_active",
-      render: (value: null | true) => {
-        if (value === true) {
-          return <Tag color="green">Active</Tag>;
-        } else if (value === null) {
-          return <Tag color="red">Inactive</Tag>;
-        }
-      },
-    },
-    {
-      title: "Age",
-      dataIndex: "age",
-      key: "age",
-      width: 100,
+      title: "Phone",
+      dataIndex: "phone",
+      key: "phone",
+      width: 145,
+      render: (text: string) => <SingleLineCell>{text || "—"}</SingleLineCell>,
     },
     {
       title: "Role",
       dataIndex: "role",
       key: "role",
+      width: 135,
       render: (role: Role | null) => {
-        if (role === null) return;
-        return <Tag color="yellow">{role.name}</Tag>;
+        if (!role?.name) return "—";
+        return (
+          <Tag color="gold" style={{ margin: 0 }}>
+            {role.name}
+          </Tag>
+        );
       },
     },
     {
-      title: "Created At",
+      title: "Status",
+      dataIndex: "is_active",
+      key: "is_active",
+      width: 95,
+      render: (value: boolean | null) =>
+        value === true ? (
+          <Tag color="green" style={{ margin: 0 }}>
+            Active
+          </Tag>
+        ) : (
+          <Tag color="red" style={{ margin: 0 }}>
+            Inactive
+          </Tag>
+        ),
+    },
+    {
+      title: "Age",
+      dataIndex: "age",
+      key: "age",
+      width: 70,
+      align: "center",
+      render: (val: number) => <SingleLineCell>{val ?? "—"}</SingleLineCell>,
+    },
+    {
+      title: "Created",
       dataIndex: "created_at",
       key: "created_at",
-      sorter: (a: CreatedAtType, b: CreatedAtType) =>
+      width: 110,
+      sorter: (a, b) =>
         new Date(a.created_at).getTime() - new Date(b.created_at).getTime(),
+      render: (val: string) => <SingleLineCell>{formatDate(val)}</SingleLineCell>,
     },
     {
       title: "Action",
       key: "action",
+      width: userData?.role === "super-admin" ? 145 : 85,
       render: (record: User) =>
         userData?.role === "super-admin" ? (
-          <Space size="middle">
+          <Space size="middle" onClick={(e) => e.stopPropagation()}>
             <EditButton onClick={() => onEditUser(record.userId)}>
-              <>Edit</> <EditOutlined />
+              <span>Edit</span> <EditOutlined />
             </EditButton>
             <DeleteButton onClick={() => onDeleteUser(record.userId)}>
-              <>Delete </>
-              <DeleteOutlined />
+              <span>Delete</span> <DeleteOutlined />
             </DeleteButton>
           </Space>
         ) : userData?.role === "admin" ? (
-          <Space size="middle">
+          <Space size="middle" onClick={(e) => e.stopPropagation()}>
             <EditButton onClick={() => onEditUser(record.userId)}>
-              <>Edit</> <EditOutlined />
+              <span>Edit</span> <EditOutlined />
             </EditButton>
           </Space>
-        ) : (
-          <></>
-        ),
+        ) : null,
     },
   ];
 
   const getVisibleColumns = (role: string | null) => {
     if (role === "admin" || role === "super-admin") {
       return columns;
-    } else {
-      return columns.filter((column) => column.key !== "action");
     }
+    return columns.filter((column) => column.key !== "action");
   };
   const visibleColumns = getVisibleColumns(userData?.role);
 
   return (
-    <Table
+    <Table<User>
+      rowKey="userId"
+      tableLayout="fixed"
       pagination={pagination}
       dataSource={dataSource}
       columns={visibleColumns}
-      sticky={true}
-      scroll={{ x: "max-content", y: "40vh" }}
+      onRow={getRowProps}
+      rowClassName={getRowClassName}
+      sticky
+      scroll={{ x: "max-content", y: "calc(100vh - 340px)" }}
     />
   );
 };

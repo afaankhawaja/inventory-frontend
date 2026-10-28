@@ -13,18 +13,13 @@ const Container = styled.section`
   width: 100%;
   display: flex;
   flex-direction: column;
-  gap: 16px;
-`;
-
-const Title = styled.h1`
-  margin: 0 0 4px;
-  font-size: 28px;
+  gap: 15px;
 `;
 
 const TwoCol = styled.div`
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
-  gap: 16px;
+  gap: 15px;
 `;
 
 const Index = () => {
@@ -52,7 +47,6 @@ const Index = () => {
 
   return (
     <Container>
-      <Title>Overview</Title>
       <AlertsTable />
       <InventoryValuationCards />
 

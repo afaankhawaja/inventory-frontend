@@ -19,17 +19,13 @@ const UsersContainer = styled.section`
   height: 100%;
   display: flex;
   flex-direction: column;
+  gap: 15px;
 `;
-const HeaderRow = styled.div`
+const ActionRow = styled.div`
   width: 100%;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  margin-bottom: 16px;
-`;
-const Title = styled.h1`
-  font-size: 28px;
-  margin: 0;
+  justify-content: flex-end;
 `;
 
 const AddNewUser = styled(Button)`
@@ -144,16 +140,15 @@ const Index = () => {
   };
   return (
     <UsersContainer>
-      <HeaderRow>
-        <Title>Users</Title>
-        {userRole && (userRole === "admin" || userRole === "super-admin") && (
+      <PageStatsCards stats={stats} loading={statsLoading} />
+
+      {userRole && (userRole === "admin" || userRole === "super-admin") && (
+        <ActionRow>
           <AddNewUser type="primary" onClick={() => setOpen(true)}>
             Add new user <UserAddOutlined />
           </AddNewUser>
-        )}
-      </HeaderRow>
-
-      <PageStatsCards stats={stats} loading={statsLoading} />
+        </ActionRow>
+      )}
 
       {error ? (
         <>{error.message}</>
