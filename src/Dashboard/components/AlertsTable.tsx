@@ -91,12 +91,9 @@ const Meta = styled.div`
   opacity: 0.8;
 `;
 const Pill = styled.span<{ $color: string }>`
-  padding: 1px 10px;
-  border-radius: 999px;
   font-size: 12px;
   font-weight: 600;
   color: ${(p) => p.$color};
-  background: ${(p) => p.$color}1f;
 `;
 
 const AlertsTable: React.FC = () => {

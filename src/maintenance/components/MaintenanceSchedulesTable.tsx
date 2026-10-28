@@ -1,4 +1,4 @@
-import { Table, Tag, Alert, Select, message } from "antd";
+import { Table, Tag, Alert, Select, Card, Skeleton, message } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import { useMutation, useQuery } from "@apollo/client";
 import { GET_MAINTENANCE_SCHEDULES } from "../graphql/queries";
@@ -6,10 +6,8 @@ import { UPDATE_STATUS } from "../graphql/mutations";
 import { useState } from "react";
 import { useAtom } from "jotai";
 import { currentUserDataAtom } from "../../store/atoms";
-import {
-  SingleLineCell,
-  useInlineRowExpand,
-} from "../../components/ExpandedRowDetail";
+import { SingleLineCell } from "../../components/ExpandedRowDetail";
+import DetailDrawer, { TitleLink } from "../../components/DetailDrawer";
 
 interface RecordType {
   maintenance_schedule_ID: string;
@@ -44,9 +42,7 @@ const MaintenanceSchedulesTable = () => {
     current: 1,
     pageSize: 10,
   });
-  const { getRowProps, getRowClassName } = useInlineRowExpand<RecordType>(
-    (r) => r.maintenance_schedule_ID,
-  );
+  const [detail, setDetail] = useState<RecordType | null>(null);
   const [user] = useAtom(currentUserDataAtom);
   const userID = user?.userID;
   const { loading, error, data, refetch } = useQuery(
@@ -81,27 +77,24 @@ const MaintenanceSchedulesTable = () => {
       title: "Item Name",
       dataIndex: ["item", "name"],
       key: "item_name",
-      width: 240,
-      render: (text: string) => (
-        <SingleLineCell style={{ fontWeight: 500 }}>
-          {text || "—"}
-        </SingleLineCell>
+      render: (text: string, record: RecordType) => (
+        <TitleLink onClick={() => setDetail(record)} title="View details">
+          {text || "-"}
+        </TitleLink>
       ),
     },
     {
       title: "Type",
       dataIndex: "maintenance_type",
       key: "maintenance_type",
-      width: 130,
+      width: 125,
       render: (text: string) => (
         <Tag
           color={text === "CORRECTIVE" ? "volcano" : "geekblue"}
           style={{
             fontSize: "12px",
             fontWeight: 600,
-            borderRadius: 999,
-            padding: "2px 10px",
-            margin: 0,
+            margin: 0, padding: 0, background: "transparent", border: "none",
           }}
         >
           {text}
@@ -112,7 +105,7 @@ const MaintenanceSchedulesTable = () => {
       title: "Status",
       dataIndex: "status",
       key: "status",
-      width: 155,
+      width: 165,
       render: (status: string, record: RecordType) => (
         <div onClick={(e) => e.stopPropagation()}>
           <Select
@@ -136,17 +129,10 @@ const MaintenanceSchedulesTable = () => {
       ),
     },
     {
-      title: "Notes",
-      dataIndex: "notes",
-      key: "notes",
-      width: 260,
-      render: (text: string) => <SingleLineCell>{text || "—"}</SingleLineCell>,
-    },
-    {
       title: "Assigned To",
       dataIndex: ["user", "username"],
       key: "username",
-      width: 145,
+      width: 130,
       render: (text: string) => (
         <SingleLineCell>{text || "system"}</SingleLineCell>
       ),
@@ -158,18 +144,29 @@ const MaintenanceSchedulesTable = () => {
       width: 110,
       render: (date: string) => <SingleLineCell>{formatDate(date)}</SingleLineCell>,
     },
-    {
-      title: "Updated",
-      dataIndex: "updatedAt",
-      key: "updatedAt",
-      width: 110,
-      render: (date: string) => <SingleLineCell>{formatDate(date)}</SingleLineCell>,
-    },
   ];
 
   return (
     <>
-      {loading && <>loading...</>}
+      <DetailDrawer
+        open={!!detail}
+        title={detail?.item?.name}
+        onClose={() => setDetail(null)}
+        fields={[
+          { label: "Type", value: detail?.maintenance_type },
+          { label: "Status", value: detail?.status },
+          { label: "Item Condition", value: detail?.item?.condition || "-" },
+          { label: "Assigned To", value: detail?.user?.username || "system" },
+          { label: "Notes", value: detail?.notes || "-" },
+          { label: "Created", value: formatDate(detail?.createdAt) },
+          { label: "Updated", value: formatDate(detail?.updatedAt) },
+        ]}
+      />
+      {loading && (
+        <Card>
+          <Skeleton active paragraph={{ rows: 6 }} />
+        </Card>
+      )}
       {error && <>{error.message}</>}
       {!loading && !error && schedules.length === 0 && (
         <Alert message="No maintenance schedules found!" type="info" showIcon />
@@ -181,10 +178,9 @@ const MaintenanceSchedulesTable = () => {
           loading={loading || mutLoading}
           dataSource={schedules}
           columns={columns}
-          onRow={getRowProps}
-          rowClassName={getRowClassName}
+          rowClassName={() => "row-static"}
           sticky
-          scroll={{ x: "max-content", y: "calc(100vh - 310px)" }}
+          scroll={{ x: 850, y: "calc(100vh - 310px)" }}
           pagination={{
             current: pagination.current,
             pageSize: pagination.pageSize,

@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Table, Tag, Space } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import { currentUserDataAtom } from "../../store/atoms";
@@ -9,10 +10,8 @@ import {
   PlusCircleOutlined,
 } from "@ant-design/icons";
 import { LocationCell } from "./LocationCell";
-import {
-  SingleLineCell,
-  useInlineRowExpand,
-} from "../../components/ExpandedRowDetail";
+import { SingleLineCell } from "../../components/ExpandedRowDetail";
+import DetailDrawer, { TitleLink } from "../../components/DetailDrawer";
 
 const EditButton = styled.div`
   display: inline-flex;
@@ -116,34 +115,31 @@ const ItemsTable = ({
   pagination,
 }: ItemsTableProps) => {
   const [userData] = useAtom(currentUserDataAtom);
-  const { getRowProps, getRowClassName } = useInlineRowExpand<Item>(
-    (r) => r.itemId,
-  );
+  const [detail, setDetail] = useState<Item | null>(null);
 
   const columns: ColumnsType<Item> = [
     {
       title: "Name",
       dataIndex: "name",
       key: "name",
-      width: 240,
-      render: (text: string) => (
-        <SingleLineCell style={{ fontWeight: 500 }}>
-          {text || "—"}
-        </SingleLineCell>
+      render: (text: string, record: Item) => (
+        <TitleLink onClick={() => setDetail(record)} title="View details">
+          {text || "-"}
+        </TitleLink>
       ),
     },
     {
       title: "Brand",
       dataIndex: "brand",
       key: "brand",
-      width: 140,
-      render: (text: string) => <SingleLineCell>{text || "—"}</SingleLineCell>,
+      width: 130,
+      render: (text: string) => <SingleLineCell>{text || "-"}</SingleLineCell>,
     },
     {
       title: "Category",
       dataIndex: "category",
       key: "category",
-      width: 170,
+      width: 150,
       render: (val: Category) => (
         <SingleLineCell>{val?.name || "—"}</SingleLineCell>
       ),
@@ -152,7 +148,7 @@ const ItemsTable = ({
       title: "Price",
       dataIndex: "price",
       key: "price",
-      width: 120,
+      width: 130,
       align: "right",
       render: (val: number) => (
         <SingleLineCell style={{ fontWeight: 600 }}>
@@ -180,35 +176,9 @@ const ItemsTable = ({
       ),
     },
     {
-      title: "Location",
-      key: "location",
-      width: 220,
-      render: (record: Item) => {
-        const leafId = record?.location?.locationId;
-        return leafId ? <LocationCell locationId={leafId} /> : "—";
-      },
-    },
-    {
-      title: "Expiry Date",
-      dataIndex: "expiry_date",
-      key: "expiry_date",
-      width: 115,
-      render: (val: string) => (
-        <SingleLineCell>{formatDate(val)}</SingleLineCell>
-      ),
-    },
-    {
-      title: "Mfg Date",
-      dataIndex: "manufacturing_date",
-      key: "manufacturing_date",
-      width: 115,
-      render: (val: string) => (
-        <SingleLineCell>{formatDate(val)}</SingleLineCell>
-      ),
-    },
-    {
       title: "Action",
       key: "action",
+      fixed: "right",
       width: userData?.role === "super-admin" ? 210 : 90,
       render: (record: Item) =>
         userData?.role === "super-admin" ? (
@@ -243,17 +213,36 @@ const ItemsTable = ({
   const visibleColumns = getVisibleColumns(userData?.role);
 
   return (
+    <>
     <Table<Item>
       rowKey="itemId"
       tableLayout="fixed"
       columns={visibleColumns}
       dataSource={dataSource}
       pagination={pagination}
-      onRow={getRowProps}
-      rowClassName={getRowClassName}
+      rowClassName={() => "row-static"}
       sticky
-      scroll={{ x: "max-content", y: "calc(100vh - 340px)" }}
+      scroll={{ x: 920, y: "calc(100vh - 340px)" }}
     />
+    <DetailDrawer
+      open={!!detail}
+      title={detail?.name}
+      onClose={() => setDetail(null)}
+      fields={[
+        { label: "Brand", value: detail?.brand || "-" },
+        { label: "Category", value: detail?.category?.name || "-" },
+        { label: "Price", value: formatCurrency(detail?.price) },
+        { label: "Stock", value: detail?.quantity_in_stock ?? "-" },
+        { label: "Reorder Threshold", value: detail?.reorder_threshold ?? "-" },
+        { label: "Condition", value: detail?.condition ? <Tag color={conditionColor(detail.condition)} style={{ margin: 0 }}>{detail.condition}</Tag> : "-" },
+        { label: "High Value", value: detail?.is_high_value ? "Yes" : "No" },
+        { label: "Barcode", value: detail?.barcode || "-" },
+        { label: "Location", value: detail?.location?.locationId ? <LocationCell locationId={detail.location.locationId} wrap /> : "-" },
+        { label: "Manufactured", value: formatDate(detail?.manufacturing_date) },
+        { label: "Expiry", value: formatDate(detail?.expiry_date) },
+      ]}
+    />
+    </>
   );
 };
 

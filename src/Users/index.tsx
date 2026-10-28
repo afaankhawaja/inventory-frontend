@@ -3,7 +3,7 @@ import UserTable from "./components/UserTable";
 import { FETCH_ALL_USERS } from "./graphql/queries";
 import { useMutation, useQuery } from "@apollo/client";
 import { UserAddOutlined } from "@ant-design/icons";
-import { Button, Modal, message } from "antd";
+import { Button, Card, Modal, Skeleton, message } from "antd";
 import { useMemo, useState } from "react";
 import CreateNewUser from "./components/CreateNewUser";
 import UpdateUser from "./components/UpdateUser";
@@ -21,11 +21,14 @@ const UsersContainer = styled.section`
   flex-direction: column;
   gap: 15px;
 `;
-const ActionRow = styled.div`
-  width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
+const ActionRow = styled(Card)`  width: 100%;
+
+  .ant-card-body {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding: 16px 20px;
+  }
 `;
 
 const AddNewUser = styled(Button)`
@@ -155,7 +158,9 @@ const Index = () => {
       ) : (
         <>
           {loading ? (
-            <div>loading users...</div>
+            <Card>
+              <Skeleton active paragraph={{ rows: 6 }} />
+            </Card>
           ) : (
             <TableWrapper>
               <UserTable

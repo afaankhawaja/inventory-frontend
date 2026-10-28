@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Table, Alert } from "antd";
+import { Table, Alert, Skeleton } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import { useQuery } from "@apollo/client";
 import { GET_ALL_PURCHASE_HISTORY } from "../graphql/queries";
@@ -126,7 +126,7 @@ const PurchaseHistoryTable: React.FC = () => {
 
   return (
     <>
-      {loading && <>Loading...</>}
+      {loading && <Skeleton active />}
       {error && <>{error.message}</>}
       {!loading && !error && historyData.length === 0 && (
         <Alert message="No purchase history found!" type="info" showIcon />

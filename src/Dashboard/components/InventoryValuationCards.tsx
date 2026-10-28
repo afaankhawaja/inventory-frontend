@@ -50,10 +50,7 @@ const Delta = styled.span<{ $color: string }>`
   gap: 4px;
   font-size: 12px;
   font-weight: 600;
-  padding: 2px 8px;
-  border-radius: 999px;
   color: ${(p) => p.$color};
-  background: ${(p) => p.$color}1f;
 `;
 
 const CountUp: React.FC<{ value: number; decimals?: number; prefix?: string }> = ({

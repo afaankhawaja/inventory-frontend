@@ -61,8 +61,9 @@ h3 {
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  background: transparent !important;
-  opacity: 0.7;
+  background: rgba(128, 128, 128, 0.12) !important;
+  color: inherit !important;
+  font-weight: 700;
 }
 .ant-table-wrapper .ant-table-thead > tr > th::before {
   display: none !important;
@@ -97,4 +98,8 @@ h3 {
 }
 .ant-btn-primary {
   box-shadow: none;
+}
+
+.ant-table-wrapper .ant-table-tbody > tr.ant-table-row.row-static {
+  cursor: default;
 }

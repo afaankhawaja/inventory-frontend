@@ -35,10 +35,7 @@ const BadgePill = styled.span<{ $color: string }>`
   gap: 4px;
   font-size: 12px;
   font-weight: 600;
-  padding: 2px 10px;
-  border-radius: 999px;
   color: ${(p) => p.$color};
-  background: ${(p) => p.$color}1f;
   white-space: nowrap;
 `;
 

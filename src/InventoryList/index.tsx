@@ -2,7 +2,7 @@ import { useMutation, useQuery } from "@apollo/client";
 import { FETCH_ALL_ITEMS } from "./graphql/queries";
 import ItemsTable from "./components/ItemsTable";
 import styled from "styled-components";
-import { Button, Modal, message } from "antd";
+import { Button, Card, Modal, Skeleton, message } from "antd";
 import { PlusOutlined } from "@ant-design/icons";
 import { useMemo, useState } from "react";
 import CreateNewItem from "./components/CreateNewItem";
@@ -20,11 +20,14 @@ const UsersContainer = styled.section`
   flex-direction: column;
   gap: 15px;
 `;
-const ActionRow = styled.div`
-  width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
+const ActionRow = styled(Card)`  width: 100%;
+
+  .ant-card-body {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding: 16px 20px;
+  }
 `;
 
 const AddNewItem = styled(Button)`
@@ -173,7 +176,9 @@ const Index = () => {
       ) : (
         <>
           {loading ? (
-            <div>loading inventory...</div>
+            <Card>
+              <Skeleton active paragraph={{ rows: 6 }} />
+            </Card>
           ) : (
             <TableWrapper>
               <ItemsTable

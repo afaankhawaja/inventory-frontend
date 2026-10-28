@@ -132,7 +132,7 @@ const UserTable = ({
       render: (role: Role | null) => {
         if (!role?.name) return "—";
         return (
-          <Tag color="gold" style={{ margin: 0 }}>
+          <Tag color="gold" style={{ margin: 0, background: "transparent", border: "none", padding: 0, fontWeight: 600 }}>
             {role.name}
           </Tag>
         );

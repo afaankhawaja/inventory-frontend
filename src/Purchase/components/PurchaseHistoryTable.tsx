@@ -1,12 +1,10 @@
-import { Table, Alert } from "antd";
+import { Table, Alert, Card, Skeleton } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import { useQuery } from "@apollo/client";
 import { FETCH_ALL_PURCHASES } from "../graphql/queries";
 import { useState } from "react";
-import {
-  SingleLineCell,
-  useInlineRowExpand,
-} from "../../components/ExpandedRowDetail";
+import { SingleLineCell } from "../../components/ExpandedRowDetail";
+import DetailDrawer, { TitleLink } from "../../components/DetailDrawer";
 
 interface PurchaseRecord {
   purchaseId: string;
@@ -43,9 +41,7 @@ const PurchaseHistoryTable: React.FC = () => {
     current: 1,
     pageSize: 10,
   });
-  const { getRowProps, getRowClassName } = useInlineRowExpand<PurchaseRecord>(
-    (r) => r.purchaseId,
-  );
+  const [detail, setDetail] = useState<PurchaseRecord | null>(null);
 
   const { loading, error, data } = useQuery(FETCH_ALL_PURCHASES, {
     variables: {
@@ -58,46 +54,34 @@ const PurchaseHistoryTable: React.FC = () => {
   const purchases: PurchaseRecord[] = data?.purchaseHistories?.purchases || [];
   const columns: ColumnsType<PurchaseRecord> = [
     {
-      title: "Purchase ID",
-      dataIndex: "purchaseId",
-      key: "purchaseId",
-      width: 115,
-      render: (val: string) => (
-        <SingleLineCell style={{ fontFamily: "monospace", opacity: 0.8 }}>
-          {val}
-        </SingleLineCell>
-      ),
-    },
-    {
       title: "Date",
       dataIndex: "purchase_date",
       key: "purchase_date",
-      width: 110,
+      width: 115,
       render: (d: string) => <SingleLineCell>{formatDate(d)}</SingleLineCell>,
     },
     {
       title: "Item",
       dataIndex: ["item", "name"],
       key: "itemName",
-      width: 260,
-      render: (text: string) => (
-        <SingleLineCell style={{ fontWeight: 500 }}>
-          {text || "—"}
-        </SingleLineCell>
+      render: (text: string, record: PurchaseRecord) => (
+        <TitleLink onClick={() => setDetail(record)} title="View details">
+          {text || "-"}
+        </TitleLink>
       ),
     },
     {
       title: "Vendor",
       dataIndex: ["vendor", "name"],
       key: "vendor",
-      width: 210,
+      width: 180,
       render: (text: string) => <SingleLineCell>{text || "—"}</SingleLineCell>,
     },
     {
       title: "Qty",
       dataIndex: "quantity",
       key: "quantity",
-      width: 75,
+      width: 70,
       align: "center",
       render: (val: number) => <SingleLineCell>{val ?? "—"}</SingleLineCell>,
     },
@@ -115,7 +99,7 @@ const PurchaseHistoryTable: React.FC = () => {
       title: "Total Cost",
       dataIndex: "total_cost",
       key: "total_cost",
-      width: 135,
+      width: 145,
       align: "right",
       render: (val: string | number) => (
         <SingleLineCell style={{ fontWeight: 600 }}>
@@ -123,25 +107,30 @@ const PurchaseHistoryTable: React.FC = () => {
         </SingleLineCell>
       ),
     },
-    {
-      title: "Created At",
-      dataIndex: "created_at",
-      key: "created_at",
-      width: 110,
-      render: (d: string) => <SingleLineCell>{formatDate(d)}</SingleLineCell>,
-    },
-    {
-      title: "Updated At",
-      dataIndex: "updated_at",
-      key: "updated_at",
-      width: 110,
-      render: (d: string) => <SingleLineCell>{formatDate(d)}</SingleLineCell>,
-    },
   ];
 
   return (
     <>
-      {loading && <>Loading purchase history…</>}
+      <DetailDrawer
+        open={!!detail}
+        title={detail?.item?.name}
+        onClose={() => setDetail(null)}
+        fields={[
+          { label: "Purchase ID", value: detail?.purchaseId },
+          { label: "Purchase Date", value: formatDate(detail?.purchase_date) },
+          { label: "Vendor", value: detail?.vendor?.name || "-" },
+          { label: "Quantity", value: detail?.quantity ?? "-" },
+          { label: "Unit Price", value: formatCurrency(detail?.unit_price) },
+          { label: "Total Cost", value: formatCurrency(detail?.total_cost) },
+          { label: "Created At", value: formatDate(detail?.created_at) },
+          { label: "Updated At", value: formatDate(detail?.updated_at) },
+        ]}
+      />
+      {loading && (
+        <Card>
+          <Skeleton active paragraph={{ rows: 6 }} />
+        </Card>
+      )}
       {error && <>{error.message}</>}
       {!loading && !error && purchases.length === 0 && (
         <Alert message="No purchase history found!" type="info" showIcon />
@@ -153,10 +142,9 @@ const PurchaseHistoryTable: React.FC = () => {
           loading={loading}
           dataSource={purchases}
           columns={columns}
-          onRow={getRowProps}
-          rowClassName={getRowClassName}
+          rowClassName={() => "row-static"}
           sticky
-          scroll={{ x: "max-content", y: "calc(100vh - 310px)" }}
+          scroll={{ x: 900, y: "calc(100vh - 310px)" }}
           pagination={{
             current: pagination.current,
             pageSize: pagination.pageSize,

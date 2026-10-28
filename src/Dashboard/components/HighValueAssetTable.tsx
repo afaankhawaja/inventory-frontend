@@ -78,7 +78,7 @@ const HighValueAssetTable = ({
       render: (val: string) => (
         <Tag
           color={val === "CHECK_OUT" ? "orange" : "green"}
-          style={{ margin: 0 }}
+          style={{ margin: 0, background: "transparent", border: "none", padding: 0, fontWeight: 600 }}
         >
           {val}
         </Tag>
