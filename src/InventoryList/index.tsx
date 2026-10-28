@@ -4,12 +4,14 @@ import ItemsTable from "./components/ItemsTable";
 import styled from "styled-components";
 import { Button, Modal, message } from "antd";
 import { PlusOutlined } from "@ant-design/icons";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import CreateNewItem from "./components/CreateNewItem";
 import { DELETE_ITEM } from "./graphql/mutations";
 import DeleteItem from "./components/DeleteItem";
 import UpdateItem from "./components/UpdateItem";
 import CreatePurchaseHistory from "./components/CreatePurchaseHistory";
+import PageStatsCards, { type PageStatItem } from "../components/PageStatsCards";
+import { palette } from "../theme/tokens";
 
 const UsersContainer = styled.section`
   width: 100%;
@@ -17,19 +19,20 @@ const UsersContainer = styled.section`
   display: flex;
   flex-direction: column;
 `;
+const HeaderRow = styled.div`
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+`;
 const Title = styled.h1`
   font-size: 28px;
-  margin: 0 0 16px;
+  margin: 0;
 `;
 
 const AddNewItem = styled(Button)`
-  font-size: 16px;
-`;
-const Wrapper = styled.div`
-  width: 100%;
-  display: flex;
-  justify-content: end;
-  margin-bottom: 20px;
+  font-size: 15px;
 `;
 
 const TableWrapper = styled.div`
@@ -43,6 +46,14 @@ const TableWrapper = styled.div`
   scrollbar-width: none;
   -ms-overflow-style: none;
 `;
+
+interface StatItemRow {
+  price?: number;
+  quantity_in_stock?: number;
+  reorder_threshold?: number;
+  is_high_value?: boolean;
+  condition?: string;
+}
 
 const Index = () => {
   const [open, setOpen] = useState(false);
@@ -61,6 +72,69 @@ const Index = () => {
       take: pagination.pageSize,
     },
   });
+
+  // Fetch full list for top-level KPI summary cards
+  const { data: allStatsData, loading: statsLoading } = useQuery(
+    FETCH_ALL_ITEMS,
+    {
+      variables: { skip: 0, take: 500 },
+    },
+  );
+
+  const stats: PageStatItem[] = useMemo(() => {
+    const allItems: StatItemRow[] = allStatsData?.items?.items || [];
+    const totalCount = allStatsData?.items?.total ?? allItems.length;
+    const totalValuation = allItems.reduce(
+      (acc, item) =>
+        acc + Number(item.price || 0) * Number(item.quantity_in_stock || 0),
+      0,
+    );
+    const highValueCount = allItems.filter((i) => i.is_high_value).length;
+    const lowStockCount = allItems.filter(
+      (i) =>
+        i.quantity_in_stock !== undefined &&
+        i.reorder_threshold !== undefined &&
+        Number(i.quantity_in_stock) <= Number(i.reorder_threshold),
+    ).length;
+    const damagedCount = allItems.filter(
+      (i) => i.condition === "DAMAGED",
+    ).length;
+
+    return [
+      {
+        label: "Total Vault Portfolio Value",
+        value: totalValuation,
+        decimals: 2,
+        prefix: "$",
+        badgeText: `${totalCount} SKUs`,
+        badgeColor: palette.light.accent,
+      },
+      {
+        label: "High-Value Certified Assets",
+        value: highValueCount,
+        badgeText:
+          totalCount > 0
+            ? `${Math.round((highValueCount / totalCount) * 100)}% of Vault`
+            : "0%",
+        badgeColor: palette.status.success,
+      },
+      {
+        label: "Low Stock / Reorder Alert",
+        value: lowStockCount,
+        badgeText: lowStockCount > 0 ? "Needs Restock" : "Optimal",
+        badgeColor:
+          lowStockCount > 0 ? palette.status.warning : palette.status.success,
+      },
+      {
+        label: "Damaged / In Repair",
+        value: damagedCount,
+        badgeText: damagedCount > 0 ? "Action Required" : "All Intact",
+        badgeColor:
+          damagedCount > 0 ? palette.status.critical : palette.status.success,
+      },
+    ];
+  }, [allStatsData]);
+
   const [removeItem] = useMutation(DELETE_ITEM);
 
   const handleEditItemClick = (itemId: string) => {
@@ -91,12 +165,14 @@ const Index = () => {
   };
   return (
     <UsersContainer>
-      <Title>Items</Title>
-      <Wrapper>
-        <AddNewItem onClick={() => setOpen(true)}>
-          Add new Item <PlusOutlined />{" "}
+      <HeaderRow>
+        <Title>Items</Title>
+        <AddNewItem type="primary" onClick={() => setOpen(true)}>
+          Add new Item <PlusOutlined />
         </AddNewItem>
-      </Wrapper>
+      </HeaderRow>
+
+      <PageStatsCards stats={stats} loading={statsLoading} />
 
       {error ? (
         <>{error.message}</>

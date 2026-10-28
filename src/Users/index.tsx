@@ -4,13 +4,15 @@ import { FETCH_ALL_USERS } from "./graphql/queries";
 import { useMutation, useQuery } from "@apollo/client";
 import { UserAddOutlined } from "@ant-design/icons";
 import { Button, Modal, message } from "antd";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import CreateNewUser from "./components/CreateNewUser";
 import UpdateUser from "./components/UpdateUser";
 import DeleteUser from "./components/DeleteUser";
 import { DELETE_USER } from "./graphql/mutations";
 import { currentUserDataAtom } from "../store/atoms";
 import { useAtom } from "jotai";
+import PageStatsCards, { type PageStatItem } from "../components/PageStatsCards";
+import { palette } from "../theme/tokens";
 
 const UsersContainer = styled.section`
   width: 100%;
@@ -18,19 +20,20 @@ const UsersContainer = styled.section`
   display: flex;
   flex-direction: column;
 `;
+const HeaderRow = styled.div`
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+`;
 const Title = styled.h1`
   font-size: 28px;
-  margin: 0 0 16px;
+  margin: 0;
 `;
 
 const AddNewUser = styled(Button)`
-  font-size: 16px;
-`;
-const Wrapper = styled.div`
-  width: 100%;
-  display: flex;
-  justify-content: end;
-  margin-bottom: 20px;
+  font-size: 15px;
 `;
 
 const TableWrapper = styled.div`
@@ -44,6 +47,11 @@ const TableWrapper = styled.div`
   scrollbar-width: none;
   -ms-overflow-style: none;
 `;
+
+interface UserRow {
+  is_active?: boolean | null;
+  role?: { name?: string } | null;
+}
 
 const Index = () => {
   const [open, setOpen] = useState(false);
@@ -60,9 +68,56 @@ const Index = () => {
       take: pagination.pageSize,
     },
   });
+  const { data: allUsersData, loading: statsLoading } = useQuery(
+    FETCH_ALL_USERS,
+    {
+      variables: { skip: 0, take: 500 },
+    },
+  );
   const [removeUser] = useMutation(DELETE_USER);
   const [currentUser] = useAtom(currentUserDataAtom);
   const userRole = currentUser?.role;
+
+  const stats: PageStatItem[] = useMemo(() => {
+    const users: UserRow[] = allUsersData?.users?.users || [];
+    const totalCount = allUsersData?.users?.total ?? users.length;
+    const activeCount = users.filter((u) => u.is_active === true).length;
+    const adminCount = users.filter(
+      (u) => u.role?.name === "admin" || u.role?.name === "super-admin",
+    ).length;
+    const uniqueRoles = new Set(users.map((u) => u.role?.name).filter(Boolean))
+      .size;
+
+    return [
+      {
+        label: "Total Registered Personnel",
+        value: totalCount,
+        badgeText: "Vault Access",
+        badgeColor: palette.light.accent,
+      },
+      {
+        label: "Active Accounts",
+        value: activeCount,
+        badgeText:
+          totalCount > 0
+            ? `${Math.round((activeCount / totalCount) * 100)}% Active`
+            : "0%",
+        badgeColor: palette.status.success,
+      },
+      {
+        label: "Administrators & Directors",
+        value: adminCount,
+        badgeText: "Privileged",
+        badgeColor: palette.status.warning,
+      },
+      {
+        label: "Assigned Security Roles",
+        value: uniqueRoles,
+        badgeText: "RBAC Tiers",
+        badgeColor: palette.light.accent,
+      },
+    ];
+  }, [allUsersData]);
 
   const handleEditUserClick = (userID: string) => {
     setSelectedUserId(userID);
@@ -89,18 +144,16 @@ const Index = () => {
   };
   return (
     <UsersContainer>
-      <Title>Users</Title>
-      <Wrapper>
-        {userRole ? (
-          (userRole === "admin" || userRole === "super-admin") && (
-            <AddNewUser onClick={() => setOpen(true)}>
-              Add new user <UserAddOutlined />{" "}
-            </AddNewUser>
-          )
-        ) : (
-          <></>
+      <HeaderRow>
+        <Title>Users</Title>
+        {userRole && (userRole === "admin" || userRole === "super-admin") && (
+          <AddNewUser type="primary" onClick={() => setOpen(true)}>
+            Add new user <UserAddOutlined />
+          </AddNewUser>
         )}
-      </Wrapper>
+      </HeaderRow>
+
+      <PageStatsCards stats={stats} loading={statsLoading} />
 
       {error ? (
         <>{error.message}</>

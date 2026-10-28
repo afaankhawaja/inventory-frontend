@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import {
   FileDoneOutlined,
   HomeOutlined,
@@ -10,6 +10,8 @@ import {
 } from "@ant-design/icons";
 import { Layout, Menu, theme } from "antd";
 import { useLocation, useNavigate } from "react-router";
+import { useAtomValue } from "jotai";
+import { currentUserDataAtom } from "../../store/atoms";
 
 const { Sider } = Layout;
 
@@ -18,7 +20,7 @@ interface SidebarProps {
   logoutUser: () => void;
 }
 
-const navItems = [
+const baseNavItems = [
   { key: "/", icon: <HomeOutlined />, label: "Home" },
   {
     key: "/inventory-list",
@@ -32,7 +34,12 @@ const navItems = [
   },
   { key: "/reports", icon: <FileDoneOutlined />, label: "Reports" },
   { key: "/maintenance", icon: <SettingOutlined />, label: "Maintenance" },
-  { key: "/users", icon: <UserOutlined />, label: "Users" },
+  {
+    key: "/users",
+    icon: <UserOutlined />,
+    label: "Users",
+    roles: ["admin", "super-admin"],
+  },
 ];
 
 const Sidebar: React.FC<SidebarProps> = ({ collapsed, logoutUser }) => {
@@ -41,6 +48,14 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed, logoutUser }) => {
   } = theme.useToken();
   const navigate = useNavigate();
   const { pathname } = useLocation();
+  const userData = useAtomValue(currentUserDataAtom);
+
+  const navItems = useMemo(() => {
+    const role = userData?.role;
+    return baseNavItems
+      .filter((item) => !item.roles || (role && item.roles.includes(role)))
+      .map(({ roles: _roles, ...rest }) => rest);
+  }, [userData?.role]);
 
   const selectedKey =
     navItems
