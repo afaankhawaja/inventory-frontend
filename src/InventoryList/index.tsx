@@ -1,5 +1,5 @@
 import { useMutation, useQuery } from "@apollo/client";
-import { FETCH_ALL_ITEMS } from "./graphql/queries";
+import { FETCH_ALL_ITEMS, GET_TRANSACTIONS } from "./graphql/queries";
 import ItemsTable from "./components/ItemsTable";
 import styled from "styled-components";
 import { Button, Card, Modal, Skeleton, message } from "antd";
@@ -7,11 +7,37 @@ import { PlusOutlined } from "@ant-design/icons";
 import { useMemo, useState } from "react";
 import CreateNewItem from "./components/CreateNewItem";
 import { DELETE_ITEM } from "./graphql/mutations";
+import CheckInOutForm, { type CheckMode } from "./components/CheckInOutForm";
 import DeleteItem from "./components/DeleteItem";
 import UpdateItem from "./components/UpdateItem";
 import CreatePurchaseHistory from "./components/CreatePurchaseHistory";
 import PageStatsCards, { type PageStatItem } from "../components/PageStatsCards";
 import { palette } from "../theme/tokens";
+import { useAtom } from "jotai";
+import { currentUserDataAtom } from "../store/atoms";
+
+interface TransactionRow {
+  transaction_type: string;
+  quantity?: number;
+  transaction_date: string;
+  transactionItems: { item: { itemId: string } }[];
+}
+
+const modalTitle = (text: string) => (
+  <div
+    style={{
+      textAlign: "center",
+      color: "inherit",
+      fontWeight: "bold",
+      fontSize: "20px",
+    }}
+  >
+    {text}
+  </div>
+);
+const modalBodyStyles = {
+  body: { maxHeight: "72vh", overflowY: "auto" as const, paddingTop: 5 },
+};
 
 const UsersContainer = styled.section`
   width: 100%;
@@ -20,18 +46,24 @@ const UsersContainer = styled.section`
   flex-direction: column;
   gap: 15px;
 `;
-const ActionRow = styled(Card)`  width: 100%;
+const ActionRow = styled(Card)`
+  width: 100%;
 
   .ant-card-body {
     display: flex;
     align-items: center;
     justify-content: flex-end;
-    padding: 16px 20px;
+    padding: 15px;
   }
 `;
 
 const AddNewItem = styled(Button)`
-  font-size: 15px;
+  font-size: 14px;
+  height: 36px;
+  padding: 0 15px;
+  width: auto;
+  border: none;
+  box-shadow: none;
 `;
 
 const TableWrapper = styled.div`
@@ -60,6 +92,8 @@ const Index = () => {
   const [updateModal, setUpdateModal] = useState(false);
   const [deleteModal, setDeleteModal] = useState(false);
   const [restockModal, setRestockModal] = useState(false);
+  const [checkModal, setCheckModal] = useState(false);
+  const [checkMode, setCheckMode] = useState<CheckMode>("out");
   const [pagination, setPagination] = useState({
     current: 1,
     pageSize: 10,
@@ -134,7 +168,39 @@ const Index = () => {
   }, [allStatsData]);
 
   const [removeItem] = useMutation(DELETE_ITEM);
+  const [currentUser] = useAtom(currentUserDataAtom);
+  const { data: transactionData } = useQuery(GET_TRANSACTIONS);
+  // Units currently out per item = total checked out minus total returned.
+  const outstandingByItem = useMemo(() => {
+    const txs: TransactionRow[] =
+      transactionData?.transactionsWithItems?.transactions || [];
+    const map = new Map<string, number>();
+    txs.forEach((tx) => {
+      const sign =
+        tx.transaction_type === "CHECK_OUT"
+          ? 1
+          : tx.transaction_type === "CHECK_IN"
+            ? -1
+            : 0;
+      tx.transactionItems.forEach((ti) => {
+        map.set(
+          ti.item.itemId,
+          (map.get(ti.item.itemId) ?? 0) + sign * (tx.quantity ?? 1),
+        );
+      });
+    });
+    map.forEach((v, k) => map.set(k, Math.max(v, 0)));
+    return map;
+  }, [transactionData]);
 
+  const handleCheck = (itemId: string, mode: CheckMode) => {
+    setSelectedItemId(itemId);
+    setCheckMode(mode);
+    setCheckModal(true);
+  };
+  const selectedItem = (data?.items?.items || []).find(
+    (i: { itemId: string }) => i.itemId === selectedItemId,
+  );
   const handleEditItemClick = (itemId: string) => {
     setSelectedItemId(itemId);
     setUpdateModal(true);
@@ -194,6 +260,8 @@ const Index = () => {
                 onEditItem={handleEditItemClick}
                 onDeleteItem={handleDeleteItem}
                 onRestockItem={handleRestockItem}
+                onCheck={handleCheck}
+                outstandingByItem={outstandingByItem}
               />
             </TableWrapper>
           )}
@@ -216,51 +284,26 @@ const Index = () => {
         open={open}
         footer={null}
         onCancel={() => setOpen(false)}
-        width={{
-          xs: "90%",
-          sm: "80%",
-          md: "70%",
-          lg: "60%",
-          xl: "50%",
-          xxl: "40%",
-        }}
-        height={"90%"}
+        width="min(760px, 94vw)"
+        styles={{ body: { maxHeight: "72vh", overflowY: "auto", paddingTop: 5 } }}
       >
         <CreateNewItem setOpen={setOpen} />
       </Modal>
       <Modal
-        title={
-          <div
-            style={{
-              textAlign: "center",
-              color: "inherit",
-              fontWeight: "bold",
-              fontSize: "20px",
-            }}
-          >
-            Update Item
-          </div>
-        }
+        title={modalTitle("Update Item")}
         centered
         open={updateModal}
         footer={null}
+        destroyOnClose
         onCancel={() => setUpdateModal(false)}
-        width={{
-          xs: "90%",
-          sm: "80%",
-          md: "70%",
-          lg: "60%",
-          xl: "50%",
-          xxl: "40%",
-        }}
-        height={"90%"}
+        width="min(760px, 94vw)"
+        styles={modalBodyStyles}
       >
         <UpdateItem
           selectedItemId={selectedItemId}
           setUpdateModal={setUpdateModal}
         />
-      </Modal>
-      <Modal
+      </Modal>      <Modal
         onOk={deleteItem}
         okText="Delete"
         okButtonProps={{
@@ -285,26 +328,41 @@ const Index = () => {
         <DeleteItem />
       </Modal>
       <Modal
+        title={modalTitle("Restock Item")}
         centered
         open={restockModal}
         footer={null}
+        destroyOnClose
         onCancel={() => setRestockModal(false)}
-        width={{
-          xs: "90%",
-          sm: "80%",
-          md: "70%",
-          lg: "60%",
-          xl: "50%",
-          xxl: "40%",
-        }}
-        height={"90%"}
+        width="min(640px, 94vw)"
+        styles={modalBodyStyles}
       >
         <CreatePurchaseHistory
           selectedItemId={selectedItemId}
           setRestockModal={setRestockModal}
         />
-      </Modal>
-    </UsersContainer>
+      </Modal>      <Modal
+        title={modalTitle(checkMode === "out" ? "Check out item" : "Check in item")}
+        centered
+        open={checkModal}
+        footer={null}
+        destroyOnClose
+        onCancel={() => setCheckModal(false)}
+        width="min(560px, 94vw)"
+        styles={modalBodyStyles}
+      >
+        {selectedItem && (
+          <CheckInOutForm
+            mode={checkMode}
+            itemId={selectedItemId}
+            itemName={selectedItem.name}
+            userId={currentUser?.userID}
+            stock={selectedItem.quantity_in_stock ?? 0}
+            outstanding={outstandingByItem.get(selectedItemId) ?? 0}
+            onClose={() => setCheckModal(false)}
+          />
+        )}
+      </Modal>    </UsersContainer>
   );
 };
 

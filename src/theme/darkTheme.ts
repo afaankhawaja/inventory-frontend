@@ -25,6 +25,12 @@ export const darkTheme = {
   },
   components: {
     ...sharedComponents,
+    Button: {
+      ...sharedComponents.Button,
+      colorPrimary: p.buttonPrimary,
+      colorPrimaryHover: p.buttonPrimaryHover,
+      colorPrimaryActive: p.buttonPrimaryActive,
+    },
     Layout: {
       headerBg: "rgba(28, 28, 30, 0.8)",
       siderBg: p.card,

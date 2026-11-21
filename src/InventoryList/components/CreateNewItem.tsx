@@ -4,18 +4,30 @@ import {
   Input,
   InputNumber,
   type FormProps,
-  Row,
-  Col,
   Switch,
   Select,
   DatePicker,
-  TreeSelect, message } from "antd";
+  TreeSelect,
+  message,
+} from "antd";
 import styled from "styled-components";
 import { useMutation, useQuery } from "@apollo/client";
 import { CREATE_NEW_ITEM } from "../graphql/mutations";
 import { FETCH_ALL_CATEGORIES, FETCH_ALL_LOCATIONS } from "../graphql/queries";
 import type { Dayjs } from "dayjs";
 import { useMemo } from "react";
+import {
+  formStyles,
+  Section,
+  SectionTitle,
+  SectionHint,
+  Grid,
+  FullRow,
+  SwitchRow,
+  SwitchText,
+  ActionBar,
+  SubmitButton,
+} from "../../components/FormLayout";
 
 type ItemType = {
   name?: string;
@@ -32,20 +44,7 @@ type ItemType = {
   location?: string;
 };
 
-const StyledForm = styled(Form<ItemType>)`
-  width: 100%;
-
-  .ant-form-item-label > label {
-    font-weight: 500;
-  }
-
-  .ant-btn-primary {
-    width: 100%;
-    border: none;
-    box-shadow: none;
-    transition: all 0.3s ease;
-  }
-`;
+const StyledForm = styled(Form<ItemType>)` ${formStyles}`;
 
 interface Props {
   setOpen: (arg: boolean) => void;
@@ -73,18 +72,9 @@ const CreateNewItem = ({ setOpen }: Props) => {
   const { data: catData } = useQuery(FETCH_ALL_CATEGORIES);
   const { data: locData } = useQuery(FETCH_ALL_LOCATIONS);
   const conditionOptions = [
-    {
-      value: "NEW",
-      label: "NEW",
-    },
-    {
-      value: "IN_USE",
-      label: "IN_USE",
-    },
-    {
-      value: "DAMAGED",
-      label: "DAMAGED",
-    },
+    { value: "NEW", label: "NEW" },
+    { value: "IN_USE", label: "IN_USE" },
+    { value: "DAMAGED", label: "DAMAGED" },
   ];
   const categoryOptions = catData?.categories.map(
     (category: CategoryProps) => ({
@@ -129,109 +119,34 @@ const CreateNewItem = ({ setOpen }: Props) => {
       form={form}
       name="createItem"
       layout="vertical"
+      requiredMark={false}
       onFinish={onFinish}
       onFinishFailed={onFinishFailed}
     >
-      <Form.Item<ItemType>
-        label="Name"
-        name="name"
-        rules={[{ required: true, message: "Please input the item name!" }]}
-      >
-        <Input placeholder="Enter item name" />
-      </Form.Item>
-
-      <Row gutter={12}>
-        <Col span={12}>
+      <Section>
+        <div>
+          <SectionTitle>Basic information</SectionTitle>
+          <SectionHint>What the item is and how to identify it</SectionHint>
+        </div>
+        <Grid>
+          <FullRow>
+            <Form.Item<ItemType>
+              label="Name"
+              name="name"
+              rules={[
+                { required: true, message: "Please input the item name!" },
+              ]}
+            >
+              <Input placeholder="Enter item name" />
+            </Form.Item>
+          </FullRow>
           <Form.Item<ItemType>
-            label="Condition"
-            name="condition"
-            rules={[{ required: true, message: "Please input the condition!" }]}
+            label="Brand"
+            name="brand"
+            rules={[{ required: true, message: "Please input the brand!" }]}
           >
-            <Select
-              style={{ height: "44px" }}
-              options={conditionOptions}
-              placeholder="Select category"
-            />
+            <Input placeholder="Enter brand" />
           </Form.Item>
-        </Col>
-        <Col span={12}>
-          <Form.Item<ItemType>
-            label="Price"
-            name="price"
-            rules={[{ required: true, message: "Please input the price!" }]}
-          >
-            <InputNumber placeholder="Enter price" style={{ width: "50%" }} />
-          </Form.Item>
-        </Col>
-      </Row>
-      <Row gutter={12}>
-        <Col span={12}>
-          <Form.Item name="expiry_date" label="Expiry Date">
-            <DatePicker
-              style={{ height: "44px", width: "100%" }}
-              showTime
-              format="YYYY-MM-DD HH:mm:ss"
-            />
-          </Form.Item>
-        </Col>
-
-        <Col span={12}>
-          <Form.Item name="manufacturing_date" label="Manufacturing Date">
-            <DatePicker
-              style={{ height: "44px", width: "100%" }}
-              showTime
-              format="YYYY-MM-DD HH:mm:ss"
-            />
-          </Form.Item>
-        </Col>
-      </Row>
-
-      <Row gutter={12}>
-        <Col span={12}>
-          <Form.Item<ItemType>
-            label="Reorder Threshold"
-            name="reorder_threshold"
-            rules={[
-              {
-                required: true,
-                message: "Please input the reorder threshold!",
-              },
-            ]}
-          >
-            <InputNumber
-              style={{ width: "50%" }}
-              placeholder="Enter reorder threshold"
-            />
-          </Form.Item>
-        </Col>
-        <Col span={12}>
-          <Form.Item<ItemType>
-            label="Quantity in Stock"
-            name="quantity_in_stock"
-            rules={[
-              {
-                required: true,
-                message: "Please input the quantity in stock!",
-              },
-            ]}
-          >
-            <InputNumber
-              style={{ width: "50%" }}
-              placeholder="Enter quantity"
-            />
-          </Form.Item>
-        </Col>
-      </Row>
-      <Form.Item<ItemType>
-        label="Brand"
-        name="brand"
-        rules={[{ required: true, message: "Please input the brand!" }]}
-      >
-        <Input placeholder="Enter brand" />
-      </Form.Item>
-
-      <Row gutter={12}>
-        <Col span={12}>
           <Form.Item<ItemType>
             label="Barcode"
             name="barcode"
@@ -239,21 +154,7 @@ const CreateNewItem = ({ setOpen }: Props) => {
           >
             <Input placeholder="Enter barcode" />
           </Form.Item>
-        </Col>
-        <Col span={12} style={{ alignContent: "center" }}>
           <Form.Item<ItemType>
-            label="High Value item"
-            name="is_high_value"
-            valuePropName="checked"
-          >
-            <Switch />
-          </Form.Item>
-        </Col>
-      </Row>
-
-      <Row gutter={12}>
-        <Col span={12}>
-          <Form.Item
             name="category"
             label="Category"
             rules={[
@@ -264,40 +165,136 @@ const CreateNewItem = ({ setOpen }: Props) => {
             ]}
           >
             <Select
-              style={{ height: "44px" }}
+              style={{ width: "100%" }}
               options={categoryOptions}
               placeholder="Select category"
             />
           </Form.Item>
-        </Col>
-        <Col span={12}>
-          <Form.Item
-            name="location"
-            label="Location"
+          <Form.Item<ItemType>
+            label="Condition"
+            name="condition"
+            rules={[{ required: true, message: "Please input the condition!" }]}
+          >
+            <Select
+              style={{ width: "100%" }}
+              options={conditionOptions}
+              placeholder="Select condition"
+            />
+          </Form.Item>
+        </Grid>
+      </Section>
+
+      <Section>
+        <div>
+          <SectionTitle>Pricing &amp; stock</SectionTitle>
+          <SectionHint>Value and quantity on hand</SectionHint>
+        </div>
+        <Grid>
+          <Form.Item<ItemType>
+            label="Price"
+            name="price"
+            rules={[{ required: true, message: "Please input the price!" }]}
+          >
+            <InputNumber
+              placeholder="Enter price"
+              prefix="$"
+              style={{ width: "100%" }}
+            />
+          </Form.Item>
+          <Form.Item<ItemType>
+            label="Quantity in stock"
+            name="quantity_in_stock"
             rules={[
               {
                 required: true,
-                message: "Please input the relevant location!",
+                message: "Please input the quantity in stock!",
               },
             ]}
           >
-            <TreeSelect
-              treeData={treeData}
-              placeholder="Select a location"
-              loading={loading}
-              treeDefaultExpandAll
-              allowClear
-              style={{ height: "44px" }}
+            <InputNumber
+              style={{ width: "100%" }}
+              placeholder="Enter quantity"
             />
           </Form.Item>
-        </Col>
-      </Row>
+          <Form.Item<ItemType>
+            label="Reorder threshold"
+            name="reorder_threshold"
+            rules={[
+              {
+                required: true,
+                message: "Please input the reorder threshold!",
+              },
+            ]}
+          >
+            <InputNumber
+              style={{ width: "100%" }}
+              placeholder="Enter reorder threshold"
+            />
+          </Form.Item>
+          <SwitchRow>
+            <SwitchText>
+              High value item
+              <small>Flag this item as a high value asset</small>
+            </SwitchText>
+            <Form.Item<ItemType> name="is_high_value" valuePropName="checked">
+              <Switch />
+            </Form.Item>
+          </SwitchRow>
+        </Grid>
+      </Section>
 
-      <Form.Item>
-        <Button type="primary" htmlType="submit">
-          {!loading ? "Create Item" : "creating..."}
-        </Button>
-      </Form.Item>
+      <Section>
+        <div>
+          <SectionTitle>Dates &amp; location</SectionTitle>
+          <SectionHint>When it was made and where it is stored</SectionHint>
+        </div>
+        <Grid>
+          <Form.Item<ItemType>
+            name="manufacturing_date"
+            label="Manufacturing date"
+          >
+            <DatePicker
+              style={{ width: "100%" }}
+              showTime
+              format="YYYY-MM-DD HH:mm:ss"
+            />
+          </Form.Item>
+          <Form.Item<ItemType> name="expiry_date" label="Expiry date">
+            <DatePicker
+              style={{ width: "100%" }}
+              showTime
+              format="YYYY-MM-DD HH:mm:ss"
+            />
+          </Form.Item>
+          <FullRow>
+            <Form.Item<ItemType>
+              name="location"
+              label="Location"
+              rules={[
+                {
+                  required: true,
+                  message: "Please input the relevant location!",
+                },
+              ]}
+            >
+              <TreeSelect
+                treeData={treeData}
+                placeholder="Select a location"
+                treeDefaultExpandAll
+                allowClear
+                style={{ width: "100%" }}
+              />
+            </Form.Item>
+          </FullRow>
+        </Grid>
+      </Section>
+
+      <ActionBar>
+        <Button onClick={() => setOpen(false)}>Cancel</Button>
+        <SubmitButton type="primary" htmlType="submit" loading={loading}>
+          {!loading ? "Create item" : "Creating..."}
+        </SubmitButton>
+      </ActionBar>
     </StyledForm>
   );
 };

@@ -1,52 +1,19 @@
 import { useState } from "react";
-import { Table, Tag, Space } from "antd";
+import { Table, Tag } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import { currentUserDataAtom } from "../../store/atoms";
 import { useAtom } from "jotai";
-import styled from "styled-components";
 import {
   DeleteOutlined,
   EditOutlined,
   PlusCircleOutlined,
+  LoginOutlined,
+  LogoutOutlined,
 } from "@ant-design/icons";
 import { LocationCell } from "./LocationCell";
 import { SingleLineCell } from "../../components/ExpandedRowDetail";
 import DetailDrawer, { TitleLink } from "../../components/DetailDrawer";
-
-const EditButton = styled.div`
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  color: darkgreen;
-  cursor: pointer;
-  white-space: nowrap;
-  &:hover {
-    color: #32cd32;
-  }
-`;
-const DeleteButton = styled.div`
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  color: red;
-  cursor: pointer;
-  white-space: nowrap;
-  &:hover {
-    color: #8b0000;
-  }
-`;
-
-const RestockButton = styled.div`
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  color: rgb(163, 47, 132);
-  cursor: pointer;
-  white-space: nowrap;
-  &:hover {
-    color: rgb(216, 121, 156);
-  }
-`;
+import RowActions, { type RowAction } from "../../components/RowActions";
 
 interface Location {
   location_name: string;
@@ -83,6 +50,9 @@ interface ItemsTableProps {
   onEditItem: (itemId: string) => void;
   onDeleteItem: (itemId: string) => void;
   onRestockItem: (itemId: string) => void;
+  onCheck: (itemId: string, mode: "in" | "out") => void;
+  /** Units currently checked out (not yet returned), by itemId. */
+  outstandingByItem: Map<string, number>;
   pagination: PaginationType;
 }
 
@@ -112,6 +82,8 @@ const ItemsTable = ({
   onEditItem,
   onDeleteItem,
   onRestockItem,
+  onCheck,
+  outstandingByItem,
   pagination,
 }: ItemsTableProps) => {
   const [userData] = useAtom(currentUserDataAtom);
@@ -179,27 +151,53 @@ const ItemsTable = ({
       title: "Action",
       key: "action",
       fixed: "right",
-      width: userData?.role === "super-admin" ? 210 : 90,
-      render: (record: Item) =>
-        userData?.role === "super-admin" ? (
-          <Space size="middle" onClick={(e) => e.stopPropagation()}>
-            <RestockButton onClick={() => onRestockItem(record.itemId)}>
-              <span>Restock</span> <PlusCircleOutlined />
-            </RestockButton>
-            <EditButton onClick={() => onEditItem(record.itemId)}>
-              <span>Edit</span> <EditOutlined />
-            </EditButton>
-            <DeleteButton onClick={() => onDeleteItem(record.itemId)}>
-              <span>Delete</span> <DeleteOutlined />
-            </DeleteButton>
-          </Space>
-        ) : userData?.role === "admin" ? (
-          <Space size="middle" onClick={(e) => e.stopPropagation()}>
-            <EditButton onClick={() => onEditItem(record.itemId)}>
-              <span>Edit</span> <EditOutlined />
-            </EditButton>
-          </Space>
-        ) : null,
+      width: 90,
+      align: "center",
+      render: (record: Item) => {
+        const role = userData?.role;
+        const actions: RowAction[] = [];
+        if (role === "super-admin") {
+          actions.push({
+            key: "restock",
+            label: "Restock",
+            icon: <PlusCircleOutlined />,
+            onClick: () => onRestockItem(record.itemId),
+          });
+        }
+        const outstanding = outstandingByItem.get(record.itemId) ?? 0;
+        if ((record.quantity_in_stock ?? 0) > 0) {
+          actions.push({
+            key: "checkout",
+            label: "Check out",
+            icon: <LogoutOutlined />,
+            onClick: () => onCheck(record.itemId, "out"),
+          });
+        }
+        if (outstanding > 0) {
+          actions.push({
+            key: "checkin",
+            label: `Check in (${outstanding} out)`,
+            icon: <LoginOutlined />,
+            onClick: () => onCheck(record.itemId, "in"),
+          });
+        }
+        actions.push({
+          key: "edit",
+          label: "Edit",
+          icon: <EditOutlined />,
+          onClick: () => onEditItem(record.itemId),
+        });
+        if (role === "super-admin") {
+          actions.push({
+            key: "delete",
+            label: "Delete",
+            icon: <DeleteOutlined />,
+            danger: true,
+            onClick: () => onDeleteItem(record.itemId),
+          });
+        }
+        return <RowActions actions={actions} />;
+      },
     },
   ];
 
@@ -233,6 +231,7 @@ const ItemsTable = ({
         { label: "Category", value: detail?.category?.name || "-" },
         { label: "Price", value: formatCurrency(detail?.price) },
         { label: "Stock", value: detail?.quantity_in_stock ?? "-" },
+        { label: "Checked out", value: detail ? (outstandingByItem.get(detail.itemId) ?? 0) : "-" },
         { label: "Reorder Threshold", value: detail?.reorder_threshold ?? "-" },
         { label: "Condition", value: detail?.condition ? <Tag color={conditionColor(detail.condition)} style={{ margin: 0 }}>{detail.condition}</Tag> : "-" },
         { label: "High Value", value: detail?.is_high_value ? "Yes" : "No" },

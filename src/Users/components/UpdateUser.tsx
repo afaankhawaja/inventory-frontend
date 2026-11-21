@@ -9,7 +9,9 @@ import {
   InputNumber,
   Button,
   type FormProps,
-  Select, message } from "antd";
+  Select,
+  message,
+} from "antd";
 import { useEffect } from "react";
 import styled from "styled-components";
 import { UPDATE_USER } from "../graphql/mutations";
@@ -36,18 +38,29 @@ interface RoleProp {
 const StyledForm = styled(Form<FieldType>)`
   width: 100%;
 
+  .ant-form-item {
+    margin-bottom: 15px;
+  }
+
   .ant-form-item-label > label {
     font-weight: 500;
   }
 
   .ant-btn-primary {
-    width: 100%;
+    width: auto;
+    min-width: 96px;
+    padding: 0 18px;
+    height: 36px;
     border: none;
     box-shadow: none;
     transition: all 0.3s ease;
   }
+`;
 
-  }
+const SubmitRow = styled.div`
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 15px;
 `;
 
 interface PropsType {
@@ -135,7 +148,7 @@ const UpdateUser = ({ selectedUserId, setUpdateModal }: PropsType) => {
           <Input placeholder="Enter your username" />
         </Form.Item>
 
-        <Row gutter={12}>
+        <Row gutter={15}>
           <Col span={12}>
             <Form.Item<FieldType> label="First Name" name="firstName">
               <Input placeholder="first name" />
@@ -153,34 +166,38 @@ const UpdateUser = ({ selectedUserId, setUpdateModal }: PropsType) => {
           <Input placeholder="your identity" />
         </Form.Item>
 
-        <Row gutter={50}>
+        <Row gutter={15}>
           <Col span={12}>
             <Form.Item<FieldType> label="Role" name="role">
               <Select
-                style={{ height: "44px" }}
+                style={{ height: "40px" }}
                 placeholder="Select a role"
                 options={menuItems}
               />
             </Form.Item>
           </Col>
-          <Col span={8}>
+          <Col span={12}>
             <Form.Item<FieldType>
               label="Age"
               name="age"
               rules={[{ required: true }]}
             >
-              <InputNumber placeholder="22 e.g." />
+              <InputNumber placeholder="22 e.g." style={{ width: "100%" }} />
             </Form.Item>
           </Col>
         </Row>
-        <Row gutter={50}>
+        <Row gutter={15}>
           <Col span={12}>
             <Form.Item<FieldType> label="Cnic" name="cnic">
               <Input />
             </Form.Item>
           </Col>
-          <Col span={8}>
-            <Form.Item<FieldType> label="Active" name="is_active">
+          <Col span={12}>
+            <Form.Item<FieldType>
+              label="Active"
+              name="is_active"
+              valuePropName="checked"
+            >
               <Switch />
             </Form.Item>
           </Col>
@@ -200,11 +217,11 @@ const UpdateUser = ({ selectedUserId, setUpdateModal }: PropsType) => {
           <Input placeholder="jeff@mail.com" />
         </Form.Item>
 
-        <Form.Item>
+        <SubmitRow>
           <Button type="primary" htmlType="submit">
-            {!loading ? "Update User" : "updating..."}
+            {!loading ? "Save" : "Saving..."}
           </Button>
-        </Form.Item>
+        </SubmitRow>
       </StyledForm>
     </div>
   );

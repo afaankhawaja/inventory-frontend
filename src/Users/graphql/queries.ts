@@ -5,6 +5,7 @@ export const FETCH_ALL_USERS = gql`
     users(skip: $skip, take: $take) {
       users {
         userId
+        image_path
         first_name
         last_name
         username
@@ -13,6 +14,8 @@ export const FETCH_ALL_USERS = gql`
         phone
         is_active
         created_at
+        updated_at
+        cnic
         role {
           name
         }

@@ -6,7 +6,9 @@ import {
   InputNumber,
   Row,
   Select,
-  type FormProps, message } from "antd";
+  type FormProps,
+  message,
+} from "antd";
 import styled from "styled-components";
 import { useMutation, useQuery } from "@apollo/client";
 import { CREATE_USER_WITH_ROLE } from "../graphql/mutations";
@@ -29,18 +31,29 @@ type FieldType = {
 const StyledForm = styled(Form<FieldType>)`
   width: 100%;
 
+  .ant-form-item {
+    margin-bottom: 15px;
+  }
+
   .ant-form-item-label > label {
     font-weight: 500;
   }
 
   .ant-btn-primary {
-    width: 100%;
+    width: auto;
+    min-width: 110px;
+    padding: 0 18px;
+    height: 36px;
     border: none;
     box-shadow: none;
     transition: all 0.3s ease;
   }
+`;
 
-  }
+const SubmitRow = styled.div`
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 15px;
 `;
 
 interface Props {
@@ -106,7 +119,7 @@ const CreateNewUser = ({ setOpen }: Props) => {
         <Input placeholder="Enter your username" />
       </Form.Item>
 
-      <Row gutter={12}>
+      <Row gutter={15}>
         <Col span={12}>
           <Form.Item<FieldType> label="First Name" name="firstName">
             <Input placeholder="first name" />
@@ -124,23 +137,23 @@ const CreateNewUser = ({ setOpen }: Props) => {
         <Input placeholder="your identity" />
       </Form.Item>
 
-      <Row gutter={50}>
+      <Row gutter={15}>
         <Col span={12}>
           <Form.Item<FieldType> label="Role" name="role">
             <Select
-              style={{ height: "44px" }}
+              style={{ height: "40px" }}
               placeholder="Select a role"
               options={menuItems}
             />
           </Form.Item>
         </Col>
-        <Col span={8}>
+        <Col span={12}>
           <Form.Item<FieldType>
             label="Age"
             name="age"
             rules={[{ required: true }]}
           >
-            <InputNumber placeholder="22 e.g." />
+            <InputNumber placeholder="22 e.g." style={{ width: "100%" }} />
           </Form.Item>
         </Col>
       </Row>
@@ -170,11 +183,11 @@ const CreateNewUser = ({ setOpen }: Props) => {
         <Input.Password placeholder="Enter your password" />
       </Form.Item>
 
-      <Form.Item>
-        <Button type="primary" htmlType="submit">
-          {!loading ? "Create User" : "creating..."}
+      <SubmitRow>
+        <Button type="primary" htmlType="submit" loading={loading}>
+          {!loading ? "Create User" : "Creating..."}
         </Button>
-      </Form.Item>
+      </SubmitRow>
     </StyledForm>
   );
 };

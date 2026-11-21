@@ -4,8 +4,6 @@ import {
   Form,
   Input,
   Switch,
-  Row,
-  Col,
   InputNumber,
   Button,
   type FormProps,
@@ -14,9 +12,10 @@ import {
   Upload,
   Card,
   Skeleton,
+  Tag,
   message,
 } from "antd";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import styled from "styled-components";
 import { UPDATE_USER } from "../graphql/mutations";
 import { UploadOutlined } from "@ant-design/icons";
@@ -39,50 +38,145 @@ type FieldType = {
   is_active?: boolean;
 };
 
-const Wrapper = styled(motion.section)`
+const GAP = 15;
+
+const Layout = styled(motion.section)`
   width: 100%;
-  max-width: 720px;
+  max-width: 1100px;
   margin: 0 auto;
+  display: grid;
+  grid-template-columns: 320px minmax(0, 1fr);
+  gap: ${GAP}px;
+  align-items: start;
+
+  @media (max-width: 900px) {
+    grid-template-columns: 1fr;
+  }
+`;
+
+/* ---------- Profile card (left) ---------- */
+const Banner = styled.div`
+  height: 96px;
+  background: linear-gradient(135deg, #2c2c2e 0%, #6e6e73 100%);
+`;
+
+const ProfileBody = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 20px;
-`;
-
-const UserSection = styled.div`
-  display: flex;
   align-items: center;
-  gap: 16px;
+  text-align: center;
+  padding: 0 ${GAP + 5}px ${GAP + 5}px;
+  gap: ${GAP}px;
 `;
 
-const UserNameTitle = styled.div`
-  font-size: 22px;
+const AvatarRing = styled.div`
+  margin-top: -60px;
+  padding: 4px;
+  border-radius: 50%;
+  background: var(--ant-color-bg-container, #fff);
+`;
+
+const Name = styled.div`
+  font-size: 20px;
   font-weight: 700;
   letter-spacing: -0.02em;
+  line-height: 1.2;
 `;
 
-const Sub = styled.div`
+const Email = styled.div`
   font-size: 13px;
   opacity: 0.6;
+  margin-top: 4px;
+  word-break: break-all;
 `;
 
-const SectionLabel = styled.div`
-  font-size: 12px;
+const MetaList = styled.div`
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  border-top: 1px solid rgba(128, 128, 128, 0.18);
+`;
+
+const MetaRow = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: ${GAP}px;
+  padding: 12px 0;
+  font-size: 13px;
+  &:not(:last-child) {
+    border-bottom: 1px solid rgba(128, 128, 128, 0.12);
+  }
+  > span:first-child {
+    opacity: 0.6;
+  }
+  > span:last-child {
+    font-weight: 500;
+  }
+`;
+
+/* ---------- Form card (right) ---------- */
+const FormSection = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${GAP}px;
+  &:not(:first-child) {
+    margin-top: ${GAP + 10}px;
+    padding-top: ${GAP + 10}px;
+    border-top: 1px solid rgba(128, 128, 128, 0.18);
+  }
+`;
+
+const SectionTitle = styled.div`
+  font-size: 15px;
   font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  opacity: 0.6;
-  margin: 0 0 8px 4px;
+  letter-spacing: -0.01em;
+`;
+
+const SectionHint = styled.div`
+  font-size: 12px;
+  opacity: 0.55;
+  margin-top: 2px;
+`;
+
+const FieldGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: ${GAP}px;
+
+  @media (max-width: 600px) {
+    grid-template-columns: 1fr;
+  }
+`;
+
+const StyledForm = styled(Form<FieldType>)`
+  .ant-form-item {
+    margin-bottom: 0;
+  }
+  .ant-form-item-label {
+    padding-bottom: 6px;
+  }
+  .ant-form-item-label > label {
+    font-size: 13px;
+    font-weight: 500;
+  }
 `;
 
 const ActionBar = styled.div`
-  position: sticky;
-  bottom: 0;
   display: flex;
   justify-content: flex-end;
-  gap: 12px;
-  padding: 12px 0;
-  backdrop-filter: saturate(180%) blur(20px);
-  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  align-items: center;
+  gap: ${GAP}px;
+  margin-top: ${GAP + 10}px;
+  padding-top: ${GAP + 5}px;
+  border-top: 1px solid rgba(128, 128, 128, 0.18);
+`;
+
+const SaveButton = styled(Button)`
+  width: auto !important;
+  min-width: 96px;
+  border: none;
+  box-shadow: none;
 `;
 
 interface PropsType {
@@ -99,10 +193,25 @@ const UpdateUser = ({ selectedUserId }: PropsType) => {
   const [updateUser, { loading: updateLoading }] = useMutation(UPDATE_USER);
   const user = data?.user;
   const navigate = useNavigate();
-  const base64Url =
-    currentUser?.image_path !== null
-      ? currentUser?.image_path
-      : "../../../assets/images/user.png";
+  const isActive = Form.useWatch("is_active", form);
+
+  const previewUrl = useMemo(() => {
+    const file = fileList[0]?.originFileObj;
+    return file ? URL.createObjectURL(file) : undefined;
+  }, [fileList]);
+
+  useEffect(
+    () => () => {
+      if (previewUrl) URL.revokeObjectURL(previewUrl);
+    },
+    [previewUrl],
+  );
+
+  const avatarSrc =
+    previewUrl ??
+    (currentUser?.image_path
+      ? currentUser.image_path
+      : "../../../assets/images/user.png");
   const username = currentUser ? currentUser.username : "";
 
   const getBase64 = (file: File): Promise<string> =>
@@ -131,12 +240,18 @@ const UpdateUser = ({ selectedUserId }: PropsType) => {
 
   if (loading)
     return (
-      <Wrapper>
-        <Skeleton active avatar paragraph={{ rows: 8 }} />
-      </Wrapper>
+      <Layout>
+        <Card>
+          <Skeleton active avatar paragraph={{ rows: 4 }} />
+        </Card>
+        <Card>
+          <Skeleton active paragraph={{ rows: 8 }} />
+        </Card>
+      </Layout>
     );
   if (error) return <p>Error: {error.message}</p>;
   if (!data || !data.user) return <p>No user found</p>;
+
   const onFinish: FormProps<FieldType>["onFinish"] = async (values) => {
     let base64: string | undefined;
     if (fileList.length > 0) {
@@ -175,73 +290,121 @@ const UpdateUser = ({ selectedUserId }: PropsType) => {
     console.log("Failed:", errorInfo);
   };
 
+  const fullName =
+    [user.first_name, user.last_name].filter(Boolean).join(" ") || username;
+
   return (
-    <Wrapper
+    <Layout
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.25 }}
     >
-      <UserSection>
-        <Avatar size={72} src={base64Url} />
-        <div>
-          <UserNameTitle>{username}</UserNameTitle>
-          <Sub>{user.email}</Sub>
-        </div>
-      </UserSection>
+      {/* Profile card */}
+      <Card styles={{ body: { padding: 0 } }} style={{ overflow: "hidden" }}>
+        <Banner />
+        <ProfileBody>
+          <AvatarRing>
+            <Avatar size={112} src={avatarSrc} />
+          </AvatarRing>
 
-      <Form
-        form={form}
-        name="updateUser"
-        layout="vertical"
-        size="large"
-        requiredMark={false}
-        onFinish={onFinish}
-        onFinishFailed={onFinishFailed}
-      >
-        <SectionLabel>Account</SectionLabel>
-        <Card styles={{ body: { paddingBottom: 4 } }} style={{ marginBottom: 20 }}>
-          <Form.Item<FieldType>
-            label="Username"
-            name="username"
-            rules={[{ required: true, message: "Please input your username!" }]}
-          >
-            <Input placeholder="Enter your username" />
-          </Form.Item>
-          <Form.Item<FieldType>
-            label="Email"
-            name="email"
-            rules={[
-              { required: true, message: "Enter your email!" },
-              { type: "email", message: "The input is not a valid email!" },
-            ]}
-          >
-            <Input placeholder="jeff@mail.com" />
-          </Form.Item>
-          <Form.Item<FieldType>
-            label="Active"
-            name="is_active"
-            valuePropName="checked"
-          >
-            <Switch />
-          </Form.Item>
-        </Card>
+          <div>
+            <Name>{fullName}</Name>
+            <Email>{user.email}</Email>
+            <div style={{ marginTop: 10 }}>
+              <Tag
+                color={isActive ? "green" : "red"}
+                style={{ margin: 0, borderRadius: 20, padding: "0 10px" }}
+              >
+                {isActive ? "Active" : "Inactive"}
+              </Tag>
+            </div>
+          </div>
 
-        <SectionLabel>Personal</SectionLabel>
-        <Card styles={{ body: { paddingBottom: 4 } }} style={{ marginBottom: 20 }}>
-          <Row gutter={12}>
-            <Col xs={24} sm={12}>
+          <Upload
+            accept="image/*"
+            beforeUpload={() => false}
+            fileList={fileList}
+            maxCount={1}
+            showUploadList={false}
+            onChange={({ fileList }) => setFileList(fileList)}
+          >
+            <Button icon={<UploadOutlined />}>Change photo</Button>
+          </Upload>
+
+          <MetaList>
+            <MetaRow>
+              <span>Username</span>
+              <span>{user.username || "—"}</span>
+            </MetaRow>
+            <MetaRow>
+              <span>Age</span>
+              <span>{user.age ?? "—"}</span>
+            </MetaRow>
+            <MetaRow>
+              <span>Phone</span>
+              <span>{user.phone || "—"}</span>
+            </MetaRow>
+          </MetaList>
+        </ProfileBody>
+      </Card>
+
+      {/* Form card */}
+      <Card styles={{ body: { padding: GAP + 10 } }}>
+        <StyledForm
+          form={form}
+          name="updateUser"
+          layout="vertical"
+          requiredMark={false}
+          onFinish={onFinish}
+          onFinishFailed={onFinishFailed}
+        >
+          <FormSection>
+            <div>
+              <SectionTitle>Account</SectionTitle>
+              <SectionHint>Your sign-in details and status</SectionHint>
+            </div>
+            <FieldGrid>
+              <Form.Item<FieldType>
+                label="Username"
+                name="username"
+                rules={[
+                  { required: true, message: "Please input your username!" },
+                ]}
+              >
+                <Input placeholder="Enter your username" />
+              </Form.Item>
+              <Form.Item<FieldType>
+                label="Email"
+                name="email"
+                rules={[
+                  { required: true, message: "Enter your email!" },
+                  { type: "email", message: "The input is not a valid email!" },
+                ]}
+              >
+                <Input placeholder="jeff@mail.com" />
+              </Form.Item>
+              <Form.Item<FieldType>
+                label="Account active"
+                name="is_active"
+                valuePropName="checked"
+              >
+                <Switch />
+              </Form.Item>
+            </FieldGrid>
+          </FormSection>
+
+          <FormSection>
+            <div>
+              <SectionTitle>Personal information</SectionTitle>
+              <SectionHint>Basic details about you</SectionHint>
+            </div>
+            <FieldGrid>
               <Form.Item<FieldType> label="First name" name="firstName">
                 <Input placeholder="First name" />
               </Form.Item>
-            </Col>
-            <Col xs={24} sm={12}>
               <Form.Item<FieldType> label="Last name" name="lastName">
                 <Input placeholder="Last name" />
               </Form.Item>
-            </Col>
-          </Row>
-          <Row gutter={12}>
-            <Col xs={24} sm={8}>
               <Form.Item<FieldType>
                 label="Age"
                 name="age"
@@ -249,41 +412,37 @@ const UpdateUser = ({ selectedUserId }: PropsType) => {
               >
                 <InputNumber placeholder="22" style={{ width: "100%" }} />
               </Form.Item>
-            </Col>
-            <Col xs={24} sm={16}>
+              <Form.Item<FieldType> label="CNIC" name="cnic">
+                <Input placeholder="Identity number" />
+              </Form.Item>
+            </FieldGrid>
+          </FormSection>
+
+          <FormSection>
+            <div>
+              <SectionTitle>Contact</SectionTitle>
+              <SectionHint>How we can reach you</SectionHint>
+            </div>
+            <FieldGrid>
               <Form.Item<FieldType> label="Phone" name="phone">
                 <Input placeholder="Phone number" />
               </Form.Item>
-            </Col>
-          </Row>
-          <Form.Item<FieldType> label="CNIC" name="cnic">
-            <Input placeholder="Identity number" />
-          </Form.Item>
-        </Card>
+            </FieldGrid>
+          </FormSection>
 
-        <SectionLabel>Photo</SectionLabel>
-        <Card style={{ marginBottom: 8 }}>
-          <Form.Item<FieldType> name="image" style={{ marginBottom: 0 }}>
-            <Upload
-              accept="image/*"
-              beforeUpload={() => false}
-              fileList={fileList}
-              maxCount={1}
-              onChange={({ fileList }) => setFileList(fileList)}
+          <ActionBar>
+            <Button onClick={() => navigate("/")}>Cancel</Button>
+            <SaveButton
+              type="primary"
+              htmlType="submit"
+              loading={updateLoading}
             >
-              <Button icon={<UploadOutlined />}>Select image</Button>
-            </Upload>
-          </Form.Item>
-        </Card>
-
-        <ActionBar>
-          <Button onClick={() => navigate("/")}>Cancel</Button>
-          <Button type="primary" htmlType="submit" loading={updateLoading}>
-            Save changes
-          </Button>
-        </ActionBar>
-      </Form>
-    </Wrapper>
+              Save
+            </SaveButton>
+          </ActionBar>
+        </StyledForm>
+      </Card>
+    </Layout>
   );
 };
 

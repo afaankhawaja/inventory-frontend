@@ -24,6 +24,12 @@ export const customTheme = {
   },
   components: {
     ...sharedComponents,
+    Button: {
+      ...sharedComponents.Button,
+      colorPrimary: p.buttonPrimary,
+      colorPrimaryHover: p.buttonPrimaryHover,
+      colorPrimaryActive: p.buttonPrimaryActive,
+    },
     Layout: {
       headerBg: "rgba(245, 245, 247, 0.8)",
       siderBg: p.card,

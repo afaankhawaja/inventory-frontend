@@ -1,6 +1,9 @@
 export const palette = {
   light: {
     accent: "#007AFF",
+    buttonPrimary: "#1D1D1F",
+    buttonPrimaryHover: "#333336",
+    buttonPrimaryActive: "#000000",
     text: "#1D1D1F",
     textSecondary: "#6E6E73",
     separator: "#D2D2D7",
@@ -11,6 +14,9 @@ export const palette = {
   },
   dark: {
     accent: "#0A84FF",
+    buttonPrimary: "#3A3A3C",
+    buttonPrimaryHover: "#48484A",
+    buttonPrimaryActive: "#2C2C2E",
     text: "#F5F5F7",
     textSecondary: "#98989D",
     separator: "#38383A",
@@ -32,7 +38,7 @@ export const fontFamily =
 export const sharedComponents = {
   Input: { paddingBlock: 8, paddingInline: 14, controlHeight: 40 },
   InputNumber: { paddingBlock: 8, paddingInline: 14, controlHeight: 40 },
-  Button: { controlHeight: 40, fontSize: 15, fontWeight: 500, primaryShadow: "none" },
+  Button: { controlHeight: 38, fontSize: 14, fontWeight: 500, primaryShadow: "none" },
   Card: { borderRadiusLG: 16 },
   Menu: { itemBorderRadius: 10, itemHeight: 40 },
 };

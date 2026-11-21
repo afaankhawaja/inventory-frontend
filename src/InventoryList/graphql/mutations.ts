@@ -59,6 +59,8 @@ export const UPDATE_ITEM = gql`
     $categoryId: String
     $locationId: String
     $price: Decimal
+    $expiry_date: DateTime
+    $manufacturing_date: DateTime
   ) {
     updateItem(
       itemID: $itemID
@@ -73,11 +75,15 @@ export const UPDATE_ITEM = gql`
         category: { connect: { categoryId: $categoryId } }
         location: { connect: { locationId: $locationId } }
         price: { set: $price }
+        expiry_date: { set: $expiry_date }
+        manufacturing_date: { set: $manufacturing_date }
       }
     ) {
       name
       brand
       price
+      expiry_date
+      manufacturing_date
       condition
       quantity_in_stock
       reorder_threshold
@@ -105,9 +111,15 @@ export const CHECK_IN_ITEM = gql`
   mutation CHECK_IN_ITEM(
     $userId: String!
     $itemId: String!
-    $quantity: Float!
+    $quantity: Int!
+    $purpose: String
   ) {
-    checkIn(userId: $userId, itemId: $itemId, quantity: $quantity) {
+    checkIn(
+      userId: $userId
+      itemId: $itemId
+      quantity: $quantity
+      purpose: $purpose
+    ) {
       transactionId
       transaction_type
       quantity
@@ -130,9 +142,15 @@ export const CHECK_OUT_ITEM = gql`
   mutation CHECK_OUT_ITEM(
     $userId: String!
     $itemId: String!
-    $quantity: Float!
+    $quantity: Int!
+    $purpose: String
   ) {
-    checkOut(userId: $userId, itemId: $itemId, quantity: $quantity) {
+    checkOut(
+      userId: $userId
+      itemId: $itemId
+      quantity: $quantity
+      purpose: $purpose
+    ) {
       transactionId
       transaction_type
       quantity
