@@ -13,7 +13,11 @@ import {
 import styled from "styled-components";
 import { useMutation, useQuery } from "@apollo/client";
 import { CREATE_NEW_ITEM } from "../graphql/mutations";
-import { FETCH_ALL_CATEGORIES, FETCH_ALL_LOCATIONS } from "../graphql/queries";
+import {
+  FETCH_ALL_CATEGORIES,
+  FETCH_ALL_ITEMS,
+  FETCH_ALL_LOCATIONS,
+} from "../graphql/queries";
 import type { Dayjs } from "dayjs";
 import { useMemo } from "react";
 import {
@@ -68,7 +72,12 @@ function convertLocationsToTreeData(locations) {
 
 const CreateNewItem = ({ setOpen }: Props) => {
   const [form] = Form.useForm();
-  const [createItem, { loading }] = useMutation(CREATE_NEW_ITEM);
+  const [createItem, { loading }] = useMutation(CREATE_NEW_ITEM, {
+    refetchQueries: [
+      { query: FETCH_ALL_ITEMS, variables: { skip: 0, take: 500 } },
+    ],
+    awaitRefetchQueries: true,
+  });
   const { data: catData } = useQuery(FETCH_ALL_CATEGORIES);
   const { data: locData } = useQuery(FETCH_ALL_LOCATIONS);
   const conditionOptions = [
@@ -103,11 +112,15 @@ const CreateNewItem = ({ setOpen }: Props) => {
         categoryId: values.category,
         locationId: values.location,
       },
-    }).then(() => {
-      form.resetFields();
-      message.success("created item successfully");
-      setOpen(false);
-    });
+    })
+      .then(() => {
+        form.resetFields();
+        message.success("Created item successfully");
+        setOpen(false);
+      })
+      .catch((error) => {
+        message.error(error?.message || "Failed to create item");
+      });
   };
 
   const onFinishFailed: FormProps<ItemType>["onFinishFailed"] = (errorInfo) => {

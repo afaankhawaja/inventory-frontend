@@ -17,6 +17,7 @@ import dayjs, { type Dayjs } from "dayjs";
 import {
   FETCH_ITEM_BY_ID,
   FETCH_ALL_CATEGORIES,
+  FETCH_ALL_ITEMS,
   FETCH_ALL_LOCATIONS,
 } from "../graphql/queries";
 import { UPDATE_ITEM } from "../graphql/mutations";
@@ -99,7 +100,12 @@ const UpdateItem = ({ selectedItemId, setUpdateModal }: PropsType) => {
   });
   const { data: catData } = useQuery(FETCH_ALL_CATEGORIES);
   const { data: locData } = useQuery(FETCH_ALL_LOCATIONS);
-  const [updateItem, { loading: updating }] = useMutation(UPDATE_ITEM);
+  const [updateItem, { loading: updating }] = useMutation(UPDATE_ITEM, {
+    refetchQueries: [
+      { query: FETCH_ALL_ITEMS, variables: { skip: 0, take: 500 } },
+    ],
+    awaitRefetchQueries: true,
+  });
 
   const treeData = useMemo(() => {
     if (!locData?.locations) return [];

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Table, Tag } from "antd";
+import { Button, Table, Tag } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import { currentUserDataAtom } from "../../store/atoms";
 import { useAtom } from "jotai";
@@ -54,6 +54,8 @@ interface ItemsTableProps {
   /** Units currently checked out (not yet returned), by itemId. */
   outstandingByItem: Map<string, number>;
   pagination: PaginationType;
+  isFiltered?: boolean;
+  onResetFilters?: () => void;
 }
 
 const formatDate = (dateStr?: string) => {
@@ -85,6 +87,8 @@ const ItemsTable = ({
   onCheck,
   outstandingByItem,
   pagination,
+  isFiltered,
+  onResetFilters,
 }: ItemsTableProps) => {
   const [userData] = useAtom(currentUserDataAtom);
   const [detail, setDetail] = useState<Item | null>(null);
@@ -94,6 +98,7 @@ const ItemsTable = ({
       title: "Name",
       dataIndex: "name",
       key: "name",
+      sorter: (a, b) => (a.name || "").localeCompare(b.name || ""),
       render: (text: string, record: Item) => (
         <TitleLink onClick={() => setDetail(record)} title="View details">
           {text || "-"}
@@ -105,6 +110,7 @@ const ItemsTable = ({
       dataIndex: "brand",
       key: "brand",
       width: 130,
+      sorter: (a, b) => (a.brand || "").localeCompare(b.brand || ""),
       render: (text: string) => <SingleLineCell>{text || "-"}</SingleLineCell>,
     },
     {
@@ -112,6 +118,8 @@ const ItemsTable = ({
       dataIndex: "category",
       key: "category",
       width: 150,
+      sorter: (a, b) =>
+        (a.category?.name || "").localeCompare(b.category?.name || ""),
       render: (val: Category) => (
         <SingleLineCell>{val?.name || "—"}</SingleLineCell>
       ),
@@ -122,6 +130,7 @@ const ItemsTable = ({
       key: "price",
       width: 130,
       align: "right",
+      sorter: (a, b) => Number(a.price || 0) - Number(b.price || 0),
       render: (val: number) => (
         <SingleLineCell style={{ fontWeight: 600 }}>
           {formatCurrency(val)}
@@ -132,15 +141,55 @@ const ItemsTable = ({
       title: "Stock",
       dataIndex: "quantity_in_stock",
       key: "quantity_in_stock",
-      width: 80,
+      width: 100,
       align: "center",
-      render: (val: number) => <SingleLineCell>{val ?? "—"}</SingleLineCell>,
+      sorter: (a, b) =>
+        Number(a.quantity_in_stock || 0) - Number(b.quantity_in_stock || 0),
+      render: (val: number, record: Item) => {
+        const threshold = record.reorder_threshold ?? 0;
+        const isOut = (val ?? 0) === 0;
+        const isLow = !isOut && (val ?? 0) <= threshold;
+        return (
+          <SingleLineCell>
+            <span>{val ?? "—"}</span>
+            {isOut && (
+              <Tag
+                color="error"
+                style={{
+                  margin: "0 0 0 6px",
+                  fontSize: 10,
+                  lineHeight: "16px",
+                  padding: "0 4px",
+                  borderRadius: 4,
+                }}
+              >
+                Out
+              </Tag>
+            )}
+            {isLow && (
+              <Tag
+                color="warning"
+                style={{
+                  margin: "0 0 0 6px",
+                  fontSize: 10,
+                  lineHeight: "16px",
+                  padding: "0 4px",
+                  borderRadius: 4,
+                }}
+              >
+                Low
+              </Tag>
+            )}
+          </SingleLineCell>
+        );
+      },
     },
     {
       title: "Condition",
       dataIndex: "condition",
       key: "condition",
       width: 110,
+      sorter: (a, b) => (a.condition || "").localeCompare(b.condition || ""),
       render: (val: string) => (
         <Tag color={conditionColor(val)} style={{ margin: 0 }}>
           {val || "—"}
@@ -212,35 +261,105 @@ const ItemsTable = ({
 
   return (
     <>
-    <Table<Item>
-      rowKey="itemId"
-      tableLayout="fixed"
-      columns={visibleColumns}
-      dataSource={dataSource}
-      pagination={pagination}
-      rowClassName={() => "row-static"}
-      sticky
-      scroll={{ x: 920, y: "calc(100vh - 340px)" }}
-    />
-    <DetailDrawer
-      open={!!detail}
-      title={detail?.name}
-      onClose={() => setDetail(null)}
-      fields={[
-        { label: "Brand", value: detail?.brand || "-" },
-        { label: "Category", value: detail?.category?.name || "-" },
-        { label: "Price", value: formatCurrency(detail?.price) },
-        { label: "Stock", value: detail?.quantity_in_stock ?? "-" },
-        { label: "Checked out", value: detail ? (outstandingByItem.get(detail.itemId) ?? 0) : "-" },
-        { label: "Reorder Threshold", value: detail?.reorder_threshold ?? "-" },
-        { label: "Condition", value: detail?.condition ? <Tag color={conditionColor(detail.condition)} style={{ margin: 0 }}>{detail.condition}</Tag> : "-" },
-        { label: "High Value", value: detail?.is_high_value ? "Yes" : "No" },
-        { label: "Barcode", value: detail?.barcode || "-" },
-        { label: "Location", value: detail?.location?.locationId ? <LocationCell locationId={detail.location.locationId} wrap /> : "-" },
-        { label: "Manufactured", value: formatDate(detail?.manufacturing_date) },
-        { label: "Expiry", value: formatDate(detail?.expiry_date) },
-      ]}
-    />
+      <Table<Item>
+        rowKey="itemId"
+        tableLayout="fixed"
+        columns={visibleColumns}
+        dataSource={dataSource}
+        pagination={{
+          ...pagination,
+          showSizeChanger: true,
+          pageSizeOptions: ["10", "20", "50"],
+          showTotal: (total, range) =>
+            `${range[0]}-${range[1]} of ${total} items`,
+        }}
+        rowClassName={() => "row-static"}
+        sticky
+        scroll={{ x: 920, y: "calc(100vh - 350px)" }}
+        locale={{
+          emptyText: (
+            <div style={{ padding: "32px 16px", textAlign: "center" }}>
+              <p
+                style={{
+                  margin: 0,
+                  fontSize: 15,
+                  fontWeight: 600,
+                  color: "inherit",
+                }}
+              >
+                {isFiltered
+                  ? "No items match your filters"
+                  : "No items in vault"}
+              </p>
+              <p
+                style={{
+                  margin: "6px 0 16px",
+                  fontSize: 13,
+                  opacity: 0.65,
+                }}
+              >
+                {isFiltered
+                  ? "Try adjusting your search terms or clearing your filters"
+                  : "Items added to the system will appear here"}
+              </p>
+              {isFiltered && onResetFilters && (
+                <Button size="small" onClick={onResetFilters}>
+                  Clear all filters
+                </Button>
+              )}
+            </div>
+          ),
+        }}
+      />
+      <DetailDrawer
+        open={!!detail}
+        title={detail?.name}
+        onClose={() => setDetail(null)}
+        fields={[
+          { label: "Brand", value: detail?.brand || "-" },
+          { label: "Category", value: detail?.category?.name || "-" },
+          { label: "Price", value: formatCurrency(detail?.price) },
+          { label: "Stock", value: detail?.quantity_in_stock ?? "-" },
+          {
+            label: "Checked out",
+            value: detail
+              ? (outstandingByItem.get(detail.itemId) ?? 0)
+              : "-",
+          },
+          {
+            label: "Reorder Threshold",
+            value: detail?.reorder_threshold ?? "-",
+          },
+          {
+            label: "Condition",
+            value: detail?.condition ? (
+              <Tag
+                color={conditionColor(detail.condition)}
+                style={{ margin: 0 }}
+              >
+                {detail.condition}
+              </Tag>
+            ) : (
+              "-"
+            ),
+          },
+          { label: "High Value", value: detail?.is_high_value ? "Yes" : "No" },
+          { label: "Barcode", value: detail?.barcode || "-" },
+          {
+            label: "Location",
+            value: detail?.location?.locationId ? (
+              <LocationCell locationId={detail.location.locationId} wrap />
+            ) : (
+              "-"
+            ),
+          },
+          {
+            label: "Manufactured",
+            value: formatDate(detail?.manufacturing_date),
+          },
+          { label: "Expiry", value: formatDate(detail?.expiry_date) },
+        ]}
+      />
     </>
   );
 };

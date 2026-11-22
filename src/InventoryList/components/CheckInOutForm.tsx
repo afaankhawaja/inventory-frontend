@@ -74,7 +74,10 @@ const CheckInOutForm: React.FC<Props> = ({
   const [mutate, { loading }] = useMutation(
     isOut ? CHECK_OUT_ITEM : CHECK_IN_ITEM,
     {
-      refetchQueries: [{ query: GET_TRANSACTIONS }, FETCH_ALL_ITEMS],
+      refetchQueries: [
+        { query: GET_TRANSACTIONS },
+        { query: FETCH_ALL_ITEMS, variables: { skip: 0, take: 500 } },
+      ],
       awaitRefetchQueries: true,
     },
   );

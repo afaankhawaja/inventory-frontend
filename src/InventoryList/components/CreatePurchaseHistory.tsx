@@ -12,6 +12,7 @@ import styled from "styled-components";
 import { useMutation, useQuery } from "@apollo/client";
 import { CREATE_PURCHASE_HISTORY } from "../graphql/mutations";
 import {
+  FETCH_ALL_ITEMS,
   FETCH_ALL_VENDORS,
   FETCH_LATEST_PURCHASE_BY_ITEM,
 } from "../graphql/queries";
@@ -73,6 +74,12 @@ const CreatePurchaseHistory: React.FC<Props> = ({
     useQuery(FETCH_ALL_VENDORS);
   const [createPurchase, { loading, error }] = useMutation(
     CREATE_PURCHASE_HISTORY,
+    {
+      refetchQueries: [
+        { query: FETCH_ALL_ITEMS, variables: { skip: 0, take: 500 } },
+      ],
+      awaitRefetchQueries: true,
+    },
   );
   const { data: purchaseData } = useQuery(FETCH_LATEST_PURCHASE_BY_ITEM, {
     variables: { itemID: selectedItemId },
