@@ -1,25 +1,39 @@
+import { Suspense, lazy } from "react";
 import { createBrowserRouter } from "react-router-dom";
+import { Card, Skeleton } from "antd";
 
-import SignIn from "../SignIn";
-import SignUp from "../SignUp";
 import ProtectedRoute from "../utils/ProtectedRoute";
-import Layout from "../Layout";
-import Dashboard from "../Dashboard";
-import Users from "../Users/index";
-import InventoryList from "../InventoryList";
-import EditUserDetails from "../EditUserDetails";
 import RoleProtectedRoute from "../utils/RoleProtectedRoute";
-import Maintenance from "../maintenance";
-import Purchase from "../Purchase";
+import Layout from "../Layout";
+
+const SignIn = lazy(() => import("../SignIn"));
+const SignUp = lazy(() => import("../SignUp"));
+const Dashboard = lazy(() => import("../Dashboard"));
+const Users = lazy(() => import("../Users/index"));
+const InventoryList = lazy(() => import("../InventoryList"));
+const EditUserDetails = lazy(() => import("../EditUserDetails"));
+const Maintenance = lazy(() => import("../maintenance"));
+const Purchase = lazy(() => import("../Purchase"));
+const Reports = lazy(() => import("../Reports"));
+
+const PageFallback = () => (
+  <Card style={{ margin: 16 }}>
+    <Skeleton active paragraph={{ rows: 6 }} />
+  </Card>
+);
+
+const withSuspense = (node: React.ReactNode) => (
+  <Suspense fallback={<PageFallback />}>{node}</Suspense>
+);
 
 const router = createBrowserRouter([
   {
     path: "/signin",
-    element: <SignIn />,
+    element: withSuspense(<SignIn />),
   },
   {
     path: "/signup",
-    element: <SignUp />,
+    element: withSuspense(<SignUp />),
   },
   {
     element: <ProtectedRoute />,
@@ -30,23 +44,27 @@ const router = createBrowserRouter([
         children: [
           {
             index: true,
-            element: <Dashboard />,
+            element: withSuspense(<Dashboard />),
           },
           {
             path: "inventory-list",
-            element: <InventoryList />,
+            element: withSuspense(<InventoryList />),
           },
           {
             path: "edit-user-details",
-            element: <EditUserDetails />,
+            element: withSuspense(<EditUserDetails />),
           },
           {
             path: "maintenance",
-            element: <Maintenance />,
+            element: withSuspense(<Maintenance />),
           },
           {
             path: "purchase-history",
-            element: <Purchase />,
+            element: withSuspense(<Purchase />),
+          },
+          {
+            path: "reports",
+            element: withSuspense(<Reports />),
           },
           {
             element: (
@@ -55,7 +73,7 @@ const router = createBrowserRouter([
             children: [
               {
                 path: "users",
-                element: <Users />,
+                element: withSuspense(<Users />),
               },
             ],
           },

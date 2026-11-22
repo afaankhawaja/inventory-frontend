@@ -14,6 +14,7 @@ import { LocationCell } from "./LocationCell";
 import { SingleLineCell } from "../../components/ExpandedRowDetail";
 import DetailDrawer, { TitleLink } from "../../components/DetailDrawer";
 import RowActions, { type RowAction } from "../../components/RowActions";
+import BarcodeLabelCard from "../../components/BarcodeLabelCard";
 
 interface Location {
   location_name: string;
@@ -359,6 +360,15 @@ const ItemsTable = ({
           },
           { label: "Expiry", value: formatDate(detail?.expiry_date) },
         ]}
+        extra={
+          <BarcodeLabelCard
+            barcode={detail?.barcode}
+            itemName={detail?.name}
+            brand={detail?.brand}
+            category={detail?.category?.name}
+            price={formatCurrency(detail?.price)}
+          />
+        }
       />
     </>
   );
