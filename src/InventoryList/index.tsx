@@ -6,19 +6,25 @@ import { Button, Card, Input, Modal, Select, Skeleton, message } from "antd";
 import {
   CloseCircleOutlined,
   PlusOutlined,
+  PrinterOutlined,
+  ScanOutlined,
   SearchOutlined,
 } from "@ant-design/icons";
-import { useMemo, useState } from "react";
+import type React from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import CreateNewItem from "./components/CreateNewItem";
 import { DELETE_ITEM } from "./graphql/mutations";
 import CheckInOutForm, { type CheckMode } from "./components/CheckInOutForm";
 import DeleteItem from "./components/DeleteItem";
 import UpdateItem from "./components/UpdateItem";
 import CreatePurchaseHistory from "./components/CreatePurchaseHistory";
+import BarcodeScannerModal from "./components/BarcodeScannerModal";
 import PageStatsCards, { type PageStatItem } from "../components/PageStatsCards";
 import { palette } from "../theme/tokens";
 import { useAtom } from "jotai";
 import { currentUserDataAtom } from "../store/atoms";
+import { printAssetLabels } from "../utils/barcode";
 
 interface TransactionRow {
   transaction_type: string;
@@ -167,6 +173,13 @@ const Index = () => {
   const [restockModal, setRestockModal] = useState(false);
   const [checkModal, setCheckModal] = useState(false);
   const [checkMode, setCheckMode] = useState<CheckMode>("out");
+  const [scannerOpen, setScannerOpen] = useState(false);
+  const [prefillBarcode, setPrefillBarcode] = useState<string | undefined>(
+    undefined,
+  );
+  const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
+  const [inspectedItemId, setInspectedItemId] = useState<string | null>(null);
+  const [searchParams, setSearchParams] = useSearchParams();
 
   // Search & Filters state
   const [searchText, setSearchText] = useState("");
@@ -368,6 +381,68 @@ const Index = () => {
     (i: { itemId: string }) => i.itemId === selectedItemId,
   );
 
+  const inspectedItem = useMemo(
+    () =>
+      inspectedItemId
+        ? allItems.find(
+            (i: { itemId: string }) => i.itemId === inspectedItemId,
+          ) || null
+        : null,
+    [allItems, inspectedItemId],
+  );
+
+  useEffect(() => {
+    const deepItemId = searchParams.get("item");
+    if (deepItemId && allItems.length > 0) {
+      const exists = allItems.some(
+        (i: { itemId: string }) => i.itemId === deepItemId,
+      );
+      if (exists) {
+        setInspectedItemId(deepItemId);
+      }
+      const next = new URLSearchParams(searchParams);
+      next.delete("item");
+      setSearchParams(next, { replace: true });
+    }
+  }, [searchParams, allItems, setSearchParams]);
+
+  const handleBatchPrintLabels = () => {
+    const keySet = new Set(selectedRowKeys.map(String));
+    const chosen = allItems.filter((i: { itemId: string }) =>
+      keySet.has(i.itemId),
+    );
+    if (chosen.length === 0) return;
+
+    const ok = printAssetLabels(
+      chosen.map(
+        (i: {
+          itemId: string;
+          name: string;
+          brand?: string;
+          category?: { name?: string };
+          price?: number;
+          barcode?: string;
+        }) => ({
+          itemId: i.itemId,
+          name: i.name,
+          brand: i.brand,
+          category: i.category?.name,
+          price:
+            i.price !== undefined && i.price !== null
+              ? `$${Number(i.price).toLocaleString(undefined, {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                })}`
+              : undefined,
+          barcode: i.barcode,
+        }),
+      ),
+    );
+    if (!ok) {
+      message.error("Unable to open print dialog");
+    }
+  };
+
   const handleEditItemClick = (itemId: string) => {
     setSelectedItemId(itemId);
     setUpdateModal(true);
@@ -474,7 +549,29 @@ const Index = () => {
                 ? `Showing ${filteredItems.length} of ${allItems.length}`
                 : `${allItems.length} items`}
             </ItemCountBadge>
-            <AddNewItem type="primary" onClick={() => setOpen(true)}>
+            {selectedRowKeys.length > 0 && (
+              <Button
+                icon={<PrinterOutlined />}
+                onClick={handleBatchPrintLabels}
+                style={{ height: 38, borderRadius: 8 }}
+              >
+                Print Labels ({selectedRowKeys.length})
+              </Button>
+            )}
+            <Button
+              icon={<ScanOutlined />}
+              onClick={() => setScannerOpen(true)}
+              style={{ height: 38, borderRadius: 8 }}
+            >
+              Scan
+            </Button>
+            <AddNewItem
+              type="primary"
+              onClick={() => {
+                setPrefillBarcode(undefined);
+                setOpen(true);
+              }}
+            >
               Add new Item <PlusOutlined />
             </AddNewItem>
           </RightGroup>
@@ -512,6 +609,10 @@ const Index = () => {
                 outstandingByItem={outstandingByItem}
                 isFiltered={hasActiveFilters}
                 onResetFilters={handleResetFilters}
+                selectedRowKeys={selectedRowKeys}
+                onSelectionChange={setSelectedRowKeys}
+                inspectedItem={inspectedItem}
+                onInspectItem={(item) => setInspectedItemId(item?.itemId ?? null)}
               />
             </TableWrapper>
           )}
@@ -533,11 +634,15 @@ const Index = () => {
         centered
         open={open}
         footer={null}
-        onCancel={() => setOpen(false)}
+        destroyOnClose
+        onCancel={() => {
+          setOpen(false);
+          setPrefillBarcode(undefined);
+        }}
         width="min(760px, 94vw)"
         styles={{ body: { maxHeight: "72vh", overflowY: "auto", paddingTop: 5 } }}
       >
-        <CreateNewItem setOpen={setOpen} />
+        <CreateNewItem setOpen={setOpen} initialBarcode={prefillBarcode} />
       </Modal>
       <Modal
         title={modalTitle("Update Item")}
@@ -615,6 +720,18 @@ const Index = () => {
           />
         )}
       </Modal>
+      <BarcodeScannerModal
+        open={scannerOpen}
+        onClose={() => setScannerOpen(false)}
+        items={allItems}
+        outstandingByItem={outstandingByItem}
+        onLookupItem={(itemId) => setInspectedItemId(itemId)}
+        onCheckItem={(itemId, mode) => handleCheck(itemId, mode)}
+        onCreateWithBarcode={(barcode) => {
+          setPrefillBarcode(barcode);
+          setOpen(true);
+        }}
+      />
     </UsersContainer>
   );
 };

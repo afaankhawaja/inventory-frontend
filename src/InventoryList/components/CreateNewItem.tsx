@@ -19,7 +19,7 @@ import {
   FETCH_ALL_LOCATIONS,
 } from "../graphql/queries";
 import type { Dayjs } from "dayjs";
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import {
   formStyles,
   Section,
@@ -52,6 +52,7 @@ const StyledForm = styled(Form<ItemType>)` ${formStyles}`;
 
 interface Props {
   setOpen: (arg: boolean) => void;
+  initialBarcode?: string;
 }
 interface CategoryProps {
   categoryId?: string;
@@ -70,8 +71,14 @@ function convertLocationsToTreeData(locations) {
   }));
 }
 
-const CreateNewItem = ({ setOpen }: Props) => {
+const CreateNewItem = ({ setOpen, initialBarcode }: Props) => {
   const [form] = Form.useForm();
+
+  useEffect(() => {
+    if (initialBarcode) {
+      form.setFieldsValue({ barcode: initialBarcode });
+    }
+  }, [initialBarcode, form]);
   const [createItem, { loading }] = useMutation(CREATE_NEW_ITEM, {
     refetchQueries: [
       { query: FETCH_ALL_ITEMS, variables: { skip: 0, take: 500 } },

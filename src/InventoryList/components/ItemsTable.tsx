@@ -1,3 +1,4 @@
+import type React from "react";
 import { useState } from "react";
 import { Button, Table, Tag } from "antd";
 import type { ColumnsType } from "antd/es/table";
@@ -57,6 +58,10 @@ interface ItemsTableProps {
   pagination: PaginationType;
   isFiltered?: boolean;
   onResetFilters?: () => void;
+  selectedRowKeys?: React.Key[];
+  onSelectionChange?: (keys: React.Key[]) => void;
+  inspectedItem?: Item | null;
+  onInspectItem?: (item: Item | null) => void;
 }
 
 const formatDate = (dateStr?: string) => {
@@ -90,9 +95,15 @@ const ItemsTable = ({
   pagination,
   isFiltered,
   onResetFilters,
+  selectedRowKeys,
+  onSelectionChange,
+  inspectedItem,
+  onInspectItem,
 }: ItemsTableProps) => {
   const [userData] = useAtom(currentUserDataAtom);
-  const [detail, setDetail] = useState<Item | null>(null);
+  const [internalDetail, setInternalDetail] = useState<Item | null>(null);
+  const detail = inspectedItem !== undefined ? inspectedItem : internalDetail;
+  const setDetail = onInspectItem ?? setInternalDetail;
 
   const columns: ColumnsType<Item> = [
     {
@@ -267,6 +278,15 @@ const ItemsTable = ({
         tableLayout="fixed"
         columns={visibleColumns}
         dataSource={dataSource}
+        rowSelection={
+          onSelectionChange
+            ? {
+                selectedRowKeys,
+                onChange: (keys) => onSelectionChange(keys),
+                preserveSelectedRowKeys: true,
+              }
+            : undefined
+        }
         pagination={{
           ...pagination,
           showSizeChanger: true,
@@ -362,6 +382,7 @@ const ItemsTable = ({
         ]}
         extra={
           <BarcodeLabelCard
+            itemId={detail?.itemId}
             barcode={detail?.barcode}
             itemName={detail?.name}
             brand={detail?.brand}
