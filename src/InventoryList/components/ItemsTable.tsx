@@ -1,6 +1,6 @@
 import type React from "react";
 import { useState } from "react";
-import { Button, Table, Tag } from "antd";
+import { Button, Space, Table, Tag } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import { currentUserDataAtom } from "../../store/atoms";
 import { useAtom } from "jotai";
@@ -200,7 +200,7 @@ const ItemsTable = ({
       title: "Condition",
       dataIndex: "condition",
       key: "condition",
-      width: 110,
+      width: 126,
       sorter: (a, b) => (a.condition || "").localeCompare(b.condition || ""),
       render: (val: string) => (
         <Tag color={conditionColor(val)} style={{ margin: 0 }}>
@@ -336,6 +336,78 @@ const ItemsTable = ({
         open={!!detail}
         title={detail?.name}
         onClose={() => setDetail(null)}
+        headerExtra={
+          detail &&
+          (userData?.role === "admin" || userData?.role === "super-admin") ? (
+            <Space wrap size={[8, 8]}>
+              {(detail.quantity_in_stock ?? 0) > 0 && (
+                <Button
+                  size="small"
+                  type="primary"
+                  icon={<LogoutOutlined />}
+                  onClick={() => {
+                    const id = detail.itemId;
+                    setDetail(null);
+                    onCheck(id, "out");
+                  }}
+                >
+                  Check Out
+                </Button>
+              )}
+              {(outstandingByItem.get(detail.itemId) ?? 0) > 0 && (
+                <Button
+                  size="small"
+                  icon={<LoginOutlined />}
+                  onClick={() => {
+                    const id = detail.itemId;
+                    setDetail(null);
+                    onCheck(id, "in");
+                  }}
+                >
+                  Check In ({outstandingByItem.get(detail.itemId)} out)
+                </Button>
+              )}
+              {userData?.role === "super-admin" && (
+                <Button
+                  size="small"
+                  icon={<PlusCircleOutlined />}
+                  onClick={() => {
+                    const id = detail.itemId;
+                    setDetail(null);
+                    onRestockItem(id);
+                  }}
+                >
+                  Restock
+                </Button>
+              )}
+              <Button
+                size="small"
+                icon={<EditOutlined />}
+                onClick={() => {
+                  const id = detail.itemId;
+                  setDetail(null);
+                  onEditItem(id);
+                }}
+              >
+                Edit
+              </Button>
+              {userData?.role === "super-admin" && (
+                <Button
+                  size="small"
+                  danger
+                  icon={<DeleteOutlined />}
+                  onClick={() => {
+                    const id = detail.itemId;
+                    setDetail(null);
+                    onDeleteItem(id);
+                  }}
+                >
+                  Delete
+                </Button>
+              )}
+            </Space>
+          ) : undefined
+        }
         fields={[
           { label: "Brand", value: detail?.brand || "-" },
           { label: "Category", value: detail?.category?.name || "-" },

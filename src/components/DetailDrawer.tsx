@@ -29,6 +29,7 @@ interface DetailDrawerProps {
   title: React.ReactNode;
   fields: DetailField[];
   onClose: () => void;
+  headerExtra?: React.ReactNode;
   extra?: React.ReactNode;
 }
 
@@ -37,15 +38,17 @@ const DetailDrawer: React.FC<DetailDrawerProps> = ({
   title,
   fields,
   onClose,
+  headerExtra,
   extra,
 }) => (
   <Drawer
     open={open}
     title={title}
     onClose={onClose}
-    width={420}
+    width={440}
     destroyOnClose
   >
+    {headerExtra && <div style={{ marginBottom: 14 }}>{headerExtra}</div>}
     <Descriptions column={1} bordered size="small" labelStyle={{ width: 150 }}
       contentStyle={{ minWidth: 0, overflowWrap: "anywhere", wordBreak: "break-word" }}
       style={{ tableLayout: "fixed", width: "100%" }}
