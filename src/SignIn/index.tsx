@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import SignInForm from "./components/SignInForm";
 import styled from "styled-components";
 
@@ -9,7 +10,11 @@ const Container = styled.section`
   justify-content: center;
 `;
 
-const index = () => {
+const SignIn = () => {
+  useEffect(() => {
+    document.title = "Sign In · Aurelia Vault";
+  }, []);
+
   return (
     <Container>
       <SignInForm />
@@ -17,4 +22,4 @@ const index = () => {
   );
 };
 
-export default index;
+export default SignIn;

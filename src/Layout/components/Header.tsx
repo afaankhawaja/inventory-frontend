@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import {
   EditOutlined,
   LogoutOutlined,
@@ -161,6 +161,10 @@ const HeaderComponent: React.FC<HeaderProps> = ({
 
   const defaultIcon = "../../../assets/images/user.png";
   const pageTitle = getPageTitle(pathname);
+
+  useEffect(() => {
+    document.title = `${pageTitle} · Aurelia Vault`;
+  }, [pageTitle]);
 
   const items: MenuProps["items"] = [
     {

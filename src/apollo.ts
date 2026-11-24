@@ -1,7 +1,11 @@
 import { ApolloClient, InMemoryCache, createHttpLink } from "@apollo/client";
 import { broadcastLogout } from "./utils/authBroadcast";
 
-const GRAPHQL_URL = "http://localhost:3000/graphql";
+const API_BASE_URL = (
+  import.meta.env.VITE_API_URL || "http://localhost:3000"
+).replace(/\/+$/, "");
+
+const GRAPHQL_URL = `${API_BASE_URL}/graphql`;
 
 const isUnauthorized = async (response: Response): Promise<boolean> => {
   try {

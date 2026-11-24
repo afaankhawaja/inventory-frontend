@@ -1,9 +1,14 @@
+import { useEffect } from "react";
 import SignUpForm from "./components/SignUpForm";
 import styled from "styled-components";
 
 const Container = styled.section``;
 
-const index = () => {
+const SignUp = () => {
+  useEffect(() => {
+    document.title = "Create Account · Aurelia Vault";
+  }, []);
+
   return (
     <Container>
       <SignUpForm />
@@ -11,4 +16,4 @@ const index = () => {
   );
 };
 
-export default index;
+export default SignUp;

@@ -12,6 +12,7 @@ import { Drawer, Layout, Menu, theme } from "antd";
 import { useLocation, useNavigate } from "react-router";
 import { useAtomValue } from "jotai";
 import { currentUserDataAtom } from "../../store/atoms";
+import BrandLogo from "../../components/BrandLogo";
 
 const { Sider } = Layout;
 
@@ -98,8 +99,10 @@ const Sidebar: React.FC<SidebarProps> = ({
           overflow: "hidden",
         }}
       >
-        <span style={{ color: colorPrimary }}>●</span>
-        {!effectiveCollapsed && <span style={{ marginLeft: 10 }}>Inventory</span>}
+        <BrandLogo size={24} color={colorPrimary} />
+        {!effectiveCollapsed && (
+          <span style={{ marginLeft: 10 }}>Aurelia Vault</span>
+        )}
       </div>
       <Menu
         style={{ borderInlineEnd: "none", background: "transparent", flex: 1 }}
