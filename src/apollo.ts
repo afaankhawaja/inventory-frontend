@@ -1,9 +1,11 @@
 import { ApolloClient, InMemoryCache, createHttpLink } from "@apollo/client";
 import { broadcastLogout } from "./utils/authBroadcast";
 
-const API_BASE_URL = (
-  import.meta.env.VITE_API_URL || "http://localhost:3000"
-).replace(/\/+$/, "");
+const rawApiUrl = import.meta.env.VITE_API_URL;
+const API_BASE_URL =
+  rawApiUrl !== undefined
+    ? rawApiUrl.trim().replace(/\/+$/, "")
+    : "http://localhost:3000";
 
 const GRAPHQL_URL = `${API_BASE_URL}/graphql`;
 
@@ -52,9 +54,6 @@ const fetchWithRefresh: typeof fetch = async (input, init) => {
     return fetch(input, init);
   }
   broadcastLogout();
-  if (window.location.pathname !== "/signin") {
-    window.location.href = "/signin";
-  }
   return response;
 };
 
