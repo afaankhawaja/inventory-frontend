@@ -1,6 +1,6 @@
 import type React from "react";
 import { useState } from "react";
-import { Button, Space, Table, Tag } from "antd";
+import { Button, Grid, Space, Table, Tag } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import { currentUserDataAtom } from "../../store/atoms";
 import { useAtom } from "jotai";
@@ -104,6 +104,8 @@ const ItemsTable = ({
   const [internalDetail, setInternalDetail] = useState<Item | null>(null);
   const detail = inspectedItem !== undefined ? inspectedItem : internalDetail;
   const setDetail = onInspectItem ?? setInternalDetail;
+  const screens = Grid.useBreakpoint();
+  const isMobile = screens.md === false;
 
   const columns: ColumnsType<Item> = [
     {
@@ -112,9 +114,25 @@ const ItemsTable = ({
       key: "name",
       sorter: (a, b) => (a.name || "").localeCompare(b.name || ""),
       render: (text: string, record: Item) => (
-        <TitleLink onClick={() => setDetail(record)} title="View details">
-          {text || "-"}
-        </TitleLink>
+        <div style={{ minWidth: 0 }}>
+          <TitleLink onClick={() => setDetail(record)} title="View details">
+            {text || "-"}
+          </TitleLink>
+          {isMobile && (
+            <div
+              style={{
+                fontSize: 11,
+                opacity: 0.6,
+                whiteSpace: "nowrap",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                marginTop: 2,
+              }}
+            >
+              {[record.brand, record.category?.name].filter(Boolean).join(" · ") || "—"}
+            </div>
+          )}
+        </div>
       ),
     },
     {
@@ -122,6 +140,7 @@ const ItemsTable = ({
       dataIndex: "brand",
       key: "brand",
       width: 130,
+      responsive: ["md"],
       sorter: (a, b) => (a.brand || "").localeCompare(b.brand || ""),
       render: (text: string) => <SingleLineCell>{text || "-"}</SingleLineCell>,
     },
@@ -130,6 +149,7 @@ const ItemsTable = ({
       dataIndex: "category",
       key: "category",
       width: 150,
+      responsive: ["md"],
       sorter: (a, b) =>
         (a.category?.name || "").localeCompare(b.category?.name || ""),
       render: (val: Category) => (
@@ -140,7 +160,7 @@ const ItemsTable = ({
       title: "Price",
       dataIndex: "price",
       key: "price",
-      width: 130,
+      width: isMobile ? 86 : 130,
       align: "right",
       sorter: (a, b) => Number(a.price || 0) - Number(b.price || 0),
       render: (val: number) => (
@@ -153,7 +173,7 @@ const ItemsTable = ({
       title: "Stock",
       dataIndex: "quantity_in_stock",
       key: "quantity_in_stock",
-      width: 100,
+      width: isMobile ? 58 : 100,
       align: "center",
       sorter: (a, b) =>
         Number(a.quantity_in_stock || 0) - Number(b.quantity_in_stock || 0),
@@ -164,7 +184,7 @@ const ItemsTable = ({
         return (
           <SingleLineCell>
             <span>{val ?? "—"}</span>
-            {isOut && (
+            {!isMobile && isOut && (
               <Tag
                 color="error"
                 style={{
@@ -178,7 +198,7 @@ const ItemsTable = ({
                 Out
               </Tag>
             )}
-            {isLow && (
+            {!isMobile && isLow && (
               <Tag
                 color="warning"
                 style={{
@@ -192,6 +212,18 @@ const ItemsTable = ({
                 Low
               </Tag>
             )}
+            {isMobile && (isOut || isLow) && (
+              <div
+                style={{
+                  fontSize: 9.5,
+                  fontWeight: 600,
+                  color: isOut ? "#FF3B30" : "#FF9500",
+                  lineHeight: 1.1,
+                }}
+              >
+                {isOut ? "Out" : "Low"}
+              </div>
+            )}
           </SingleLineCell>
         );
       },
@@ -201,6 +233,7 @@ const ItemsTable = ({
       dataIndex: "condition",
       key: "condition",
       width: 126,
+      responsive: ["md"],
       sorter: (a, b) => (a.condition || "").localeCompare(b.condition || ""),
       render: (val: string) => (
         <Tag color={conditionColor(val)} style={{ margin: 0 }}>
@@ -211,8 +244,8 @@ const ItemsTable = ({
     {
       title: "Action",
       key: "action",
-      fixed: "right",
-      width: 90,
+      fixed: isMobile ? undefined : "right",
+      width: isMobile ? 48 : 90,
       align: "center",
       render: (record: Item) => {
         const role = userData?.role;
@@ -289,14 +322,16 @@ const ItemsTable = ({
         }
         pagination={{
           ...pagination,
-          showSizeChanger: true,
+          size: isMobile ? "small" : "default",
+          showSizeChanger: !isMobile,
           pageSizeOptions: ["10", "20", "50"],
-          showTotal: (total, range) =>
-            `${range[0]}-${range[1]} of ${total} items`,
+          showTotal: isMobile
+            ? undefined
+            : (total, range) => `${range[0]}-${range[1]} of ${total} items`,
         }}
         rowClassName={() => "row-static"}
-        sticky
-        scroll={{ x: 920, y: "calc(100vh - 350px)" }}
+        sticky={!isMobile}
+        scroll={isMobile ? undefined : { x: 920, y: "calc(100vh - 350px)" }}
         locale={{
           emptyText: (
             <div style={{ padding: "32px 16px", textAlign: "center" }}>

@@ -103,3 +103,76 @@ h3 {
 .ant-table-wrapper .ant-table-tbody > tr.ant-table-row.row-static {
   cursor: default;
 }
+
+
+/* Tablet typography & table density */
+@media (max-width: 1024px) {
+  body {
+    font-size: 13.5px;
+  }
+
+  .ant-table-wrapper .ant-table-thead > tr > th {
+    font-size: 11px;
+    padding: 10px 10px;
+  }
+
+  .ant-table-wrapper .ant-table-tbody > tr > td {
+    font-size: 13px;
+    padding: 10px 10px;
+  }
+}
+
+/* Mobile typography, cards, and compact tables */
+@media (max-width: 767px) {
+  body {
+    font-size: 13px;
+  }
+
+  h1 {
+    font-size: 17px;
+  }
+
+  h2 {
+    font-size: 15px;
+  }
+
+  h3 {
+    font-size: 14px;
+  }
+
+  .ant-card .ant-card-body {
+    padding: 12px;
+  }
+
+  .ant-card .ant-card-head {
+    padding: 0 12px;
+    min-height: 44px;
+    font-size: 14px;
+  }
+
+  .ant-table-wrapper .ant-table {
+    border-radius: 12px;
+  }
+
+  .ant-table-wrapper .ant-table-thead > tr > th {
+    font-size: 10.5px;
+    letter-spacing: 0.03em;
+    padding: 8px 8px;
+  }
+
+  .ant-table-wrapper .ant-table-tbody > tr > td {
+    font-size: 12.5px;
+    padding: 8px 8px;
+  }
+
+  .ant-table-wrapper .ant-table-selection-column {
+    width: 34px !important;
+    min-width: 34px !important;
+    padding-inline: 6px !important;
+  }
+
+  .ant-pagination {
+    margin-top: 10px !important;
+    font-size: 12px;
+  }
+}

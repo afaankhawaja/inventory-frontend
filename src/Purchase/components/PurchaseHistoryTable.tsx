@@ -1,4 +1,4 @@
-import { Table, Alert, Card, Skeleton } from "antd";
+import { Table, Alert, Card, Grid, Skeleton } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import { useQuery } from "@apollo/client";
 import { FETCH_ALL_PURCHASES } from "../graphql/queries";
@@ -51,6 +51,9 @@ const PurchaseHistoryTable: React.FC = () => {
     fetchPolicy: "network-only",
   });
 
+  const screens = Grid.useBreakpoint();
+  const isMobile = screens.md === false;
+
   const purchases: PurchaseRecord[] = data?.purchaseHistories?.purchases || [];
   const columns: ColumnsType<PurchaseRecord> = [
     {
@@ -58,6 +61,7 @@ const PurchaseHistoryTable: React.FC = () => {
       dataIndex: "purchase_date",
       key: "purchase_date",
       width: 115,
+      responsive: ["md"],
       render: (d: string) => <SingleLineCell>{formatDate(d)}</SingleLineCell>,
     },
     {
@@ -65,9 +69,31 @@ const PurchaseHistoryTable: React.FC = () => {
       dataIndex: ["item", "name"],
       key: "itemName",
       render: (text: string, record: PurchaseRecord) => (
-        <TitleLink onClick={() => setDetail(record)} title="View details">
-          {text || "-"}
-        </TitleLink>
+        <div style={{ minWidth: 0 }}>
+          <TitleLink onClick={() => setDetail(record)} title="View details">
+            {text || "-"}
+          </TitleLink>
+          {isMobile && (
+            <div
+              style={{
+                fontSize: 11,
+                opacity: 0.6,
+                whiteSpace: "nowrap",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                marginTop: 2,
+              }}
+            >
+              {[
+                record.vendor?.name,
+                record.quantity ? `×${record.quantity}` : null,
+                formatDate(record.purchase_date),
+              ]
+                .filter(Boolean)
+                .join(" · ")}
+            </div>
+          )}
+        </div>
       ),
     },
     {
@@ -75,6 +101,7 @@ const PurchaseHistoryTable: React.FC = () => {
       dataIndex: ["vendor", "name"],
       key: "vendor",
       width: 180,
+      responsive: ["md"],
       render: (text: string) => <SingleLineCell>{text || "—"}</SingleLineCell>,
     },
     {
@@ -83,6 +110,7 @@ const PurchaseHistoryTable: React.FC = () => {
       key: "quantity",
       width: 70,
       align: "center",
+      responsive: ["md"],
       render: (val: number) => <SingleLineCell>{val ?? "—"}</SingleLineCell>,
     },
     {
@@ -91,6 +119,7 @@ const PurchaseHistoryTable: React.FC = () => {
       key: "unit_price",
       width: 125,
       align: "right",
+      responsive: ["md"],
       render: (val: string | number) => (
         <SingleLineCell>{formatCurrency(val)}</SingleLineCell>
       ),
@@ -99,7 +128,7 @@ const PurchaseHistoryTable: React.FC = () => {
       title: "Total Cost",
       dataIndex: "total_cost",
       key: "total_cost",
-      width: 145,
+      width: isMobile ? 105 : 145,
       align: "right",
       render: (val: string | number) => (
         <SingleLineCell style={{ fontWeight: 600 }}>
@@ -143,9 +172,10 @@ const PurchaseHistoryTable: React.FC = () => {
           dataSource={purchases}
           columns={columns}
           rowClassName={() => "row-static"}
-          sticky
-          scroll={{ x: 900, y: "calc(100vh - 310px)" }}
+          sticky={!isMobile}
+          scroll={isMobile ? undefined : { x: 900, y: "calc(100vh - 310px)" }}
           pagination={{
+            size: isMobile ? "small" : "default",
             current: pagination.current,
             pageSize: pagination.pageSize,
             total: data?.purchaseHistories?.total,

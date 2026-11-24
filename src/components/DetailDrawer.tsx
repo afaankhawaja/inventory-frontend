@@ -45,7 +45,7 @@ const DetailDrawer: React.FC<DetailDrawerProps> = ({
     open={open}
     title={title}
     onClose={onClose}
-    width={440}
+    width="min(440px, 100vw)"
     destroyOnClose
   >
     {headerExtra && <div style={{ marginBottom: 14 }}>{headerExtra}</div>}

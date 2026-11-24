@@ -1,5 +1,5 @@
 import React from "react";
-import { Layout } from "antd";
+import { Grid, Layout } from "antd";
 import { Outlet, useLocation } from "react-router";
 import { motion } from "framer-motion";
 
@@ -7,18 +7,20 @@ const { Content } = Layout;
 
 const ContentComponent: React.FC = () => {
   const location = useLocation();
+  const screens = Grid.useBreakpoint();
+  const isMobile = screens.sm === false;
 
   return (
     <Content
       style={{
         margin: 0,
-        padding: "15px",
+        padding: isMobile ? "10px" : "15px",
         width: "100%",
         flex: 1,
         minWidth: 0,
         boxSizing: "border-box",
         overflow: "auto",
-        height: "calc(100vh - 64px)",
+        height: isMobile ? "calc(100vh - 56px)" : "calc(100vh - 64px)",
       }}
     >
       <motion.div

@@ -1,4 +1,4 @@
-import { Table, Tag, Alert, Select, Card, Skeleton, message } from "antd";
+import { Table, Tag, Alert, Grid, Select, Card, Skeleton, message } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import { useMutation, useQuery } from "@apollo/client";
 import { GET_MAINTENANCE_SCHEDULES } from "../graphql/queries";
@@ -68,6 +68,9 @@ const MaintenanceSchedulesTable = () => {
     },
   );
 
+  const screens = Grid.useBreakpoint();
+  const isMobile = screens.md === false;
+
   const schedules: RecordType[] =
     data?.maintenanceSchedules?.maintenanceSchedules || [];
   const total = data?.maintenanceSchedules?.total || 0;
@@ -78,9 +81,27 @@ const MaintenanceSchedulesTable = () => {
       dataIndex: ["item", "name"],
       key: "item_name",
       render: (text: string, record: RecordType) => (
-        <TitleLink onClick={() => setDetail(record)} title="View details">
-          {text || "-"}
-        </TitleLink>
+        <div style={{ minWidth: 0 }}>
+          <TitleLink onClick={() => setDetail(record)} title="View details">
+            {text || "-"}
+          </TitleLink>
+          {isMobile && (
+            <div
+              style={{
+                fontSize: 11,
+                opacity: 0.6,
+                whiteSpace: "nowrap",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                marginTop: 2,
+              }}
+            >
+              {[record.maintenance_type, record.user?.username || "system", formatDate(record.createdAt)]
+                .filter(Boolean)
+                .join(" · ")}
+            </div>
+          )}
+        </div>
       ),
     },
     {
@@ -88,6 +109,7 @@ const MaintenanceSchedulesTable = () => {
       dataIndex: "maintenance_type",
       key: "maintenance_type",
       width: 125,
+      responsive: ["md"],
       render: (text: string) => (
         <Tag
           color={text === "CORRECTIVE" ? "volcano" : "geekblue"}
@@ -105,10 +127,11 @@ const MaintenanceSchedulesTable = () => {
       title: "Status",
       dataIndex: "status",
       key: "status",
-      width: 165,
+      width: isMobile ? 132 : 165,
       render: (status: string, record: RecordType) => (
         <div onClick={(e) => e.stopPropagation()}>
           <Select
+            size={isMobile ? "small" : "middle"}
             value={status}
             options={statusOptions}
             loading={mutLoading}
@@ -123,7 +146,7 @@ const MaintenanceSchedulesTable = () => {
                 },
               });
             }}
-            style={{ width: 135 }}
+            style={{ width: isMobile ? 116 : 135 }}
           />
         </div>
       ),
@@ -133,6 +156,7 @@ const MaintenanceSchedulesTable = () => {
       dataIndex: ["user", "username"],
       key: "username",
       width: 130,
+      responsive: ["md"],
       render: (text: string) => (
         <SingleLineCell>{text || "system"}</SingleLineCell>
       ),
@@ -142,6 +166,7 @@ const MaintenanceSchedulesTable = () => {
       dataIndex: "createdAt",
       key: "createdAt",
       width: 110,
+      responsive: ["md"],
       render: (date: string) => <SingleLineCell>{formatDate(date)}</SingleLineCell>,
     },
   ];
@@ -179,9 +204,10 @@ const MaintenanceSchedulesTable = () => {
           dataSource={schedules}
           columns={columns}
           rowClassName={() => "row-static"}
-          sticky
-          scroll={{ x: 850, y: "calc(100vh - 310px)" }}
+          sticky={!isMobile}
+          scroll={isMobile ? undefined : { x: 850, y: "calc(100vh - 310px)" }}
           pagination={{
+            size: isMobile ? "small" : "default",
             current: pagination.current,
             pageSize: pagination.pageSize,
             total,

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Avatar, Table, Tag } from "antd";
+import { Avatar, Grid, Table, Tag } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import { DeleteOutlined, EditOutlined, UserOutlined } from "@ant-design/icons";
 import { useAtom } from "jotai";
@@ -60,26 +60,48 @@ const UserTable = ({
 }: UserTableProps) => {
   const [userData] = useAtom(currentUserDataAtom);
   const [detail, setDetail] = useState<User | null>(null);
+  const screens = Grid.useBreakpoint();
+  const isMobile = screens.md === false;
 
   const role = userData?.role;
   const canManage = role === "admin" || role === "super-admin";
 
   const columns: ColumnsType<User> = [
     {
-      title: "First Name",
+      title: isMobile ? "User" : "First Name",
       key: "first_name",
       dataIndex: "first_name",
-      width: 160,
+      width: isMobile ? undefined : 160,
       render: (_: string, record: User) => (
-        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 10, minWidth: 0 }}>
           <Avatar
-            size={28}
+            size={isMobile ? 26 : 28}
             src={record.image_path || undefined}
             icon={<UserOutlined />}
+            style={{ flexShrink: 0 }}
           />
-          <TitleLink onClick={() => setDetail(record)} title="View details">
-            {record.first_name || "—"}
-          </TitleLink>
+          <div style={{ minWidth: 0 }}>
+            <TitleLink onClick={() => setDetail(record)} title="View details">
+              {isMobile
+                ? [record.first_name, record.last_name].filter(Boolean).join(" ") ||
+                  record.username ||
+                  "—"
+                : record.first_name || "—"}
+            </TitleLink>
+            {isMobile && (
+              <div
+                style={{
+                  fontSize: 11,
+                  opacity: 0.6,
+                  whiteSpace: "nowrap",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                }}
+              >
+                {record.email || record.username}
+              </div>
+            )}
+          </div>
         </div>
       ),
     },
@@ -88,6 +110,7 @@ const UserTable = ({
       dataIndex: "last_name",
       key: "last_name",
       width: 110,
+      responsive: ["md"],
       render: (text: string) => <SingleLineCell>{text || "—"}</SingleLineCell>,
     },
     {
@@ -95,6 +118,7 @@ const UserTable = ({
       dataIndex: "username",
       key: "username",
       width: 140,
+      responsive: ["md"],
       sorter: (a, b) => (a.username || "").localeCompare(b.username || ""),
       render: (text: string) => (
         <SingleLineCell style={{ fontWeight: 500 }}>{text || "—"}</SingleLineCell>
@@ -105,6 +129,7 @@ const UserTable = ({
       dataIndex: "email",
       key: "email",
       width: 210,
+      responsive: ["md"],
       render: (text: string) => <SingleLineCell>{text || "—"}</SingleLineCell>,
     },
     {
@@ -112,13 +137,15 @@ const UserTable = ({
       dataIndex: "phone",
       key: "phone",
       width: 130,
+      responsive: ["md"],
       render: (text: string) => <SingleLineCell>{text || "—"}</SingleLineCell>,
     },
     {
       title: "Role",
       dataIndex: "role",
       key: "role",
-      width: 120,
+      width: isMobile ? 96 : 120,
+      responsive: ["md"],
       render: (r: Role | null) =>
         r?.name ? <Tag style={{ margin: 0 }}>{r.name}</Tag> : "—",
     },
@@ -126,7 +153,7 @@ const UserTable = ({
       title: "Status",
       dataIndex: "is_active",
       key: "is_active",
-      width: 90,
+      width: isMobile ? 76 : 90,
       render: (value: boolean | null) => (
         <Tag color={value === true ? "green" : "red"} style={{ margin: 0 }}>
           {value === true ? "Active" : "Inactive"}
@@ -139,6 +166,7 @@ const UserTable = ({
       key: "age",
       width: 60,
       align: "center",
+      responsive: ["md"],
       render: (val: number) => <SingleLineCell>{val ?? "—"}</SingleLineCell>,
     },
     {
@@ -146,15 +174,17 @@ const UserTable = ({
       dataIndex: "created_at",
       key: "created_at",
       width: 105,
+      responsive: ["md"],
       sorter: (a, b) =>
         new Date(a.created_at).getTime() - new Date(b.created_at).getTime(),
       render: (val: string) => <SingleLineCell>{formatDate(val)}</SingleLineCell>,
-    },    {
+    },
+    {
       title: "Action",
       key: "action",
-      width: 64,
+      width: isMobile ? 48 : 64,
       align: "center",
-      fixed: "right",
+      fixed: isMobile ? undefined : "right",
       render: (record: User) => {
         const actions: RowAction[] = [
           {
@@ -186,15 +216,18 @@ const UserTable = ({
     <>
       <Table<User>
         rowKey="userId"
-        pagination={pagination}
+        pagination={{
+          ...pagination,
+          size: isMobile ? "small" : "default",
+        }}
         dataSource={dataSource}
         columns={visibleColumns}
         onRow={(record) => ({
           onClick: () => setDetail(record),
           style: { cursor: "pointer" },
         })}
-        sticky
-        scroll={{ x: 1190, y: "calc(100vh - 340px)" }}
+        sticky={!isMobile}
+        scroll={isMobile ? undefined : { x: 1190, y: "calc(100vh - 340px)" }}
       />
       <UserDetailDrawer
         user={detail}

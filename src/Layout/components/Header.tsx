@@ -11,6 +11,7 @@ import {
   Avatar,
   Button,
   Dropdown,
+  Grid,
   Layout,
   Segmented,
   theme,
@@ -34,6 +35,12 @@ const LeftWrapper = styled.div`
   display: flex;
   align-items: center;
   gap: 12px;
+  min-width: 0;
+  flex: 1;
+
+  @media (max-width: 640px) {
+    gap: 6px;
+  }
 `;
 const ScreenTitle = styled.h1`
   margin: 0;
@@ -41,12 +48,28 @@ const ScreenTitle = styled.h1`
   font-weight: 700;
   letter-spacing: -0.02em;
   line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+
+  @media (max-width: 1024px) {
+    font-size: 18px;
+  }
+
+  @media (max-width: 640px) {
+    font-size: 15.5px;
+  }
 `;
 const Wrapper = styled.div`
   display: flex;
   gap: 0px 12px;
   justify-content: center;
   align-items: center;
+  flex-shrink: 0;
+
+  @media (max-width: 640px) {
+    gap: 0px 8px;
+  }
 `;
 const CommandTrigger = styled.button<{ $isDark: boolean }>`
   display: inline-flex;
@@ -133,6 +156,8 @@ const HeaderComponent: React.FC<HeaderProps> = ({
   const navigate = useNavigate();
   const { pathname } = useLocation();
   const [currentTheme, setCurrentTheme] = useAtom(selectedTheme);
+  const screens = Grid.useBreakpoint();
+  const isMobile = screens.sm === false;
 
   const defaultIcon = "../../../assets/images/user.png";
   const pageTitle = getPageTitle(pathname);
@@ -175,8 +200,8 @@ const HeaderComponent: React.FC<HeaderProps> = ({
         position: "sticky",
         top: 0,
         zIndex: 10,
-        height: 64,
-        padding: "0 15px",
+        height: isMobile ? 56 : 64,
+        padding: isMobile ? "0 10px" : "0 15px",
         background: currentTheme.isDark
           ? "rgba(28, 28, 30, 0.8)"
           : "rgba(245, 245, 247, 0.8)",
@@ -212,7 +237,7 @@ const HeaderComponent: React.FC<HeaderProps> = ({
           </ShortcutBadge>
         </CommandTrigger>
         <Segmented
-          size="middle"
+          size={isMobile ? "small" : "middle"}
           value={currentTheme.isDark ? "Dark" : "Light"}
           options={["Light", "Dark"]}
           onChange={(v) => setCurrentTheme({ isDark: v === "Dark" })}

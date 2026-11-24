@@ -125,8 +125,15 @@ const FilterSelect = styled(Select)`
 const RightGroup = styled.div`
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   margin-left: auto;
+  flex-wrap: wrap;
+
+  @media (max-width: 640px) {
+    width: 100%;
+    margin-left: 0;
+    justify-content: space-between;
+  }
 `;
 
 const ItemCountBadge = styled.span`

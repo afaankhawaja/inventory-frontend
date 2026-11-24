@@ -7,6 +7,15 @@ const Grid = styled.section`
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
   gap: 15px;
+
+  @media (max-width: 1024px) {
+    gap: 12px;
+  }
+
+  @media (max-width: 640px) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
 `;
 
 const Label = styled.div`
@@ -14,6 +23,14 @@ const Label = styled.div`
   font-weight: 500;
   opacity: 0.65;
   margin-bottom: 8px;
+
+  @media (max-width: 640px) {
+    font-size: 11.5px;
+    margin-bottom: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
 `;
 
 const ValueRow = styled.div`
@@ -21,12 +38,21 @@ const ValueRow = styled.div`
   align-items: baseline;
   justify-content: space-between;
   gap: 8px;
+  flex-wrap: wrap;
 `;
 
 const Value = styled.div`
   font-size: 28px;
   font-weight: 700;
   letter-spacing: -0.02em;
+
+  @media (max-width: 1024px) {
+    font-size: 23px;
+  }
+
+  @media (max-width: 640px) {
+    font-size: 18px;
+  }
 `;
 
 const BadgePill = styled.span<{ $color: string }>`
@@ -37,6 +63,10 @@ const BadgePill = styled.span<{ $color: string }>`
   font-weight: 600;
   color: ${(p) => p.$color};
   white-space: nowrap;
+
+  @media (max-width: 640px) {
+    font-size: 10.5px;
+  }
 `;
 
 const CountUp: React.FC<{
