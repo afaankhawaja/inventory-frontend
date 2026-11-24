@@ -8,7 +8,7 @@ import {
   UnorderedListOutlined,
   UserOutlined,
 } from "@ant-design/icons";
-import { Layout, Menu, theme } from "antd";
+import { Drawer, Layout, Menu, theme } from "antd";
 import { useLocation, useNavigate } from "react-router";
 import { useAtomValue } from "jotai";
 import { currentUserDataAtom } from "../../store/atoms";
@@ -18,6 +18,9 @@ const { Sider } = Layout;
 interface SidebarProps {
   collapsed: boolean;
   logoutUser: () => void;
+  isMobile?: boolean;
+  mobileOpen?: boolean;
+  onCloseMobile?: () => void;
 }
 
 const baseNavItems = [
@@ -42,7 +45,13 @@ const baseNavItems = [
   },
 ];
 
-const Sidebar: React.FC<SidebarProps> = ({ collapsed, logoutUser }) => {
+const Sidebar: React.FC<SidebarProps> = ({
+  collapsed,
+  logoutUser,
+  isMobile = false,
+  mobileOpen = false,
+  onCloseMobile,
+}) => {
   const {
     token: { colorBgContainer, colorBorderSecondary, colorPrimary, colorText },
   } = theme.useToken();
@@ -63,6 +72,94 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed, logoutUser }) => {
       .filter((k) => (k === "/" ? pathname === "/" : pathname.startsWith(k)))
       .sort((a, b) => b.length - a.length)[0] ?? "";
 
+  const effectiveCollapsed = isMobile ? false : collapsed;
+
+  const sidebarContent = (
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        height: "100%",
+        padding: "0 8px",
+      }}
+    >
+      <div
+        style={{
+          height: 64,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: effectiveCollapsed ? "center" : "flex-start",
+          padding: effectiveCollapsed ? 0 : "0 16px",
+          fontWeight: 700,
+          fontSize: 17,
+          letterSpacing: "-0.02em",
+          color: colorText,
+          whiteSpace: "nowrap",
+          overflow: "hidden",
+        }}
+      >
+        <span style={{ color: colorPrimary }}>●</span>
+        {!effectiveCollapsed && <span style={{ marginLeft: 10 }}>Inventory</span>}
+      </div>
+      <Menu
+        style={{ borderInlineEnd: "none", background: "transparent", flex: 1 }}
+        mode="inline"
+        theme="light"
+        selectedKeys={[selectedKey]}
+        onClick={({ key }) => {
+          navigate(key);
+          if (isMobile) onCloseMobile?.();
+        }}
+        items={navItems}
+      />
+      <Menu
+        style={{
+          borderInlineEnd: "none",
+          background: "transparent",
+          borderTop: `1px solid ${colorBorderSecondary}`,
+          paddingTop: 8,
+          marginBottom: 8,
+        }}
+        mode="inline"
+        theme="light"
+        selectable={false}
+        onClick={() => {
+          if (isMobile) onCloseMobile?.();
+          logoutUser();
+        }}
+        items={[
+          {
+            key: "logout",
+            icon: <LogoutOutlined />,
+            label: "Log Out",
+            danger: true,
+          },
+        ]}
+      />
+    </div>
+  );
+
+  if (isMobile) {
+    return (
+      <Drawer
+        placement="left"
+        open={mobileOpen}
+        onClose={onCloseMobile}
+        width={248}
+        closable={false}
+        styles={{
+          body: {
+            padding: 0,
+            backgroundColor: colorBgContainer,
+            height: "100%",
+          },
+        }}
+      >
+        {sidebarContent}
+      </Drawer>
+    );
+  }
+
   return (
     <Sider
       trigger={null}
@@ -79,62 +176,7 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed, logoutUser }) => {
         left: 0,
       }}
     >
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          height: "100%",
-          padding: "0 8px",
-        }}
-      >
-        <div
-          style={{
-            height: 64,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: collapsed ? "center" : "flex-start",
-            padding: collapsed ? 0 : "0 16px",
-            fontWeight: 700,
-            fontSize: 17,
-            letterSpacing: "-0.02em",
-            color: colorText,
-            whiteSpace: "nowrap",
-            overflow: "hidden",
-          }}
-        >
-          <span style={{ color: colorPrimary }}>●</span>
-          {!collapsed && <span style={{ marginLeft: 10 }}>Inventory</span>}
-        </div>
-        <Menu
-          style={{ borderInlineEnd: "none", background: "transparent", flex: 1 }}
-          mode="inline"
-          theme="light"
-          selectedKeys={[selectedKey]}
-          onClick={({ key }) => navigate(key)}
-          items={navItems}
-        />
-        <Menu
-          style={{
-            borderInlineEnd: "none",
-            background: "transparent",
-            borderTop: `1px solid ${colorBorderSecondary}`,
-            paddingTop: 8,
-            marginBottom: 8,
-          }}
-          mode="inline"
-          theme="light"
-          selectable={false}
-          onClick={() => logoutUser()}
-          items={[
-            {
-              key: "logout",
-              icon: <LogoutOutlined />,
-              label: "Log Out",
-              danger: true,
-            },
-          ]}
-        />
-      </div>
+      {sidebarContent}
     </Sider>
   );
 };

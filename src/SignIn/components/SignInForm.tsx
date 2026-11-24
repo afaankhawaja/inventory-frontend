@@ -1,6 +1,6 @@
-import React from "react";
+import React, { useState } from "react";
 import type { FormProps } from "antd";
-import { Button, Checkbox, Form, Input, message } from "antd";
+import { Alert, App as AntdApp, Button, Checkbox, Form, Input } from "antd";
 import { useNavigate } from "react-router-dom";
 import SignInIcon from "../../../assets/svgs/sign_in_icon.svg?react";
 import { SIGNIN_MUTATION } from "../graphql/mutations";
@@ -16,22 +16,31 @@ type FieldType = {
 
 const SignInForm: React.FC = () => {
   const [form] = Form.useForm();
+  const [authError, setAuthError] = useState<string | null>(null);
   const navigate = useNavigate();
+  const { message, notification } = AntdApp.useApp();
 
   const [signIn, { loading }] = useMutation(SIGNIN_MUTATION, {
     onCompleted: (data) => {
       if (data?.signin) {
+        setAuthError(null);
         broadcastLogin();
-        message.success("Signed in");
+        notification.success({
+          message: "Signed in",
+          description: "Welcome back to your inventory workspace.",
+        });
         navigate("/");
+      } else {
+        setAuthError("Invalid username or password. Please try again.");
       }
     },
     onError: (error) => {
-      message.error(error.message);
+      setAuthError(error.message || "Sign in failed. Please try again.");
     },
   });
 
   const onFinish: FormProps<FieldType>["onFinish"] = async (values) => {
+    setAuthError(null);
     try {
       await signIn({
         variables: {
@@ -71,9 +80,23 @@ const SignInForm: React.FC = () => {
         size="large"
         requiredMark={false}
         initialValues={{ remember: true }}
+        onValuesChange={() => {
+          if (authError) setAuthError(null);
+        }}
         onFinish={onFinish}
         onFinishFailed={onFinishFailed}
       >
+        {authError && (
+          <Alert
+            type="error"
+            showIcon
+            closable
+            message="Sign in failed"
+            description={authError}
+            onClose={() => setAuthError(null)}
+            style={{ marginBottom: 16, borderRadius: 10 }}
+          />
+        )}
         <Form.Item<FieldType>
           label="Username"
           name="username"

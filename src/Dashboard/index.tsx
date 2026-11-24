@@ -1,5 +1,5 @@
 import styled from "styled-components";
-import { Card, Skeleton, Tabs } from "antd";
+import { Button, Card, Result, Skeleton, Tabs } from "antd";
 import HighValueAssetTable from "./components/HighValueAssetTable";
 import InventoryValuationCards from "./components/InventoryValuationCards";
 import { useState } from "react";
@@ -28,7 +28,7 @@ const Index = () => {
     pageSize: 5,
   });
 
-  const { data, loading, error } = useQuery(GET_TRANSACTIONS, {
+  const { data, loading, error, refetch } = useQuery(GET_TRANSACTIONS, {
     variables: {
       skip: (pagination.current - 1) * pagination.pageSize,
       take: pagination.pageSize,
@@ -62,7 +62,16 @@ const Index = () => {
               key: "high",
               label: "High value check-outs",
               children: error ? (
-                <>error {error.message}</>
+                <Result
+                  status="warning"
+                  title="Unable to load transactions"
+                  subTitle={error.message}
+                  extra={
+                    <Button type="primary" onClick={() => void refetch()}>
+                      Retry
+                    </Button>
+                  }
+                />
               ) : loading ? (
                 <Skeleton active />
               ) : (

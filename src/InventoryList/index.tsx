@@ -2,7 +2,17 @@ import { useMutation, useQuery } from "@apollo/client";
 import { FETCH_ALL_ITEMS, GET_TRANSACTIONS } from "./graphql/queries";
 import ItemsTable from "./components/ItemsTable";
 import styled from "styled-components";
-import { Button, Card, Input, Modal, Select, Skeleton, message } from "antd";
+import {
+  App as AntdApp,
+  Button,
+  Card,
+  Input,
+  Modal,
+  Result,
+  Select,
+  Skeleton,
+  message,
+} from "antd";
 import {
   CloseCircleOutlined,
   PlusOutlined,
@@ -196,7 +206,9 @@ const Index = () => {
     pageSize: 10,
   });
 
-  const { data, loading, error } = useQuery(FETCH_ALL_ITEMS, {
+  const { notification } = AntdApp.useApp();
+
+  const { data, loading, error, refetch } = useQuery(FETCH_ALL_ITEMS, {
     variables: { skip: 0, take: 500 },
   });
 
@@ -484,11 +496,17 @@ const Index = () => {
       },
     })
       .then(() => {
-        message.success("sucessfully deleted");
+        notification.success({
+          message: "Item deleted",
+          description: "The item has been removed from inventory.",
+        });
         setDeleteModal(false);
       })
       .catch((error) => {
-        message.error(error?.message);
+        notification.error({
+          message: "Delete failed",
+          description: error?.message || "Unable to delete item.",
+        });
       });
   };
 
@@ -598,10 +616,17 @@ const Index = () => {
       </ActionRow>
 
       {error ? (
-        <Card style={{ textAlign: "center", padding: "20px" }}>
-          <p style={{ color: palette.status.critical, margin: 0 }}>
-            Error loading inventory: {error.message}
-          </p>
+        <Card>
+          <Result
+            status="warning"
+            title="Unable to load inventory"
+            subTitle={error.message}
+            extra={
+              <Button type="primary" onClick={() => void refetch()}>
+                Retry
+              </Button>
+            }
+          />
         </Card>
       ) : (
         <>

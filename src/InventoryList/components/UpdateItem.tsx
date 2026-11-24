@@ -1,15 +1,18 @@
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
+  Alert,
+  App as AntdApp,
   Form,
   Input,
   InputNumber,
+  Result,
+  Skeleton,
   Switch,
   Select,
   Button,
   DatePicker,
   type FormProps,
   TreeSelect,
-  message,
 } from "antd";
 import { useQuery, useMutation } from "@apollo/client";
 import styled from "styled-components";
@@ -94,6 +97,8 @@ interface PropsType {
 
 const UpdateItem = ({ selectedItemId, setUpdateModal }: PropsType) => {
   const [form] = Form.useForm<FieldType>();
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const { notification } = AntdApp.useApp();
   const { data, loading, error } = useQuery(FETCH_ITEM_BY_ID, {
     variables: { itemID: selectedItemId },
     fetchPolicy: "cache-and-network",
@@ -142,11 +147,19 @@ const UpdateItem = ({ selectedItemId, setUpdateModal }: PropsType) => {
     }
   }, [item, form]);
 
-  if (loading && !item) return <p>Loading item data...</p>;
-  if (error) return <p>Error: {error.message}</p>;
-  if (!item) return <p>No item found</p>;
+  if (loading && !item) return <Skeleton active paragraph={{ rows: 5 }} />;
+  if (error)
+    return (
+      <Result
+        status="warning"
+        title="Unable to load item"
+        subTitle={error.message}
+      />
+    );
+  if (!item) return <Result status="404" title="Item not found" />;
 
   const onFinish: FormProps<FieldType>["onFinish"] = (values) => {
+    setSubmitError(null);
     updateItem({
       variables: {
         itemID: selectedItemId,
@@ -169,11 +182,14 @@ const UpdateItem = ({ selectedItemId, setUpdateModal }: PropsType) => {
       },
     })
       .then(() => {
-        message.success("Updated item successfully");
+        notification.success({
+          message: "Item updated",
+          description: `"${values.name}" changes have been saved.`,
+        });
         setUpdateModal(false);
       })
       .catch((err) => {
-        message.error(err.message);
+        setSubmitError(err?.message || "Failed to update item");
       });
   };
 
@@ -183,8 +199,22 @@ const UpdateItem = ({ selectedItemId, setUpdateModal }: PropsType) => {
       name="updateItem"
       layout="vertical"
       requiredMark={false}
+      onValuesChange={() => {
+        if (submitError) setSubmitError(null);
+      }}
       onFinish={onFinish}
     >
+      {submitError && (
+        <Alert
+          type="error"
+          showIcon
+          closable
+          message="Update failed"
+          description={submitError}
+          onClose={() => setSubmitError(null)}
+          style={{ marginBottom: 14, borderRadius: 10 }}
+        />
+      )}
       <Section>
         <div>
           <SectionTitle>Basic information</SectionTitle>

@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { RouterProvider } from "react-router-dom";
 import router from "./routes";
-import { ConfigProvider } from "antd";
+import { App as AntdApp, ConfigProvider } from "antd";
 import { customTheme } from "./theme/theme";
 import { ApolloProvider } from "@apollo/client";
 import { apolloClient } from "./apollo";
@@ -75,9 +75,11 @@ function App() {
       variant="filled"
       theme={theme.isDark ? darkTheme : customTheme}
     >
-      <ApolloProvider client={apolloClient}>
-        <RouterProvider router={router} />
-      </ApolloProvider>
+      <AntdApp notification={{ placement: "topRight", duration: 3.5 }}>
+        <ApolloProvider client={apolloClient}>
+          <RouterProvider router={router} />
+        </ApolloProvider>
+      </AntdApp>
     </ConfigProvider>
   );
 }

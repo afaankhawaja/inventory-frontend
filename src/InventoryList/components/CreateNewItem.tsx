@@ -1,4 +1,6 @@
 import {
+  Alert,
+  App as AntdApp,
   Button,
   Form,
   Input,
@@ -8,7 +10,6 @@ import {
   Select,
   DatePicker,
   TreeSelect,
-  message,
 } from "antd";
 import styled from "styled-components";
 import { useMutation, useQuery } from "@apollo/client";
@@ -19,7 +20,7 @@ import {
   FETCH_ALL_LOCATIONS,
 } from "../graphql/queries";
 import type { Dayjs } from "dayjs";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   formStyles,
   Section,
@@ -73,6 +74,8 @@ function convertLocationsToTreeData(locations) {
 
 const CreateNewItem = ({ setOpen, initialBarcode }: Props) => {
   const [form] = Form.useForm();
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const { notification } = AntdApp.useApp();
 
   useEffect(() => {
     if (initialBarcode) {
@@ -104,6 +107,7 @@ const CreateNewItem = ({ setOpen, initialBarcode }: Props) => {
   }, [locData]);
 
   const onFinish: FormProps<ItemType>["onFinish"] = (values) => {
+    setSubmitError(null);
     createItem({
       variables: {
         name: values.name,
@@ -122,11 +126,14 @@ const CreateNewItem = ({ setOpen, initialBarcode }: Props) => {
     })
       .then(() => {
         form.resetFields();
-        message.success("Created item successfully");
+        notification.success({
+          message: "Item created",
+          description: `"${values.name}" has been added to the inventory.`,
+        });
         setOpen(false);
       })
       .catch((error) => {
-        message.error(error?.message || "Failed to create item");
+        setSubmitError(error?.message || "Failed to create item");
       });
   };
 
@@ -140,9 +147,23 @@ const CreateNewItem = ({ setOpen, initialBarcode }: Props) => {
       name="createItem"
       layout="vertical"
       requiredMark={false}
+      onValuesChange={() => {
+        if (submitError) setSubmitError(null);
+      }}
       onFinish={onFinish}
       onFinishFailed={onFinishFailed}
     >
+      {submitError && (
+        <Alert
+          type="error"
+          showIcon
+          closable
+          message="Could not create item"
+          description={submitError}
+          onClose={() => setSubmitError(null)}
+          style={{ marginBottom: 14, borderRadius: 10 }}
+        />
+      )}
       <Section>
         <div>
           <SectionTitle>Basic information</SectionTitle>

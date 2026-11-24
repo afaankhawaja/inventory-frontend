@@ -1,5 +1,5 @@
-import React from "react";
-import { Button, Form, Input, InputNumber, message } from "antd";
+import React, { useState } from "react";
+import { Alert, App as AntdApp, Button, Form, Input, InputNumber } from "antd";
 import styled from "styled-components";
 import { useMutation } from "@apollo/client";
 import { CHECK_IN_ITEM, CHECK_OUT_ITEM } from "../graphql/mutations";
@@ -68,6 +68,8 @@ const CheckInOutForm: React.FC<Props> = ({
   onClose,
 }) => {
   const [form] = Form.useForm<FormValues>();
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const { notification } = AntdApp.useApp();
   const isOut = mode === "out";
   const max = isOut ? stock : outstanding;
 
@@ -85,6 +87,7 @@ const CheckInOutForm: React.FC<Props> = ({
   const quantity = Form.useWatch("quantity", form) ?? 1;
 
   const onFinish = async (values: FormValues) => {
+    setSubmitError(null);
     try {
       await mutate({
         variables: {
@@ -94,14 +97,13 @@ const CheckInOutForm: React.FC<Props> = ({
           purpose: values.purpose,
         },
       });
-      message.success(
-        isOut
-          ? `Checked out ${values.quantity} × ${itemName}`
-          : `Checked in ${values.quantity} × ${itemName}`,
-      );
+      notification.success({
+        message: isOut ? "Checked out" : "Checked in",
+        description: `${values.quantity} × ${itemName}`,
+      });
       onClose();
     } catch (err) {
-      message.error(err instanceof Error ? err.message : String(err));
+      setSubmitError(err instanceof Error ? err.message : String(err));
     }
   };
 
@@ -111,8 +113,22 @@ const CheckInOutForm: React.FC<Props> = ({
       layout="vertical"
       requiredMark={false}
       initialValues={{ quantity: 1 }}
+      onValuesChange={() => {
+        if (submitError) setSubmitError(null);
+      }}
       onFinish={onFinish}
     >
+      {submitError && (
+        <Alert
+          type="error"
+          showIcon
+          closable
+          message={isOut ? "Check-out failed" : "Check-in failed"}
+          description={submitError}
+          onClose={() => setSubmitError(null)}
+          style={{ marginBottom: 14, borderRadius: 10 }}
+        />
+      )}
       <Section>
         <div>
           <SectionTitle>{itemName}</SectionTitle>

@@ -1,12 +1,13 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
+  Alert,
+  App as AntdApp,
   Form,
   InputNumber,
   DatePicker,
   Select,
   Button,
   type FormProps,
-  message,
 } from "antd";
 import styled from "styled-components";
 import { useMutation, useQuery } from "@apollo/client";
@@ -70,6 +71,8 @@ const CreatePurchaseHistory: React.FC<Props> = ({
   setRestockModal,
 }) => {
   const [form] = Form.useForm<FormTypes>();
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const { notification } = AntdApp.useApp();
   const { data: vendorData, loading: vendorsLoading } =
     useQuery(FETCH_ALL_VENDORS);
   const [createPurchase, { loading, error }] = useMutation(
@@ -107,6 +110,7 @@ const CreatePurchaseHistory: React.FC<Props> = ({
   }));
 
   const onFinish: FormProps<FormTypes>["onFinish"] = async (values) => {
+    setSubmitError(null);
     try {
       await createPurchase({
         variables: {
@@ -119,11 +123,14 @@ const CreatePurchaseHistory: React.FC<Props> = ({
         },
       });
       form.resetFields();
-      message.success("Purchase history created");
+      notification.success({
+        message: "Restock recorded",
+        description: `Added ${values.quantity} unit(s) to inventory.`,
+      });
       setRestockModal(false);
     } catch (err) {
       console.error(err);
-      message.error(err instanceof Error ? err.message : String(err));
+      setSubmitError(err instanceof Error ? err.message : String(err));
     }
   };
 
@@ -132,9 +139,23 @@ const CreatePurchaseHistory: React.FC<Props> = ({
       form={form}
       layout="vertical"
       requiredMark={false}
+      onValuesChange={() => {
+        if (submitError) setSubmitError(null);
+      }}
       onFinish={onFinish}
       initialValues={{ quantity: 1, unit_price: 0 }}
     >
+      {submitError && (
+        <Alert
+          type="error"
+          showIcon
+          closable
+          message="Restock failed"
+          description={submitError}
+          onClose={() => setSubmitError(null)}
+          style={{ marginBottom: 14, borderRadius: 10 }}
+        />
+      )}
       <Section>
         <div>
           <SectionTitle>Purchase details</SectionTitle>

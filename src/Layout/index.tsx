@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Layout } from "antd";
+import { Grid, Layout } from "antd";
 import { useNavigate } from "react-router";
 import { useMutation, useQuery } from "@apollo/client";
 import { apolloClient } from "../apollo";
@@ -14,7 +14,16 @@ import CommandPalette from "../components/CommandPalette";
 
 const HomeLayout: React.FC = () => {
   const [collapsed, setCollapsed] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
   const [commandOpen, setCommandOpen] = useState(false);
+  const screens = Grid.useBreakpoint();
+  const isMobile = screens.md === false;
+
+  useEffect(() => {
+    if (!isMobile && mobileOpen) {
+      setMobileOpen(false);
+    }
+  }, [isMobile, mobileOpen]);
   const navigate = useNavigate();
   const { data } = useQuery(FETCH_USER_BY_USERNAME);
   const [logout] = useMutation(LOGOUT_MUTATION);
@@ -88,11 +97,19 @@ const HomeLayout: React.FC = () => {
 
   return (
     <Layout style={{ minHeight: "100vh", width: "100%" }}>
-      <Sidebar collapsed={collapsed} logoutUser={logoutUser} />
+      <Sidebar
+        collapsed={collapsed}
+        logoutUser={logoutUser}
+        isMobile={isMobile}
+        mobileOpen={mobileOpen}
+        onCloseMobile={() => setMobileOpen(false)}
+      />
       <Layout style={{ flex: 1, minWidth: 0 }}>
         <HeaderComponent
-          collapsed={collapsed}
-          setCollapsed={setCollapsed}
+          collapsed={isMobile ? !mobileOpen : collapsed}
+          setCollapsed={() =>
+            isMobile ? setMobileOpen((prev) => !prev) : setCollapsed((prev) => !prev)
+          }
           userData={userData}
           logoutUser={logoutUser}
           onOpenCommandPalette={() => setCommandOpen(true)}

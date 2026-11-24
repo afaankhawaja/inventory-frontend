@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import type { FormProps } from "antd";
 import {
+  Alert,
+  App as AntdApp,
   Button,
   Col,
   Form,
@@ -8,7 +10,6 @@ import {
   InputNumber,
   Row,
   Upload,
-  message,
 } from "antd";
 import { useNavigate } from "react-router-dom";
 import SignUpIcon from "../../../assets/svgs/sign_up_user.svg?react";
@@ -51,9 +52,11 @@ const strengthLabels = ["", "Weak", "Fair", "Good", "Strong"];
 const SignUpForm: React.FC = () => {
   const [fileList, setFileList] = useState<UploadFile[]>([]);
   const [password, setPassword] = useState("");
+  const [signupError, setSignupError] = useState<string | null>(null);
   const navigate = useNavigate();
   const [CreateUser, { loading }] = useMutation(CREATE_USER);
   const [form] = Form.useForm();
+  const { notification } = AntdApp.useApp();
 
   const strength = strengthOf(password);
 
@@ -71,6 +74,7 @@ const SignUpForm: React.FC = () => {
       const file = fileList[0].originFileObj as File;
       base64 = await getBase64(file);
     }
+    setSignupError(null);
     CreateUser({
       variables: {
         username: values.username,
@@ -85,11 +89,14 @@ const SignUpForm: React.FC = () => {
     })
       .then(() => {
         form.resetFields();
-        message.success("Account created");
+        notification.success({
+          message: "Account created",
+          description: "You can now sign in with your new credentials.",
+        });
         navigate("/");
       })
       .catch((error) => {
-        message.error(error.message);
+        setSignupError(error.message || "Could not create account.");
         console.error(error);
       });
   };
@@ -121,9 +128,23 @@ const SignUpForm: React.FC = () => {
         layout="vertical"
         size="large"
         requiredMark={false}
+        onValuesChange={() => {
+          if (signupError) setSignupError(null);
+        }}
         onFinish={onFinish}
         onFinishFailed={onFinishFailed}
       >
+        {signupError && (
+          <Alert
+            type="error"
+            showIcon
+            closable
+            message="Registration failed"
+            description={signupError}
+            onClose={() => setSignupError(null)}
+            style={{ marginBottom: 16, borderRadius: 10 }}
+          />
+        )}
         <Form.Item<FieldType>
           label="Username"
           name="username"
