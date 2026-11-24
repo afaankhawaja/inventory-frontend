@@ -3,9 +3,11 @@ import { broadcastLogout } from "./utils/authBroadcast";
 
 const rawApiUrl = import.meta.env.VITE_API_URL;
 const API_BASE_URL =
-  rawApiUrl !== undefined
+  typeof rawApiUrl === "string"
     ? rawApiUrl.trim().replace(/\/+$/, "")
-    : "http://localhost:3000";
+    : import.meta.env.PROD
+      ? ""
+      : "http://localhost:3000";
 
 const GRAPHQL_URL = `${API_BASE_URL}/graphql`;
 
