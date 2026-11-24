@@ -10,9 +10,11 @@ import { broadcastLogout } from "../utils/authBroadcast";
 import Sidebar from "./components/Sidebar";
 import HeaderComponent from "./components/Header";
 import ContentComponent from "./components/Content";
+import CommandPalette from "../components/CommandPalette";
 
 const HomeLayout: React.FC = () => {
   const [collapsed, setCollapsed] = useState(false);
+  const [commandOpen, setCommandOpen] = useState(false);
   const navigate = useNavigate();
   const { data } = useQuery(FETCH_USER_BY_USERNAME);
   const [logout] = useMutation(LOGOUT_MUTATION);
@@ -57,6 +59,33 @@ const HomeLayout: React.FC = () => {
     }
   };
 
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        setCommandOpen((prev) => !prev);
+        return;
+      }
+
+      if (e.key === "/" && !e.metaKey && !e.ctrlKey && !e.altKey) {
+        const target = e.target as HTMLElement | null;
+        const tag = target?.tagName?.toLowerCase();
+        const isEditable =
+          tag === "input" ||
+          tag === "textarea" ||
+          tag === "select" ||
+          target?.isContentEditable;
+        if (!isEditable) {
+          e.preventDefault();
+          setCommandOpen(true);
+        }
+      }
+    };
+
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, []);
+
   return (
     <Layout style={{ minHeight: "100vh", width: "100%" }}>
       <Sidebar collapsed={collapsed} logoutUser={logoutUser} />
@@ -66,9 +95,16 @@ const HomeLayout: React.FC = () => {
           setCollapsed={setCollapsed}
           userData={userData}
           logoutUser={logoutUser}
+          onOpenCommandPalette={() => setCommandOpen(true)}
         />
         <ContentComponent />
       </Layout>
+      <CommandPalette
+        open={commandOpen}
+        onClose={() => setCommandOpen(false)}
+        userRole={userData?.role}
+        onLogout={logoutUser}
+      />
     </Layout>
   );
 };

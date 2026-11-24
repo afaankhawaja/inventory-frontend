@@ -4,6 +4,7 @@ import {
   LogoutOutlined,
   MenuFoldOutlined,
   MenuUnfoldOutlined,
+  SearchOutlined,
   UserOutlined,
 } from "@ant-design/icons";
 import {
@@ -19,6 +20,7 @@ import { useLocation, useNavigate } from "react-router";
 import styled from "styled-components";
 import { useAtom } from "jotai";
 import { selectedTheme } from "../.././store/themeAtom";
+import { isApplePlatform } from "../../components/CommandPalette";
 
 const { Header } = Layout;
 
@@ -42,9 +44,53 @@ const ScreenTitle = styled.h1`
 `;
 const Wrapper = styled.div`
   display: flex;
-  gap: 0px 15px;
+  gap: 0px 12px;
   justify-content: center;
   align-items: center;
+`;
+const CommandTrigger = styled.button<{ $isDark: boolean }>`
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 34px;
+  padding: 0 10px 0 12px;
+  border-radius: 10px;
+  border: 1px solid
+    ${(p) => (p.$isDark ? "rgba(255, 255, 255, 0.14)" : "rgba(0, 0, 0, 0.1)")};
+  background: ${(p) =>
+    p.$isDark ? "rgba(255, 255, 255, 0.06)" : "rgba(0, 0, 0, 0.035)"};
+  color: inherit;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background-color 140ms ease, border-color 140ms ease;
+
+  &:hover {
+    background: ${(p) =>
+      p.$isDark ? "rgba(255, 255, 255, 0.1)" : "rgba(0, 0, 0, 0.06)"};
+  }
+
+  .cmd-label {
+    opacity: 0.65;
+  }
+
+  @media (max-width: 720px) {
+    padding: 0 9px;
+    .cmd-label,
+    .cmd-kbd {
+      display: none;
+    }
+  }
+`;
+const ShortcutBadge = styled.kbd`
+  display: inline-block;
+  padding: 1px 6px;
+  font-size: 11px;
+  font-weight: 600;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  border-radius: 6px;
+  border: 1px solid rgba(128, 128, 128, 0.25);
+  background: rgba(128, 128, 128, 0.1);
+  opacity: 0.8;
 `;
 const UserName = styled.strong``;
 const UserEmail = styled.div``;
@@ -71,6 +117,7 @@ interface HeaderProps {
     role: string | null;
   };
   logoutUser: () => void;
+  onOpenCommandPalette: () => void;
 }
 
 const HeaderComponent: React.FC<HeaderProps> = ({
@@ -78,6 +125,7 @@ const HeaderComponent: React.FC<HeaderProps> = ({
   setCollapsed,
   userData,
   logoutUser,
+  onOpenCommandPalette,
 }) => {
   const {
     token: { colorBorderSecondary, colorText },
@@ -150,6 +198,19 @@ const HeaderComponent: React.FC<HeaderProps> = ({
         <ScreenTitle style={{ color: colorText }}>{pageTitle}</ScreenTitle>
       </LeftWrapper>
       <Wrapper>
+        <CommandTrigger
+          type="button"
+          $isDark={currentTheme.isDark}
+          onClick={onOpenCommandPalette}
+          aria-label="Open command palette"
+          title="Search or jump to command"
+        >
+          <SearchOutlined style={{ opacity: 0.65 }} />
+          <span className="cmd-label">Quick search…</span>
+          <ShortcutBadge className="cmd-kbd">
+            {isApplePlatform() ? "⌘K" : "Ctrl K"}
+          </ShortcutBadge>
+        </CommandTrigger>
         <Segmented
           size="middle"
           value={currentTheme.isDark ? "Dark" : "Light"}

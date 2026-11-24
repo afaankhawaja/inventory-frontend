@@ -393,6 +393,25 @@ const Index = () => {
 
   useEffect(() => {
     const deepItemId = searchParams.get("item");
+    const action = searchParams.get("action");
+
+    if (action === "scan") {
+      setScannerOpen(true);
+      const next = new URLSearchParams(searchParams);
+      next.delete("action");
+      setSearchParams(next, { replace: true });
+      return;
+    }
+
+    if (action === "create") {
+      setPrefillBarcode(undefined);
+      setOpen(true);
+      const next = new URLSearchParams(searchParams);
+      next.delete("action");
+      setSearchParams(next, { replace: true });
+      return;
+    }
+
     if (deepItemId && allItems.length > 0) {
       const exists = allItems.some(
         (i: { itemId: string }) => i.itemId === deepItemId,
